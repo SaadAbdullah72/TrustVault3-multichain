@@ -1,3 +1,148 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .glass-premium {
+    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_#1f26875e];
+  }
+}
+
+/* Premium Cyber Vault Background (Local SVG) */
+.premium-bg {
+  background-color: #020617;
+  /* Premium Earth Network Background */
+  background-image: url('/src/assets/bg-premium.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  min-height: 100vh;
+}
+
+.premium-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Enhanced Snake Border Animation */
+.snake-border {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.snake-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #22d3ee, #a855f7);
+  animation: snake-top 2s linear infinite;
+  filter: drop-shadow(0 0 5px #22d3ee);
+}
+
+.snake-border::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  right: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, #22d3ee, #a855f7);
+  animation: snake-right 2s linear infinite;
+  animation-delay: 0.5s;
+  filter: drop-shadow(0 0 5px #a855f7);
+}
+
+.snake-border-bottom {
+  position: absolute;
+  bottom: 0;
+  right: -100%;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(270deg, transparent, #22d3ee, #a855f7);
+  animation: snake-bottom 2s linear infinite;
+  animation-delay: 1s;
+  filter: drop-shadow(0 0 5px #22d3ee);
+}
+
+.snake-border-left {
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(0deg, transparent, #22d3ee, #a855f7);
+  animation: snake-left 2s linear infinite;
+  animation-delay: 1.5s;
+  filter: drop-shadow(0 0 5px #a855f7);
+}
+
+@keyframes snake-top {
+  0% {
+    left: -100%;
+  }
+
+  50%,
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes snake-right {
+  0% {
+    top: -100%;
+  }
+
+  50%,
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes snake-bottom {
+  0% {
+    right: -100%;
+  }
+
+  50%,
+  100% {
+    right: 100%;
+  }
+}
+
+@keyframes snake-left {
+  0% {
+    bottom: -100%;
+  }
+
+  50%,
+  100% {
+    bottom: 100%;
+  }
+}
+
+/* Glowing Text */
+.glow-text {
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Card Hover Glow */
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.5);
+}

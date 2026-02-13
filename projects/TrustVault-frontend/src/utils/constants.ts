@@ -2,36 +2,28 @@ export const APPROVAL_TEAL = `#pragma version 8
 txn NumAppArgs
 int 0
 ==
-bnz main_l10
+bnz main_l12
 txna ApplicationArgs 0
 method "bootstrap(address,uint64)void"
 ==
-bnz main_l9
+bnz main_l11
 txna ApplicationArgs 0
 method "deposit()void"
 ==
-bnz main_l8
+bnz main_l10
 txna ApplicationArgs 0
 method "heartbeat()void"
 ==
-bnz main_l7
+bnz main_l9
+txna ApplicationArgs 0
+method "withdraw(uint64)void"
+==
+bnz main_l8
 txna ApplicationArgs 0
 method "auto_release()void"
 ==
-bnz main_l6
+bnz main_l7
 err
-main_l6:
-txn OnCompletion
-int NoOp
-==
-txn ApplicationID
-int 0
-!=
-&&
-assert
-callsub autoreleasecaster_7
-int 1
-return
 main_l7:
 txn OnCompletion
 int NoOp
@@ -41,7 +33,7 @@ int 0
 !=
 &&
 assert
-callsub heartbeatcaster_6
+callsub autoreleasecaster_9
 int 1
 return
 main_l8:
@@ -53,7 +45,7 @@ int 0
 !=
 &&
 assert
-callsub depositcaster_5
+callsub withdrawcaster_8
 int 1
 return
 main_l9:
@@ -65,37 +57,55 @@ int 0
 !=
 &&
 assert
-callsub bootstrapcaster_4
+callsub heartbeatcaster_7
 int 1
 return
 main_l10:
 txn OnCompletion
 int NoOp
 ==
-bnz main_l20
+txn ApplicationID
+int 0
+!=
+&&
+assert
+callsub depositcaster_6
+int 1
+return
+main_l11:
+txn OnCompletion
+int NoOp
+==
+txn ApplicationID
+int 0
+!=
+&&
+assert
+callsub bootstrapcaster_5
+int 1
+return
+main_l12:
+txn OnCompletion
+int NoOp
+==
+bnz main_l22
 txn OnCompletion
 int OptIn
 ==
-bnz main_l19
+bnz main_l21
 txn OnCompletion
 int CloseOut
 ==
-bnz main_l18
+bnz main_l20
 txn OnCompletion
 int UpdateApplication
 ==
-bnz main_l17
+bnz main_l19
 txn OnCompletion
 int DeleteApplication
 ==
-bnz main_l16
+bnz main_l18
 err
-main_l16:
-int 0
-return
-main_l17:
-int 0
-return
 main_l18:
 int 0
 return
@@ -103,6 +113,12 @@ main_l19:
 int 0
 return
 main_l20:
+int 0
+return
+main_l21:
+int 0
+return
+main_l22:
 txn ApplicationID
 int 0
 ==
@@ -171,8 +187,28 @@ byte "Heartbeat"
 log
 retsub
 
+// withdraw
+withdraw_3:
+proto 1 0
+txn Sender
+byte "Owner"
+app_global_get
+==
+assert
+itxn_begin
+int pay
+itxn_field TypeEnum
+txn Sender
+itxn_field Receiver
+frame_dig -1
+itxn_field Amount
+itxn_submit
+byte "Withdraw"
+log
+retsub
+
 // auto_release
-autorelease_3:
+autorelease_4:
 proto 0 0
 byte "Released"
 app_global_get
@@ -207,7 +243,7 @@ log
 retsub
 
 // bootstrap_caster
-bootstrapcaster_4:
+bootstrapcaster_5:
 proto 0 0
 byte ""
 int 0
@@ -222,21 +258,32 @@ callsub bootstrap_0
 retsub
 
 // deposit_caster
-depositcaster_5:
+depositcaster_6:
 proto 0 0
 callsub deposit_1
 retsub
 
 // heartbeat_caster
-heartbeatcaster_6:
+heartbeatcaster_7:
 proto 0 0
 callsub heartbeat_2
 retsub
 
-// auto_release_caster
-autoreleasecaster_7:
+// withdraw_caster
+withdrawcaster_8:
 proto 0 0
-callsub autorelease_3
+int 0
+txna ApplicationArgs 1
+btoi
+frame_bury 0
+frame_dig 0
+callsub withdraw_3
+retsub
+
+// auto_release_caster
+autoreleasecaster_9:
+proto 0 0
+callsub autorelease_4
 retsub
 `
 

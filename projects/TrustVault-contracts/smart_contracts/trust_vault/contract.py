@@ -72,6 +72,24 @@ def heartbeat():
 
 
 @router.method
+def withdraw(amount: abi.Uint64):
+    return Seq(
+        # Only owner can withdraw
+        Assert(Txn.sender() == App.globalGet(owner_key)),
+        
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields({
+            TxnField.type_enum: TxnType.Payment,
+            TxnField.receiver: Txn.sender(),
+            TxnField.amount: amount.get(), 
+        }),
+        InnerTxnBuilder.Submit(),
+        
+        Log(Bytes("Withdraw")),
+    )
+
+
+@router.method
 def auto_release():
     # Logic:
     # 1. Check if already released

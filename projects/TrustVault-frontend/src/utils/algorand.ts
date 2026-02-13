@@ -238,6 +238,34 @@ export async function depositAlgo(
     return response.txid
 }
 
+// Call withdraw function
+export async function callWithdraw(
+    appId: number | bigint,
+    amount: number,
+    senderAddress: string,
+    signer: any
+): Promise<string> {
+    const suggestedParams = await algodClient.getTransactionParams().do()
+    const method = new algosdk.ABIMethod({
+        name: 'withdraw',
+        args: [{ type: 'uint64', name: 'amount' }],
+        returns: { type: 'void' }
+    })
+
+    const atc = new algosdk.AtomicTransactionComposer()
+    atc.addMethodCall({
+        appID: appId,
+        method: method,
+        methodArgs: [BigInt(Math.round(amount * 1_000_000))], // Amount in microAlgos
+        sender: senderAddress,
+        suggestedParams: suggestedParams,
+        signer: signer
+    })
+
+    const result = await atc.execute(algodClient, 4)
+    return result.txIDs[0]
+}
+
 // Get application address
 export function getAppAddress(appId: number | bigint): string {
     const addr = algosdk.getApplicationAddress(appId)
