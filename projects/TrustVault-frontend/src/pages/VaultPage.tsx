@@ -409,11 +409,15 @@ export default function VaultPage() {
         try {
             const ids = await discoverVaults(activeAddress)
             if (ids.length > 0) {
-                const unique = Array.from(new Set([...userVaults, ...ids]))
+                // Sort by ID descending (latest first) and take top 5
+                const sortedIds = [...ids].sort((a, b) => Number(b - a))
+                const latestFive = sortedIds.slice(0, 5)
+
+                const unique = Array.from(new Set([...userVaults, ...latestFive]))
                 setUserVaults(unique)
                 localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(unique.map(i => i.toString())))
-                setSelectedAppId(ids[0])
-                setTxId(`Scan complete! Found ${ids.length} vault(s).`)
+                setSelectedAppId(latestFive[0])
+                setTxId(`Scan complete! Loaded latest ${latestFive.length} vault(s).`)
             } else {
                 setTxId('No vaults found.')
             }
