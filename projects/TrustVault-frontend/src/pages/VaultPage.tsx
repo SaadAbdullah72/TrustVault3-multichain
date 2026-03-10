@@ -107,17 +107,52 @@ export default function VaultPage() {
     const [copied, setCopied] = useState(false)
     const [showBalanceHidden, setShowBalanceHidden] = useState(false)
 
-    // Card slider state
+    // Card 3D interaction state
+    const [tilt, setTilt] = useState({ x: 0, y: 0 })
+    const [isInteracting, setIsInteracting] = useState(false)
+
+    // Handle 3D Tilt
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        const centerX = rect.width / 2
+        const centerY = rect.height / 2
+        const rotateX = ((y - centerY) / centerY) * -15 // Max 15 deg
+        const rotateY = ((x - centerX) / centerX) * 15
+        setTilt({ x: rotateX, y: rotateY })
+        setIsInteracting(true)
+    }
+
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const touch = e.touches[0]
+        const x = touch.clientX - rect.left
+        const y = touch.clientY - rect.top
+        const centerX = rect.width / 2
+        const centerY = rect.height / 2
+        const rotateX = ((y - centerY) / centerY) * -20
+        const rotateY = ((x - centerX) / centerX) * 20
+        setTilt({ x: rotateX, y: rotateY })
+        setIsInteracting(true)
+    }
+
+    const resetTilt = () => {
+        setTilt({ x: 0, y: 0 })
+        setIsInteracting(false)
+    }
+
+    // Card slider state (for onboarding)
     const cardImages = ['/trustvault-card.png', '/trustvault-card-angle.png', '/trustvault-card-back.png']
     const cardLabels = ['Front View', 'Angle View', 'Back View']
-    const [cardSlide, setCardSlide] = useState(0)
-    const [cardAutoPlay, setCardAutoPlay] = useState(true)
+    const [cardSlide, setCardSlide] = useState<number>(0)
+    const [cardAutoPlay, setCardAutoPlay] = useState<boolean>(true)
 
     // Auto-rotate card slider
     useEffect(() => {
         if (!cardAutoPlay) return
         const interval = setInterval(() => {
-            setCardSlide(prev => (prev + 1) % cardImages.length)
+            setCardSlide((prev: number) => (prev + 1) % cardImages.length)
         }, 3000)
         return () => clearInterval(interval)
     }, [cardAutoPlay, cardImages.length])
@@ -443,17 +478,17 @@ export default function VaultPage() {
                                 onMouseLeave={() => setCardAutoPlay(true)}
                             >
                                 {/* Nav arrows */}
-                                <button className="card-slider-arrow left" onClick={() => setCardSlide(prev => (prev - 1 + cardImages.length) % cardImages.length)}>
+                                <button className="card-slider-arrow left" onClick={() => setCardSlide((prev: number) => (prev - 1 + cardImages.length) % cardImages.length)}>
                                     <ChevronLeft />
                                 </button>
-                                <button className="card-slider-arrow right" onClick={() => setCardSlide(prev => (prev + 1) % cardImages.length)}>
+                                <button className="card-slider-arrow right" onClick={() => setCardSlide((prev: number) => (prev + 1) % cardImages.length)}>
                                     <ChevronRight />
                                 </button>
 
                                 {/* Card images */}
                                 <div className="card-slider-viewport">
                                     <div className="card-slider-glow" />
-                                    {cardImages.map((src, idx) => (
+                                    {cardImages.map((src: string, idx: number) => (
                                         <img
                                             key={idx}
                                             src={src}
@@ -465,7 +500,7 @@ export default function VaultPage() {
 
                                 {/* Dots */}
                                 <div className="card-slider-dots">
-                                    {cardImages.map((_, idx) => (
+                                    {cardImages.map((_: string, idx: number) => (
                                         <button
                                             key={idx}
                                             className={`card-slider-dot ${idx === cardSlide ? 'active' : ''}`}
@@ -850,9 +885,23 @@ export default function VaultPage() {
                             </div>
                             <div className="section-card">
                                 <div className="card-tab-showcase">
-                                    <div className="card-tab-image-wrap">
-                                        <div className="card-tab-reflection" />
-                                        <img src="/trustvault-card.png" alt="TrustVault Virtual Card" className="card-tab-image" />
+                                    <div
+                                        className="card-tab-image-wrap"
+                                        onMouseMove={handleMouseMove}
+                                        onMouseLeave={resetTilt}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={resetTilt}
+                                    >
+                                        <div
+                                            className="card-tab-inner"
+                                            style={{
+                                                '--rotateX': `${tilt.x}deg`,
+                                                '--rotateY': `${tilt.y}deg`
+                                            } as any}
+                                        >
+                                            <div className="card-tab-reflection" />
+                                            <img src="/trustvault-card.png" alt="TrustVault Virtual Card" className="card-tab-image" />
+                                        </div>
                                     </div>
                                     <div className="card-tab-info">
                                         <div className="card-tab-info-row">
@@ -947,6 +996,19 @@ export default function VaultPage() {
                                 <Search className="wallet-empty-btn-icon" />
                                 Scan Network
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ======= TRANSACTION OVERLAY ======= */}
+                {loading && (
+                    <div className="wallet-overlay">
+                        <div className="overlay-card">
+                            <div className="overlay-spinner">
+                                <RefreshCw className="spinning overlay-icon" />
+                            </div>
+                            <h3>Waiting for Wallet</h3>
+                            <p>Please check your Pera Wallet to sign the transaction.</p>
                         </div>
                     </div>
                 )}
