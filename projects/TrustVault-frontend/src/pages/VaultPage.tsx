@@ -312,13 +312,19 @@ export default function VaultPage() {
 
             await atc.execute(algodClient, 4)
 
+            setTxId('Vault established! Syncing with cloud...')
             saveBeneficiaryMapping(beneficiaryInput.trim(), appId)
-            saveVaultToRegistry(appId.toString(), beneficiaryInput.trim(), activeAddress)
+            const synced = await saveVaultToRegistry(appId.toString(), beneficiaryInput.trim(), activeAddress)
+
+            if (synced) {
+                setTxId('Vault created & Cloud synced! ✨')
+            } else {
+                setTxId('Vault created! (Cloud sync failed, save ID manually)')
+            }
 
             setSelectedAppId(appId)
             await loadUserVaults()
-            setShowCreateForm(false)
-            setTxId('Vault successfully established and funded!')
+            setTimeout(() => setShowCreateForm(false), 2000)
         } catch (e: any) {
             setError(e.message || 'Creation failed')
             setTxId('')
