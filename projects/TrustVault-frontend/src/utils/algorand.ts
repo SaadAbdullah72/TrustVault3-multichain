@@ -221,6 +221,7 @@ export const getVaultBalance = async (appId: bigint): Promise<number> => {
 // Function to deploy a new vault
 export const deployVault = async (sender: string, signer: any) => {
     try {
+        await new Promise(resolve => setTimeout(resolve, 500))
         const params = await algodClient.getTransactionParams().do()
 
         // Compile programs
@@ -243,11 +244,16 @@ export const deployVault = async (sender: string, signer: any) => {
             numGlobalByteSlices: 2, // Owner, Beneficiary
         })
 
-        const signedResult = await signer([txn])
-        const signedTxn = Array.isArray(signedResult) ? signedResult[0] : signedResult
+        // Use ATC for deployment as it's more reliable with Pera
+        const atc = new algosdk.AtomicTransactionComposer()
+        atc.addTransaction({
+            txn: txn,
+            signer: signer
+        })
 
-        const response = await algodClient.sendRawTransaction(signedTxn).do()
-        const txId = response.txid || ''
+        const result = await atc.execute(algodClient, 4)
+        const txId = result.txIDs[0]
+        console.log('App Create TxID:', txId)
 
         await algosdk.waitForConfirmation(algodClient, txId, 4)
 
@@ -327,8 +333,9 @@ export async function callHeartbeat(
         appID: appId,
         method: method,
         sender: senderAddress,
-        suggestedParams: suggestedParams,
-        signer: signer
+        suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
+        signer: signer,
+        note: new TextEncoder().encode(`TrustVault:heartbeat:${Date.now()}`)
     })
 
     const result = await atc.execute(algodClient, 4)
@@ -353,8 +360,9 @@ export async function callAutoRelease(
         appID: appId,
         method: method,
         sender: senderAddress,
-        suggestedParams: suggestedParams,
-        signer: signer
+        suggestedParams: { ...suggestedParams, flatFee: true, fee: 3000 }, // Higher fee for release as it sends funds
+        signer: signer,
+        note: new TextEncoder().encode(`TrustVault:claim:${Date.now()}`)
     })
 
     const result = await atc.execute(algodClient, 4)
@@ -403,8 +411,9 @@ export async function callWithdraw(
         method: method,
         methodArgs: [BigInt(Math.round(amount * 1_000_000))], // Amount in microAlgos
         sender: senderAddress,
-        suggestedParams: suggestedParams,
-        signer: signer
+        suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
+        signer: signer,
+        note: new TextEncoder().encode(`TrustVault:withdraw:${Date.now()}`)
     })
 
     const result = await atc.execute(algodClient, 4)

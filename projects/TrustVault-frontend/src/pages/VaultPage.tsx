@@ -265,6 +265,9 @@ export default function VaultPage() {
 
             setTxId('Step 2/2: Setting up & Funding...')
 
+            // Brief pause to ensure UI settles before wallet prompt
+            await new Promise(resolve => setTimeout(resolve, 500))
+
             const appAddress = getAppAddress(appId)
             const suggestedParams = await algodClient.getTransactionParams().do()
             const method = new algosdk.ABIMethod({
@@ -281,7 +284,7 @@ export default function VaultPage() {
                     appID: appId,
                     method: method,
                     sender: activeAddress,
-                    suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
+                    suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
                     signer: transactionSigner,
                     methodArgs: [beneficiaryInput.trim(), BigInt(lockDurationInput)],
                     accounts: [beneficiaryInput.trim()],
@@ -292,7 +295,7 @@ export default function VaultPage() {
                 sender: activeAddress,
                 receiver: appAddress,
                 amount: depositMicro,
-                suggestedParams: suggestedParams,
+                suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
             })
             atc.addTransaction({ txn: payTxn, signer: transactionSigner })
 
@@ -334,6 +337,7 @@ export default function VaultPage() {
         setLoading(true)
         setError('')
         try {
+            await new Promise(resolve => setTimeout(resolve, 500))
             const id = await callHeartbeat(selectedAppId, activeAddress, transactionSigner)
             setTxId(`Heartbeat confirmed! TX: ${id}`)
             await loadVaultState()
@@ -350,6 +354,7 @@ export default function VaultPage() {
         setError('')
         setTxId('Step 1/1: Claiming Inheritance funds...')
         try {
+            await new Promise(resolve => setTimeout(resolve, 500))
             const id = await callAutoRelease(selectedAppId, activeAddress, transactionSigner)
             setTxId(`Inheritance claimed successfully! TX: ${id}`)
             await loadVaultState()
@@ -415,6 +420,7 @@ export default function VaultPage() {
         setError('')
         setTxId('Step 1/1: Claiming Inheritance funds...')
         try {
+            await new Promise(resolve => setTimeout(resolve, 500))
             const id = await callAutoRelease(vaultAppId, activeAddress, transactionSigner)
             setTxId(`Inheritance funds claimed successfully! TX: ${id}`)
             setClaimableVaults(prev => prev.filter(v => v.appId !== vaultAppId))
