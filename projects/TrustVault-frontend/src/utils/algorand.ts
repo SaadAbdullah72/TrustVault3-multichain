@@ -244,12 +244,14 @@ export const deployVault = async (sender: string, signer: any) => {
         const params = await algodClient.getTransactionParams().do()
 
         // Compile programs
+        console.log('[Deploy] Compiling TEAL scripts...')
         const approvalRes = await algodClient.compile(APPROVAL_TEAL).do()
         const clearRes = await algodClient.compile(CLEAR_TEAL).do()
 
         const approvalProgram = new Uint8Array(Buffer.from(approvalRes.result, 'base64'))
         const clearProgram = new Uint8Array(Buffer.from(clearRes.result, 'base64'))
 
+        console.log('[Deploy] Creating Application Create Transaction...')
         // Create the application creation transaction
         const txn = algosdk.makeApplicationCreateTxnFromObject({
             sender: sender,
@@ -264,15 +266,21 @@ export const deployVault = async (sender: string, signer: any) => {
             note: new TextEncoder().encode(`TrustVault:deploy:${Date.now()}`)
         })
 
-        // Use ATC for deployment as it's more reliable with Pera
-        const atc = new algosdk.AtomicTransactionComposer()
-        atc.addTransaction({
-            txn: txn,
-            signer: signer
-        })
+        console.log('[Deploy] Awaiting Pera Wallet Signature...')
 
-        const result = await atc.execute(algodClient, 4)
-        const txId = result.txIDs[0]
+        // Use direct transaction signer instead of ATC for raw creation.
+        // ATC can sometimes have issues with bare app creations on Pera WCv2
+
+        // We must wrap the transaction in a group, even if it's single
+        algosdk.assignGroupID([txn])
+
+        // The signer function expects array of txns and array of indices to sign
+        const signedTxns = await signer([txn], [0])
+
+        console.log('[Deploy] Signature received! Sending to Algod network...')
+
+        const sendResult = await algodClient.sendRawTransaction(signedTxns[0]).do()
+        const txId = sendResult.txid
         console.log('App Create TxID:', txId)
 
         await algosdk.waitForConfirmation(algodClient, txId, 4)
