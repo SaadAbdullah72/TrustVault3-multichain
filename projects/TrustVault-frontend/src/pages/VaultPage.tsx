@@ -228,6 +228,28 @@ export default function VaultPage() {
         setUserVaults([])
     }
 
+    // Robust Connect helper
+    const handleConnect = async () => {
+        try {
+            setLoading(true)
+            setError('')
+            const pera = wallets.find(w => w.id === 'pera') || wallets[0]
+            if (!pera) throw new Error('No wallet provider found')
+
+            // Defensively clear any stuck sessions first
+            if (pera.isConnected) {
+                await pera.disconnect().catch(() => { })
+            }
+
+            await pera.connect()
+        } catch (e: any) {
+            console.error('Connection aborted:', e)
+            setError(e.message || 'Connection failed. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleDeleteVaultId = (id: bigint) => {
         const updated = userVaults.filter(v => v !== id)
         setUserVaults(updated)
@@ -303,14 +325,14 @@ export default function VaultPage() {
 
             await atc.execute(algodClient, 4)
 
-            setTxId('Vault established! Syncing with cloud...')
+            setTxId('Vault established! Finalizing secure registry...')
             saveBeneficiaryMapping(beneficiaryInput.trim(), appId)
-            const synced = await saveVaultToRegistry(appId.toString(), beneficiaryInput.trim(), activeAddress)
+            const synced = await saveVaultToRegistry(appId.toString(), beneficiaryInput, activeAddress)
 
             if (synced) {
-                setTxId('Vault created & Cloud synced! ✨')
+                setTxId('Vault established! Finalizing secure registry... ✨')
             } else {
-                setTxId('Vault created! (Cloud sync failed, save ID manually)')
+                setTxId('Vault created! (Registry sync delayed, save ID manually)')
             }
 
             setSelectedAppId(appId)
@@ -397,7 +419,7 @@ export default function VaultPage() {
         if (!activeAddress) return
         setLoading(true)
         setDiscovering(true)
-        setTxId('Scanning blockchain & cloud...')
+        setTxId('Scanning decentralized networks...')
         setError('')
         try {
             const ids = await discoverVaults(activeAddress)
@@ -566,7 +588,7 @@ export default function VaultPage() {
                         </div>
 
                         <button
-                            onClick={() => wallets[0]?.connect()}
+                            onClick={handleConnect}
                             className="connect-btn"
                             disabled={loading}
                         >
