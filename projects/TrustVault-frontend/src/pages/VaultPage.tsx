@@ -58,7 +58,7 @@ import {
 } from 'lucide-react'
 
 export default function VaultPage() {
-    const { activeAddress, wallets, transactionSigner } = useWallet()
+    const { activeAddress, wallets, transactionSigner, activeWallet } = useWallet()
 
     // Selection state
     const [selectedAppId, setSelectedAppId] = useState<bigint | null>(null)
@@ -281,7 +281,7 @@ export default function VaultPage() {
             }
 
             setTxId('Step 1/2: Deploying Vault...')
-            const appId = await deployVault(activeAddress, transactionSigner)
+            const appId = await deployVault(activeAddress, activeWallet)
             if (!appId) throw new Error('Deployment failed')
 
             setTxId('Step 1/2 Complete! Finalizing (3s)...')
@@ -301,19 +301,23 @@ export default function VaultPage() {
             })
 
             const encodedNote = new TextEncoder().encode(VAULT_NOTE_PREFIX + beneficiaryInput.trim())
-            const atc = new algosdk.AtomicTransactionComposer()
 
-            Object.defineProperty(atc, 'addMethodCall', { value: (atc as any).addMethodCall, writable: true })
-                ; (atc as any).addMethodCall({
-                    appID: appId,
-                    method: method,
-                    sender: activeAddress,
-                    suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
-                    signer: transactionSigner,
-                    methodArgs: [beneficiaryInput.trim(), BigInt(lockDurationInput)],
-                    accounts: [beneficiaryInput.trim()],
-                    note: encodedNote
-                })
+            // We'll create the Method Call and Payment transactions manually
+            // to avoid WalletConnect issues with ATC
+
+            const bootstrapTxn = algosdk.makeApplicationCallTxnFromObject({
+                sender: activeAddress,
+                appIndex: Number(appId),
+                onComplete: algosdk.OnApplicationComplete.NoOpOC,
+                suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
+                appArgs: [
+                    method.getSelector(),
+                    algosdk.decodeAddress(beneficiaryInput.trim()).publicKey,
+                    algosdk.encodeUint64(Number(lockDurationInput))
+                ],
+                accounts: [beneficiaryInput.trim()],
+                note: encodedNote
+            })
 
             const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
                 sender: activeAddress,
@@ -321,9 +325,27 @@ export default function VaultPage() {
                 amount: depositMicro,
                 suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
             })
-            atc.addTransaction({ txn: payTxn, signer: transactionSigner })
 
-            await atc.execute(algodClient, 4)
+            // Group the transactions
+            const txns = [bootstrapTxn, payTxn]
+            algosdk.assignGroupID(txns)
+
+            // Encode for the wallet provider
+            const encodedTxns = txns.map(tx => tx.toByte())
+
+            const activeWalletAny = activeWallet as any
+            if (!activeWalletAny || !activeWalletAny.signTransactions) {
+                throw new Error('Wallet provider does not support signTransactions')
+            }
+
+            // Request signature
+            const signedTxns = await activeWalletAny.signTransactions(encodedTxns)
+
+            // Send raw transactions
+            await algodClient.sendRawTransaction(signedTxns).do()
+
+            // Wait for confirmation of the first tx in the group
+            await algosdk.waitForConfirmation(algodClient, bootstrapTxn.txID().toString(), 4)
 
             setTxId('Vault established! Finalizing secure registry...')
             saveBeneficiaryMapping(beneficiaryInput.trim(), appId)
