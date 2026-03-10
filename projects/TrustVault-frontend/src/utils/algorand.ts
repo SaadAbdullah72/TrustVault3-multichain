@@ -33,8 +33,8 @@ export const discoverVaults = async (address: string): Promise<bigint[]> => {
             })
         }
 
-        // Run both searches in parallel for speed
-        const [createdApps, involvedTxs] = await Promise.all([
+        // Run searches in parallel for speed
+        const [createdApps, involvedTxs, supabaseOwnerIds, supabaseBenIds] = await Promise.all([
             indexerClient.searchForApplications().creator(address).do().catch((e: any) => {
                 console.warn('Creator search failed:', e)
                 return { applications: [] }
@@ -42,13 +42,18 @@ export const discoverVaults = async (address: string): Promise<bigint[]> => {
             indexerClient.searchForTransactions().address(address).txType('appl').do().catch((e: any) => {
                 console.warn('Involved txs search failed:', e)
                 return { transactions: [] }
-            })
+            }),
+            import('./supabase').then(mod => mod.getVaultsByOwner(address)).catch(() => [] as string[]),
+            import('./supabase').then(mod => mod.getVaultsByBeneficiary(address)).catch(() => [] as string[])
         ])
 
         if (createdApps.applications) {
             createdApps.applications.forEach((app: any) => foundIds.add(app.id.toString()))
         }
         processTxs(involvedTxs.transactions || [])
+
+        supabaseOwnerIds.forEach((id: string) => foundIds.add(id))
+        supabaseBenIds.forEach((id: string) => foundIds.add(id))
 
         // Also include locally cached vault IDs
         if (typeof window !== 'undefined') {
