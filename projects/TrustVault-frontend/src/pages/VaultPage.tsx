@@ -555,7 +555,7 @@ export default function VaultPage() {
                     <div className="connect-content">
                         <div className="connect-logo-wrap">
                             <div className="connect-logo-glow" />
-                            <img src="/logo.svg" alt="TrustVault" className="connect-logo-img" />
+                            <img src="/logo.svg" alt="TrustVault³" className="connect-logo-img" />
                         </div>
 
                         <h1 className="connect-title">TrustVault<sup className="connect-title-sup">3</sup></h1>
@@ -647,7 +647,7 @@ export default function VaultPage() {
                 <div className="wallet-topbar">
                     <div className="topbar-left">
                         <div className="topbar-logo">
-                            <img src="/logo.svg" alt="TV" className="topbar-logo-img" />
+                            <img src="/logo.svg" alt="TrustVault³" className="topbar-logo-img" />
                         </div>
                         <span className="topbar-brand">TrustVault<sup className="topbar-brand-sup">3</sup></span>
                     </div>

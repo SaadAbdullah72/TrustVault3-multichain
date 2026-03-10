@@ -169,7 +169,7 @@ const TrustVaultApp = () => {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-10 border-b border-slate-700 pb-4">
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500">
-            Auto Inheritance Vault (MVP)
+            TrustVault³ (Legacy MVP)
           </h1>
           <button
             className="btn btn-outline btn-info gap-2"

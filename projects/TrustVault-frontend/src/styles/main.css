@@ -2056,6 +2056,7 @@ body {
 .connect-title-sup {
     font-size: 18px;
     color: #2dd4bf;
+    -webkit-text-fill-color: #2dd4bf;
     font-weight: 800;
     vertical-align: super;
     margin-left: 2px;
@@ -2081,8 +2082,10 @@ body {
 .topbar-brand-sup {
     font-size: 10px;
     color: #2dd4bf;
+    -webkit-text-fill-color: #2dd4bf;
     font-weight: 800;
     vertical-align: super;
+    margin-left: 1px;
 }
 
 /* ========================================
