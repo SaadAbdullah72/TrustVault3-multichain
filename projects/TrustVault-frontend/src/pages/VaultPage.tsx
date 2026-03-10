@@ -310,11 +310,17 @@ export default function VaultPage() {
             setTxId('Vault successfully established and funded!')
         } catch (e: any) {
             setError(e.message || 'Creation failed')
+            setTxId('')
         } finally {
             setLoading(false)
         }
     }
 
+    const resetLoadingState = () => {
+        setLoading(false)
+        setTxId('')
+        setError('')
+    }
     const handleImportVault = async () => {
         if (!importIdInput) return
         try {
@@ -336,6 +342,7 @@ export default function VaultPage() {
         if (!activeAddress || !selectedAppId) return
         setLoading(true)
         setError('')
+        setTxId('Step 1/1: Processing Heartbeat...')
         try {
             await new Promise(resolve => setTimeout(resolve, 500))
             const id = await callHeartbeat(selectedAppId, activeAddress, transactionSigner)
@@ -343,6 +350,7 @@ export default function VaultPage() {
             await loadVaultState()
         } catch (e: any) {
             setError(e.message || 'Heartbeat failed')
+            setTxId('')
         } finally {
             setLoading(false)
         }
@@ -360,6 +368,7 @@ export default function VaultPage() {
             await loadVaultState()
         } catch (e: any) {
             setError(e.message || 'Claim failed')
+            setTxId('')
         } finally {
             setLoading(false)
         }
@@ -378,6 +387,7 @@ export default function VaultPage() {
 
         setLoading(true)
         setError('')
+        setTxId('Step 1/1: Processing Withdrawal...')
         try {
             await new Promise(resolve => setTimeout(resolve, 500))
             const id = await callWithdraw(selectedAppId, amount, activeAddress, transactionSigner)
@@ -385,6 +395,7 @@ export default function VaultPage() {
             await loadVaultState()
         } catch (e: any) {
             setError(e.message || 'Withdrawal failed')
+            setTxId('')
         } finally {
             setLoading(false)
         }
@@ -1019,10 +1030,22 @@ export default function VaultPage() {
                             <div className="overlay-spinner">
                                 <RefreshCw className="spinning overlay-icon" />
                             </div>
-                            <h3>{txId?.includes('Step') ? 'Creating Vault' : 'Waiting for Wallet'}</h3>
+                            <h3>{txId?.includes('Step') ? 'Vault Action' : 'Waiting for Wallet'}</h3>
                             <p>{txId ? txId : 'Please check your Pera Wallet to sign and proceed.'}</p>
+
+                            <div className="overlay-actions">
+                                <button className="overlay-btn primary" onClick={() => window.location.href = 'pera://'}>
+                                    <Wallet size={16} />
+                                    <span>Open Pera Wallet</span>
+                                </button>
+                                <button className="overlay-btn secondary" onClick={resetLoadingState}>
+                                    <X size={16} />
+                                    <span>Cancel Request</span>
+                                </button>
+                            </div>
+
                             <div className="overlay-hint">
-                                Keep the wallet app open until transaction is confirmed.
+                                If the wallet doesn't open automatically, use the button above.
                             </div>
                         </div>
                     </div>
