@@ -236,12 +236,32 @@ export default function VaultPage() {
             const pera = wallets.find(w => w.id === 'pera') || wallets[0]
             if (!pera) throw new Error('No wallet provider found')
 
-            // Defensively clear any stuck sessions first
-            if (pera.isConnected) {
-                await pera.disconnect().catch(() => { })
+            // Step 1: Forcefully try to disconnect first to clear any internal SDK ghosts
+            // We call it unconditionally and catch any errors. 
+            // In many cases, the Pera SDK thinks a session is active when the react state doesn't.
+            try {
+                await pera.disconnect()
+                // Brief pause to allow the provider state to settle
+                await new Promise(resolve => setTimeout(resolve, 800))
+            } catch (err) {
+                console.warn('Initial disconnect check (can ignore):', err)
             }
 
-            await pera.connect()
+            // Step 2: Attempt to connect
+            try {
+                await pera.connect()
+            } catch (connectError: any) {
+                // Step 3: Specific retry for "Session currently connected"
+                // If the disconnect above didn't catch the ghost session, we try one more intensive clear.
+                if (connectError.message?.includes('Session currently connected')) {
+                    console.log('Detected ghost session, performing emergency disconnect and retry...')
+                    await pera.disconnect().catch(() => { })
+                    await new Promise(resolve => setTimeout(resolve, 1500)) // Longer wait
+                    await pera.connect()
+                } else {
+                    throw connectError
+                }
+            }
         } catch (e: any) {
             console.error('Connection aborted:', e)
             setError(e.message || 'Connection failed. Please try again.')
