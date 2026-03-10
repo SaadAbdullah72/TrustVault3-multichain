@@ -66,16 +66,6 @@ export default function VaultPage() {
     const [vaultRoles, setVaultRoles] = useState<Record<string, 'owner' | 'beneficiary'>>({})
     const [showCreateForm, setShowCreateForm] = useState(false)
 
-    // Load available vaults on connect
-    useEffect(() => {
-        if (activeAddress) {
-            loadUserVaults()
-        } else {
-            setUserVaults([])
-            setSelectedAppId(null)
-        }
-    }, [activeAddress])
-
     // UI state
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
     const [vaultBalance, setVaultBalance] = useState<number>(0)
@@ -179,6 +169,16 @@ export default function VaultPage() {
             setDiscovering(false)
         }
     }, [activeAddress, selectedAppId])
+
+    // Load available vaults on connect
+    useEffect(() => {
+        if (activeAddress) {
+            loadUserVaults()
+        } else {
+            setUserVaults([])
+            setSelectedAppId(null)
+        }
+    }, [activeAddress, loadUserVaults])
 
     // Auto-discover claimable vaults for beneficiary
     const scanForClaimableVaults = useCallback(async () => {
@@ -328,22 +328,6 @@ export default function VaultPage() {
         setLoading(false)
         setTxId('')
         setError('')
-    }
-    const handleImportVault = async () => {
-        if (!importIdInput) return
-        try {
-            const id = BigInt(importIdInput)
-            if (!userVaults.includes(id)) {
-                setUserVaults(prev => [...prev, id])
-                localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify([...userVaults, id].map(i => i.toString())))
-            }
-            setSelectedAppId(id)
-            setShowImportForm(false)
-            setImportIdInput('')
-            setTxId('Vault Imported!')
-        } catch (e) {
-            setError('Invalid App ID')
-        }
     }
 
     const handleHeartbeat = async () => {
