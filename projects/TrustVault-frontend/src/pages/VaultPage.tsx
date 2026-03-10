@@ -237,6 +237,17 @@ export default function VaultPage() {
         setUserVaults([])
     }
 
+    const handleDeleteVaultId = (id: bigint) => {
+        const updated = userVaults.filter(v => v !== id)
+        setUserVaults(updated)
+        if (activeAddress) {
+            localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(updated.map(v => v.toString())))
+        }
+        if (selectedAppId === id) {
+            setSelectedAppId(updated.length > 0 ? updated[0] : null)
+        }
+    }
+
     const handleCreateVault = async () => {
         if (!activeAddress) return
         if (!beneficiaryInput || !lockDurationInput || !depositInput) {
@@ -639,20 +650,28 @@ export default function VaultPage() {
                                 </div>
                             )}
                             {userVaults.map(id => (
-                                <button
-                                    key={id.toString()}
-                                    className={`vault-dropdown-item ${selectedAppId === id ? 'active' : ''}`}
-                                    onClick={() => { setSelectedAppId(id); setShowVaultSelector(false) }}
-                                >
-                                    <div className="vault-dropdown-item-avatar">
-                                        <Shield className="vault-dropdown-item-icon" />
-                                    </div>
-                                    <div className="vault-dropdown-item-info">
-                                        <span className="vault-dropdown-item-name">Vault #{id.toString()}</span>
-                                        <span className="vault-dropdown-item-addr">{formatAddr(getAppAddress(id))}</span>
-                                    </div>
-                                    {selectedAppId === id && <CheckCircle className="vault-dropdown-item-check" />}
-                                </button>
+                                <div key={id.toString()} className={`vault-dropdown-row ${selectedAppId === id ? 'active' : ''}`}>
+                                    <button
+                                        className="vault-dropdown-item"
+                                        onClick={() => { setSelectedAppId(id); setShowVaultSelector(false) }}
+                                    >
+                                        <div className="vault-dropdown-item-avatar">
+                                            <Shield className="vault-dropdown-item-icon" />
+                                        </div>
+                                        <div className="vault-dropdown-item-info">
+                                            <span className="vault-dropdown-item-name">Vault #{id.toString()}</span>
+                                            <span className="vault-dropdown-item-addr">{formatAddr(getAppAddress(id))}</span>
+                                        </div>
+                                        {selectedAppId === id && <CheckCircle className="vault-dropdown-item-check" />}
+                                    </button>
+                                    <button
+                                        className="vault-dropdown-delete"
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteVaultId(id) }}
+                                        title="Remove from history"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
                             ))}
                             <div className="vault-dropdown-actions">
                                 <button className="vault-dropdown-action-btn" onClick={() => { setShowCreateForm(true); setShowImportForm(false); setShowVaultSelector(false) }}>

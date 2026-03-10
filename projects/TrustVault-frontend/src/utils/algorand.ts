@@ -29,7 +29,7 @@ export const discoverVaults = async (address: string): Promise<bigint[]> => {
         const processTxs = (txs: any[]) => {
             txs.forEach((tx: any) => {
                 const appId = tx['application-transaction']?.['application-id']
-                if (appId) foundIds.add(appId.toString())
+                if (appId && appId > 0) foundIds.add(appId.toString())
             })
         }
 
@@ -48,7 +48,9 @@ export const discoverVaults = async (address: string): Promise<bigint[]> => {
         ])
 
         if (createdApps.applications) {
-            createdApps.applications.forEach((app: any) => foundIds.add(app.id.toString()))
+            createdApps.applications.forEach((app: any) => {
+                if (app.id > 0) foundIds.add(app.id.toString())
+            })
         }
         processTxs(involvedTxs.transactions || [])
 

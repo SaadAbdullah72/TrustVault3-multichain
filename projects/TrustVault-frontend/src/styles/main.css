@@ -594,26 +594,57 @@ body {
     opacity: 0.4;
 }
 
+.vault-dropdown-row {
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.vault-dropdown-row:hover {
+    background: rgba(124, 58, 237, 0.04);
+}
+
+.vault-dropdown-row.active {
+    background: rgba(124, 58, 237, 0.08);
+}
+
 .vault-dropdown-item {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%;
     padding: 10px 14px;
     border: none;
     background: transparent;
     cursor: pointer;
-    transition: all 0.15s;
     text-align: left;
     color: var(--text-primary);
 }
 
-.vault-dropdown-item:hover {
-    background: rgba(124, 58, 237, 0.06);
+.vault-dropdown-delete {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    opacity: 0;
 }
 
-.vault-dropdown-item.active {
-    background: rgba(124, 58, 237, 0.1);
+.vault-dropdown-row:hover .vault-dropdown-delete {
+    opacity: 1;
+}
+
+.vault-dropdown-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
 }
 
 .vault-dropdown-item-avatar {
