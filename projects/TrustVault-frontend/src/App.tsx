@@ -6,16 +6,8 @@ import VaultPage from './pages/VaultPage'
 const walletManager = new WalletManager({
   wallets: [
     {
-      id: WalletId.WALLETCONNECT,
-      options: {
-        projectId: 'c1b47ac841baf67be16a927a3c3e7b16',
-        themeMode: 'dark',
-        enableExplorer: true,
-        explorerRecommendedWalletIds: 'NONE', // Can put pera wallet id later
-        privacyPolicyUrl: '',
-        termsOfServiceUrl: '',
-        themeVariables: {}
-      } // Required for mobile wallets like Pera
+      id: WalletId.PERA,
+      options: { compactMode: false }
     },
     WalletId.DEFLY,
     WalletId.EXODUS
