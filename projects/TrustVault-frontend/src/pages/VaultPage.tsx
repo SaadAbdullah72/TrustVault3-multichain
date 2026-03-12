@@ -1,25 +1,16 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import {
-    fetchVaultState,
     getAppAddress,
     VaultState,
-    algodClient,
-    discoverVaults,
-    discoverBeneficiaryVaults,
-    ClaimableVault,
-    deployVault,
-    callHeartbeat,
-    callAutoRelease,
-    callWithdraw,
-    saveBeneficiaryMapping,
-    checkAccountBalance,
-    getVaultBalance,
-    VAULT_NOTE_PREFIX
 } from '../utils/algorand'
-import { saveVaultToRegistry } from '../utils/supabase'
 import Countdown from '../components/Countdown'
-import algosdk from 'algosdk'
+import ConnectScreen from '../components/ConnectScreen'
+import TransactionOverlay from '../components/TransactionOverlay'
+import StatusToast from '../components/StatusToast'
+import { useVaultActions } from '../hooks/useVaultActions'
+import { useVaultDiscovery } from '../hooks/useVaultDiscovery'
+import { useVaultState } from '../hooks/useVaultState'
 import {
     Shield,
     Lock,
@@ -30,244 +21,106 @@ import {
     X,
     Wallet,
     Clock,
-    AlertTriangle,
     CheckCircle,
     LogOut,
     ChevronDown,
     ArrowRight,
     Zap,
     Copy,
-    ExternalLink,
     RefreshCw,
-    Send,
-    Download,
     Heart,
     ChevronLeft,
-    ChevronRight,
-    MoreVertical,
-    ArrowDownToLine,
     ArrowUpFromLine,
-    Eye,
-    EyeOff,
-    Settings,
-    Bell,
     CircleDot,
+    Bell,
     CreditCard,
     Timer,
+    Eye,
+    EyeOff,
     FileText
 } from 'lucide-react'
 
 export default function VaultPage() {
-    const { activeAddress, wallets, transactionSigner, activeWallet } = useWallet()
+    const { wallets, activeAddress } = useWallet()
 
-    // Selection state
-    const [selectedAppId, setSelectedAppId] = useState<bigint | null>(null)
-    const [userVaults, setUserVaults] = useState<bigint[]>([])
-    const [vaultRoles, setVaultRoles] = useState<Record<string, 'owner' | 'beneficiary'>>({})
+    // --- Modular Hooks ---
+    const {
+        uiStatus,
+        updateStatus,
+        resetStatus,
+        handleConnect,
+        handleDisconnect,
+        handleCreateVault,
+        handleHeartbeat,
+        handleClaim,
+        handleWithdraw
+    } = useVaultActions()
+
+    const {
+        userVaults,
+        setUserVaults,
+        selectedAppId,
+        setSelectedAppId,
+        claimableVaults,
+        vaultRoles,
+        handleManualScan,
+        handleDirectClaim
+    } = useVaultDiscovery(activeAddress)
+
+    const {
+        vaultState,
+        vaultBalance,
+        loadVaultState
+    } = useVaultState(selectedAppId)
+
+    // --- Page Local State ---
     const [showCreateForm, setShowCreateForm] = useState(false)
-
-    // UI state
-    const [vaultState, setVaultState] = useState<VaultState | null>(null)
-    const [vaultBalance, setVaultBalance] = useState<number>(0)
-    const [loading, setLoading] = useState(false)
-    const [discovering, setDiscovering] = useState(false)
-    const [error, setError] = useState('')
-    const [txId, setTxId] = useState('')
-
-    // Form state
     const [beneficiaryInput, setBeneficiaryInput] = useState('')
     const [lockDurationInput, setLockDurationInput] = useState('60')
     const [depositInput, setDepositInput] = useState('1')
 
-    // Beneficiary auto-discovery state
-    const [claimableVaults, setClaimableVaults] = useState<ClaimableVault[]>([])
-    const [scanningClaims, setScanningClaims] = useState(false)
-
-    // Wallet UI state
     const [showVaultSelector, setShowVaultSelector] = useState(false)
     const [copied, setCopied] = useState(false)
     const [showBalanceHidden, setShowBalanceHidden] = useState(false)
-
-    // Card 3D interaction state
     const [tilt, setTilt] = useState({ x: 0, y: 0 })
     const [isInteracting, setIsInteracting] = useState(false)
 
-    // Handle 3D Tilt
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-        const centerX = rect.width / 2
-        const centerY = rect.height / 2
-        const rotateX = ((y - centerY) / centerY) * -15 // Max 15 deg
-        const rotateY = ((x - centerX) / centerX) * 15
-        setTilt({ x: rotateX, y: rotateY })
-        setIsInteracting(true)
+    // --- Derived State ---
+    const vaultAddress = useMemo(() => selectedAppId ? getAppAddress(selectedAppId) : '', [selectedAppId])
+    const isOwner = useMemo(() => activeAddress && String(vaultState?.owner || '').toUpperCase() === activeAddress.toUpperCase(), [activeAddress, vaultState])
+    const isBeneficiary = useMemo(() => activeAddress && String(vaultState?.beneficiary || '').toUpperCase() === activeAddress.toUpperCase(), [activeAddress, vaultState])
+
+    const now = Math.floor(Date.now() / 1000)
+    const canRelease = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
+    const isExpired = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
+
+    // --- Handlers ---
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
     }
 
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const touch = e.touches[0]
-        const x = touch.clientX - rect.left
-        const y = touch.clientY - rect.top
-        const centerX = rect.width / 2
-        const centerY = rect.height / 2
-        const rotateX = ((y - centerY) / centerY) * -20
-        const rotateY = ((x - centerX) / centerX) * 20
-        setTilt({ x: rotateX, y: rotateY })
-        setIsInteracting(true)
+    const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
+
+    const handleCreateVaultSubmit = async () => {
+        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (appId) => {
+            setSelectedAppId(appId)
+            setShowCreateForm(false)
+        })
     }
 
-    const resetTilt = () => {
-        setTilt({ x: 0, y: 0 })
-        setIsInteracting(false)
+    const handleWithdrawAction = async () => {
+        const amountStr = window.prompt('Enter amount to withdraw (ALGO):')
+        if (amountStr) {
+            await handleWithdraw(selectedAppId!, parseFloat(amountStr), loadVaultState)
+        }
     }
 
-    // Card slider state (for onboarding)
-    const cardImages = ['/trustvault-card.png', '/trustvault-card-angle.png', '/trustvault-card-back.png']
-    const cardLabels = ['Front View', 'Angle View', 'Back View']
-    const [cardSlide, setCardSlide] = useState<number>(0)
-    const [cardAutoPlay, setCardAutoPlay] = useState<boolean>(true)
-
-    // Auto-rotate card slider
-    useEffect(() => {
-        if (!cardAutoPlay) return
-        const interval = setInterval(() => {
-            setCardSlide((prev: number) => (prev + 1) % cardImages.length)
-        }, 3000)
-        return () => clearInterval(interval)
-    }, [cardAutoPlay, cardImages.length])
-
-    // Load available vaults (filter out released ones)
-    const loadUserVaults = useCallback(async () => {
-        if (!activeAddress) return
-        setDiscovering(true)
-        try {
-            const ids = await discoverVaults(activeAddress)
-
-            // Filter out released/dead vaults
-            const activeVaults: bigint[] = []
-            const states = await Promise.all(
-                ids.map(id => fetchVaultState(id).catch(() => null))
-            )
-            ids.forEach((id, idx) => {
-                const state = states[idx]
-                if (!state || !state.released) {
-                    activeVaults.push(id)
-                }
-            })
-
-            setUserVaults(activeVaults)
-            localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(activeVaults.map(id => id.toString())))
-
-            if (activeVaults.length > 0 && selectedAppId === null) {
-                setSelectedAppId(activeVaults[0])
-            }
-        } catch (e) {
-            console.error('Discovery error', e)
-        } finally {
-            setDiscovering(false)
-        }
-    }, [activeAddress, selectedAppId])
-
-    // Load available vaults on connect
-    useEffect(() => {
-        if (activeAddress) {
-            loadUserVaults()
-        } else {
-            setUserVaults([])
-            setSelectedAppId(null)
-        }
-    }, [activeAddress, loadUserVaults])
-
-    // Auto-discover claimable vaults for beneficiary
-    const scanForClaimableVaults = useCallback(async () => {
-        if (!activeAddress) return
-        setScanningClaims(true)
-        try {
-            const vaults = await discoverBeneficiaryVaults(activeAddress)
-            setClaimableVaults(vaults)
-        } catch (e) {
-            console.error('Beneficiary scan error', e)
-        } finally {
-            setScanningClaims(false)
-        }
-    }, [activeAddress])
-
-    // Auto-scan on connect + every 30 seconds
-    useEffect(() => {
-        if (activeAddress) {
-            scanForClaimableVaults()
-            const interval = setInterval(scanForClaimableVaults, 30000)
-            return () => clearInterval(interval)
-        } else {
-            setClaimableVaults([])
-            return undefined
-        }
-    }, [activeAddress, scanForClaimableVaults])
-
-    // Load state for selected vault
-    const loadVaultState = useCallback(async () => {
-        if (selectedAppId === null) return
-        try {
-            const [state, balance] = await Promise.all([
-                fetchVaultState(selectedAppId),
-                getVaultBalance(selectedAppId)
-            ])
-            setVaultState(state)
-            setVaultBalance(balance)
-        } catch (e) {
-            console.error('State load error', e)
-        }
-    }, [selectedAppId])
-
-    // Disconnect helper
-    const startDisconnect = async (wallet: any) => {
-        if (wallet) await wallet.disconnect()
-        setSelectedAppId(null)
-        setUserVaults([])
-    }
-
-    // Robust Connect helper
-    const handleConnect = async () => {
-        try {
-            setLoading(true)
-            setError('')
-            const pera = wallets.find(w => w.id === 'pera') || wallets[0]
-            if (!pera) throw new Error('No wallet provider found')
-
-            // Step 1: Forcefully try to disconnect first to clear any internal SDK ghosts
-            // We call it unconditionally and catch any errors. 
-            // In many cases, the Pera SDK thinks a session is active when the react state doesn't.
-            try {
-                await pera.disconnect()
-                // Brief pause to allow the provider state to settle
-                await new Promise(resolve => setTimeout(resolve, 800))
-            } catch (err) {
-                console.warn('Initial disconnect check (can ignore):', err)
-            }
-
-            // Step 2: Attempt to connect
-            try {
-                await pera.connect()
-            } catch (connectError: any) {
-                // Step 3: Specific retry for "Session currently connected"
-                // If the disconnect above didn't catch the ghost session, we try one more intensive clear.
-                if (connectError.message?.includes('Session currently connected')) {
-                    console.log('Detected ghost session, performing emergency disconnect and retry...')
-                    await pera.disconnect().catch(() => { })
-                    await new Promise(resolve => setTimeout(resolve, 1500)) // Longer wait
-                    await pera.connect()
-                } else {
-                    throw connectError
-                }
-            }
-        } catch (e: any) {
-            console.error('Connection aborted:', e)
-            setError(e.message || 'Connection failed. Please try again.')
-        } finally {
-            setLoading(false)
-        }
+    const handleDirectClaim = async (appId: bigint) => {
+        await handleClaim(appId, () => {
+            handleManualScan()
+        })
     }
 
     const handleDeleteVaultId = (id: bigint) => {
@@ -281,365 +134,31 @@ export default function VaultPage() {
         }
     }
 
-    const handleCreateVault = async () => {
-        if (!activeAddress) return
-        if (!beneficiaryInput || !lockDurationInput || !depositInput) {
-            setError('Please fill all fields')
-            return
-        }
-
-        setLoading(true)
-        setError('')
-        try {
-            const depositMicro = Math.round(parseFloat(depositInput) * 1_000_000)
-            const totalNeeded = depositMicro + 500_000
-            const balCheck = await checkAccountBalance(activeAddress, totalNeeded)
-            if (!balCheck.ok) {
-                setError(`Insufficient balance! You have ${(balCheck.balance / 1_000_000).toFixed(2)} ALGO but need ~${(balCheck.needed / 1_000_000).toFixed(2)} ALGO (including minimum balance). Fund your account first.`)
-                setLoading(false)
-                return
-            }
-
-            setTxId('Step 1/2: Deploying Vault...')
-            const appId = await deployVault(activeAddress, transactionSigner)
-            if (!appId) throw new Error('Deployment failed')
-
-            setTxId('Step 1/2 Complete! Finalizing (3s)...')
-            await new Promise(resolve => setTimeout(resolve, 3000))
-
-            setTxId('Step 2/2: Setting up & Funding...')
-
-            // Brief pause to ensure UI settles before wallet prompt
-            await new Promise(resolve => setTimeout(resolve, 500))
-
-            const appAddress = getAppAddress(appId)
-            const suggestedParams = await algodClient.getTransactionParams().do()
-            const method = new algosdk.ABIMethod({
-                name: 'bootstrap',
-                args: [{ name: 'beneficiary', type: 'address' }, { name: 'lock_duration', type: 'uint64' }],
-                returns: { type: 'void' }
-            })
-
-            const encodedNote = new TextEncoder().encode(VAULT_NOTE_PREFIX + beneficiaryInput.trim())
-
-            // We'll create the Method Call and Payment transactions manually
-            // to avoid WalletConnect issues with ATC
-
-            const bootstrapTxn = algosdk.makeApplicationCallTxnFromObject({
-                sender: activeAddress,
-                appIndex: Number(appId),
-                onComplete: algosdk.OnApplicationComplete.NoOpOC,
-                suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
-                appArgs: [
-                    method.getSelector(),
-                    algosdk.decodeAddress(beneficiaryInput.trim()).publicKey,
-                    algosdk.encodeUint64(Number(lockDurationInput))
-                ],
-                accounts: [beneficiaryInput.trim()],
-                note: encodedNote
-            })
-
-            const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-                sender: activeAddress,
-                receiver: appAddress,
-                amount: depositMicro,
-                suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
-            })
-
-            // Group the transactions
-            const txns = [bootstrapTxn, payTxn]
-            algosdk.assignGroupID(txns)
-
-            // Request signature
-            const signedTxns = await transactionSigner(txns, [0, 1])
-
-            // Send raw transactions
-            await algodClient.sendRawTransaction(signedTxns).do()
-
-            // Wait for confirmation of the first tx in the group
-            await algosdk.waitForConfirmation(algodClient, bootstrapTxn.txID().toString(), 4)
-
-            setTxId('Vault established! Finalizing secure registry...')
-            saveBeneficiaryMapping(beneficiaryInput.trim(), appId)
-            const synced = await saveVaultToRegistry(appId.toString(), beneficiaryInput, activeAddress)
-
-            if (synced) {
-                setTxId('Vault established! Finalizing secure registry... ✨')
-            } else {
-                setTxId('Vault created! (Registry sync delayed, save ID manually)')
-            }
-
-            setSelectedAppId(appId)
-            await loadUserVaults()
-            setTimeout(() => setShowCreateForm(false), 2000)
-        } catch (e: any) {
-            setError(e.message || 'Creation failed')
-            setTxId('')
-        } finally {
-            setLoading(false)
-        }
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const rotateX = (((e.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2)) * -15
+        const rotateY = (((e.clientX - rect.left) - (rect.width / 2)) / (rect.width / 2)) * 15
+        setTilt({ x: rotateX, y: rotateY })
+        setIsInteracting(true)
     }
 
-    const resetLoadingState = () => {
-        setLoading(false)
-        setTxId('')
-        setError('')
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const touch = e.touches[0]
+        const rotateX = (((touch.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2)) * -20
+        const rotateY = (((touch.clientX - rect.left) - (rect.width / 2)) / (rect.width / 2)) * 20
+        setTilt({ x: rotateX, y: rotateY })
+        setIsInteracting(true)
     }
 
-    const handleHeartbeat = async () => {
-        if (!activeAddress || !selectedAppId) return
-        setLoading(true)
-        setError('')
-        setTxId('Step 1/1: Processing Heartbeat...')
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callHeartbeat(selectedAppId, activeAddress, transactionSigner)
-            setTxId(`Heartbeat confirmed! TX: ${id}`)
-            await loadVaultState()
-        } catch (e: any) {
-            setError(e.message || 'Heartbeat failed')
-            setTxId('')
-        } finally {
-            setLoading(false)
-        }
+    const resetTilt = () => {
+        setTilt({ x: 0, y: 0 })
+        setIsInteracting(false)
     }
 
-    const handleClaim = async () => {
-        if (!activeAddress || !selectedAppId) return
-        setLoading(true)
-        setError('')
-        setTxId('Step 1/1: Claiming Inheritance funds...')
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callAutoRelease(selectedAppId, activeAddress, transactionSigner)
-            setTxId(`Inheritance claimed successfully! TX: ${id}`)
-            await loadVaultState()
-        } catch (e: any) {
-            setError(e.message || 'Claim failed')
-            setTxId('')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleWithdraw = async () => {
-        if (!activeAddress || !selectedAppId) return
-        const amountStr = window.prompt('Enter amount to withdraw (ALGO):')
-        if (!amountStr) return
-
-        const amount = parseFloat(amountStr)
-        if (isNaN(amount) || amount <= 0) {
-            setError('Invalid amount')
-            return
-        }
-
-        setLoading(true)
-        setError('')
-        setTxId('Step 1/1: Processing Withdrawal...')
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callWithdraw(selectedAppId, amount, activeAddress, transactionSigner)
-            setTxId(`Funds Withdrawn! TX: ${id}`)
-            await loadVaultState()
-        } catch (e: any) {
-            setError(e.message || 'Withdrawal failed')
-            setTxId('')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleScanForClaims = async () => {
-        if (!activeAddress) return
-        setLoading(true)
-        setDiscovering(true)
-        setTxId('Scanning decentralized networks...')
-        setError('')
-        try {
-            const ids = await discoverVaults(activeAddress)
-
-            // Fetch roles for all found vaults to distinguish Owner vs Beneficiary
-            const roles: Record<string, 'owner' | 'beneficiary'> = { ...vaultRoles }
-            const states = await Promise.all(ids.map(id => fetchVaultState(id).catch(() => null)))
-
-            ids.forEach((id, idx) => {
-                const state = states[idx]
-                if (state) {
-                    roles[id.toString()] = state.owner.toUpperCase() === activeAddress.toUpperCase() ? 'owner' : 'beneficiary'
-                }
-            })
-            setVaultRoles(roles)
-
-            if (ids.length > 0) {
-                // Remove duplicates and maintain latest-first sort
-                const unique = Array.from(new Set([...userVaults, ...ids])).sort((a, b) => Number(b - a))
-                setUserVaults(unique)
-                localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(unique.map(i => i.toString())))
-
-                if (!selectedAppId) {
-                    setSelectedAppId(ids[0])
-                }
-                setTxId(`Scan complete! Found ${ids.length} vault(s).`)
-            } else {
-                setTxId('No vaults found on this account.')
-            }
-            await scanForClaimableVaults()
-        } catch (e: any) {
-            setError(e.message || 'Scan failed')
-        } finally {
-            setLoading(false)
-            setDiscovering(false)
-        }
-    }
-
-    // Direct claim for auto-discovered beneficiary vaults (no import needed)
-    const handleDirectClaim = async (vaultAppId: bigint) => {
-        if (!activeAddress) return
-        setLoading(true)
-        setError('')
-        setTxId('Step 1/1: Claiming Inheritance funds...')
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callAutoRelease(vaultAppId, activeAddress, transactionSigner)
-            setTxId(`Inheritance funds claimed successfully! TX: ${id}`)
-            setClaimableVaults(prev => prev.filter(v => v.appId !== vaultAppId))
-            await scanForClaimableVaults()
-        } catch (e: any) {
-            setError(e.message || 'Claim failed')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        if (activeAddress) loadUserVaults()
-    }, [activeAddress, loadUserVaults])
-
-    useEffect(() => {
-        if (selectedAppId) {
-            loadVaultState()
-            const interval = setInterval(loadVaultState, 5000)
-            return () => clearInterval(interval)
-        } else {
-            setVaultState(null)
-            return undefined
-        }
-    }, [selectedAppId, loadVaultState])
-
-    const isOwner = activeAddress && String(vaultState?.owner || '').toUpperCase() === activeAddress.toUpperCase()
-    const isBeneficiary = activeAddress && String(vaultState?.beneficiary || '').toUpperCase() === activeAddress.toUpperCase()
-    const now = Math.floor(Date.now() / 1000)
-    const canRelease = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
-    const isExpired = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
-
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-    }
-
-    const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
-
-    const vaultAddress = selectedAppId ? getAppAddress(selectedAppId) : ''
-
-    // ===== CONNECT SCREEN (Like wallet onboarding) =====
     if (!activeAddress) {
-        return (
-            <div className="wallet-shell">
-                <div className="wallet-container wallet-connect-screen">
-                    {/* Gradient orb background */}
-                    <div className="connect-orb connect-orb-1" />
-                    <div className="connect-orb connect-orb-2" />
-                    <div className="connect-orb connect-orb-3" />
-
-                    <div className="connect-content">
-                        <div className="connect-logo-wrap">
-                            <div className="connect-logo-glow" />
-                            <img src="/logo.svg" alt="TrustVault³" className="connect-logo-img" />
-                        </div>
-
-                        <h1 className="connect-title">TrustVault<sup className="connect-title-sup">3</sup></h1>
-                        <p className="connect-subtitle">Autonomous Inheritance Protocol</p>
-
-                        {/* ====== 3D CREDIT CARD SLIDER ====== */}
-                        <div className="card-slider-section">
-                            <div className="card-slider-stage"
-                                onMouseEnter={() => setCardAutoPlay(false)}
-                                onMouseLeave={() => setCardAutoPlay(true)}
-                            >
-                                {/* Nav arrows */}
-                                <button className="card-slider-arrow left" onClick={() => setCardSlide((prev: number) => (prev - 1 + cardImages.length) % cardImages.length)}>
-                                    <ChevronLeft />
-                                </button>
-                                <button className="card-slider-arrow right" onClick={() => setCardSlide((prev: number) => (prev + 1) % cardImages.length)}>
-                                    <ChevronRight />
-                                </button>
-
-                                {/* Card images */}
-                                <div className="card-slider-viewport">
-                                    <div className="card-slider-glow" />
-                                    {cardImages.map((src: string, idx: number) => (
-                                        <img
-                                            key={idx}
-                                            src={src}
-                                            alt={cardLabels[idx]}
-                                            className={`card-slider-img ${idx === cardSlide ? 'active' : idx === (cardSlide - 1 + cardImages.length) % cardImages.length ? 'prev' : idx === (cardSlide + 1) % cardImages.length ? 'next' : 'hidden'}`}
-                                        />
-                                    ))}
-                                </div>
-
-                                {/* Dots */}
-                                <div className="card-slider-dots">
-                                    {cardImages.map((_: string, idx: number) => (
-                                        <button
-                                            key={idx}
-                                            className={`card-slider-dot ${idx === cardSlide ? 'active' : ''}`}
-                                            onClick={() => setCardSlide(idx)}
-                                        />
-                                    ))}
-                                </div>
-                                <span className="card-slider-label">{cardLabels[cardSlide]}</span>
-                            </div>
-                            <div className="card-promo-badge">
-                                <CreditCard className="card-promo-badge-icon" />
-                                <span>Virtual Card Included</span>
-                            </div>
-                        </div>
-
-                        <div className="connect-features">
-                            <div className="connect-feature">
-                                <Lock className="connect-feature-icon" />
-                                <span>Secure Vaults</span>
-                            </div>
-                            <div className="connect-feature">
-                                <Heart className="connect-feature-icon" />
-                                <span>Heartbeat Timer</span>
-                            </div>
-                            <div className="connect-feature">
-                                <Zap className="connect-feature-icon" />
-                                <span>Auto Release</span>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={handleConnect}
-                            className="connect-btn"
-                            disabled={loading}
-                        >
-                            <Wallet className="connect-btn-icon" />
-                            <span>{loading ? 'Connecting...' : 'Connect Wallet'}</span>
-                        </button>
-
-                        <p className="connect-footer">
-                            Secured by Algorand Blockchain
-                        </p>
-                    </div>
-                </div>
-            </div>
-        )
+        return <ConnectScreen onConnect={handleConnect} wallets={wallets} loading={uiStatus.loading} error={uiStatus.error} />
     }
-
-    // ===== MAIN WALLET UI =====
     return (
         <div className="wallet-shell">
             <div className="wallet-container">
@@ -653,13 +172,12 @@ export default function VaultPage() {
                     </div>
 
                     <div className="topbar-right">
-                        {/* Network badge */}
                         <div className="network-badge">
                             <CircleDot className="network-dot" />
                             <span>Testnet</span>
                         </div>
                         <button
-                            onClick={() => startDisconnect(wallets.find(w => w.isActive))}
+                            onClick={handleDisconnect}
                             className="topbar-disconnect"
                             title="Disconnect"
                         >
@@ -670,7 +188,6 @@ export default function VaultPage() {
 
                 {/* ======= ACCOUNT HEADER ======= */}
                 <div className="wallet-account-header">
-                    {/* Vault Selector */}
                     <div className="vault-selector-trigger" onClick={() => setShowVaultSelector(!showVaultSelector)}>
                         <div className="vault-avatar">
                             <Shield className="vault-avatar-icon" />
@@ -686,13 +203,12 @@ export default function VaultPage() {
                         <ChevronDown className={`vault-selector-chevron ${showVaultSelector ? 'rotated' : ''}`} />
                     </div>
 
-                    {/* Vault Selector Dropdown */}
                     {showVaultSelector && (
                         <div className="vault-selector-dropdown">
                             <div className="vault-dropdown-header">
                                 <span>My Vaults</span>
-                                <button onClick={handleScanForClaims} className="vault-dropdown-scan" disabled={loading || discovering}>
-                                    <RefreshCw className={`vault-dropdown-scan-icon ${discovering ? 'spinning' : ''}`} />
+                                <button onClick={handleManualScan} className="vault-dropdown-scan" disabled={uiStatus.loading || isDiscovering}>
+                                    <RefreshCw className={`vault-dropdown-scan-icon ${isDiscovering ? 'spinning' : ''}`} />
                                 </button>
                             </div>
                             {userVaults.length === 0 && (
@@ -737,15 +253,14 @@ export default function VaultPage() {
                                     <Plus className="vault-dropdown-action-icon" />
                                     <span>Create Vault</span>
                                 </button>
-                                <button className="vault-dropdown-action-btn scan" onClick={handleScanForClaims} disabled={discovering}>
-                                    <RefreshCw className={`vault-dropdown-action-icon ${discovering ? 'spinning' : ''}`} />
+                                <button className="vault-dropdown-action-btn scan" onClick={handleManualScan} disabled={isDiscovering}>
+                                    <RefreshCw className={`vault-dropdown-action-icon ${isDiscovering ? 'spinning' : ''}`} />
                                     <span>Full Scan</span>
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {/* Connected Address */}
                     <div className="wallet-address-bar">
                         <div className="wallet-address-dot" />
                         <span className="wallet-address-text">{formatAddr(activeAddress)}</span>
@@ -755,7 +270,7 @@ export default function VaultPage() {
                     </div>
                 </div>
 
-                {/* ======= CLAIMABLE VAULTS NOTIFICATION ======= */}
+                {/* ======= NOTIFICATIONS ======= */}
                 {claimableVaults.length > 0 && (
                     <div className="claim-notification">
                         <div className="claim-notification-header">
@@ -770,26 +285,26 @@ export default function VaultPage() {
                                     <span className="claim-card-status">Timer Expired</span>
                                 </div>
                                 <button
-                                    onClick={() => handleDirectClaim(vault.appId)}
-                                    disabled={loading}
+                                    onClick={() => handleClaim(vault.appId, loadVaultState)}
+                                    disabled={uiStatus.loading}
                                     className="claim-card-btn"
                                 >
                                     <Unlock className="claim-card-btn-icon" />
-                                    {loading ? 'Claiming...' : 'Claim'}
+                                    {uiStatus.loading ? 'Claiming...' : 'Claim'}
                                 </button>
                             </div>
                         ))}
                     </div>
                 )}
 
-                {scanningClaims && claimableVaults.length === 0 && (
+                {isScanningClaims && claimableVaults.length === 0 && (
                     <div className="scanning-indicator">
                         <RefreshCw className="scanning-icon spinning" />
                         <span>Scanning for claimable vaults...</span>
                     </div>
                 )}
 
-                {/* ======= FORMS (Create / Import) ======= */}
+                {/* ======= FORMS ======= */}
                 {showCreateForm && (
                     <div className="wallet-form-overlay">
                         <div className="wallet-form-card">
@@ -839,30 +354,27 @@ export default function VaultPage() {
                                         />
                                     </div>
                                 </div>
-                                <button onClick={handleCreateVault} disabled={loading} className="wallet-form-submit">
-                                    {loading ? (
+                                <button onClick={handleCreateVaultSubmit} disabled={uiStatus.loading} className="wallet-form-submit">
+                                    {uiStatus.loading ? (
                                         <RefreshCw className="spinning submit-icon" />
                                     ) : (
                                         <Shield className="submit-icon" />
                                     )}
-                                    <span>{loading ? 'Deploying...' : 'Deploy & Fund Vault'}</span>
+                                    <span>{uiStatus.loading ? 'Deploying...' : 'Deploy & Fund Vault'}</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* ======= IMPORT FORM REMOVED (UNIFIED WITH SCAN) ======= */}
-
                 {/* ======= MAIN CONTENT ======= */}
-                {discovering ? (
+                {isDiscovering ? (
                     <div className="wallet-loading">
                         <div className="wallet-loading-spinner" />
                         <span className="wallet-loading-text">Syncing with blockchain...</span>
                     </div>
                 ) : selectedAppId && vaultState ? (
                     <div className="wallet-main-content">
-                        {/* ===== BALANCE + STATUS ===== */}
                         <div className="balance-section">
                             <div className="balance-label">
                                 <span>Vault Balance</span>
@@ -894,17 +406,16 @@ export default function VaultPage() {
                             </div>
                         </div>
 
-                        {/* ===== QUICK ACTIONS ===== */}
                         <div className="quick-actions">
                             {isOwner && !vaultState.released && (
                                 <>
-                                    <button className="quick-action-btn" onClick={handleHeartbeat} disabled={loading || isExpired}>
+                                    <button className="quick-action-btn" onClick={() => handleHeartbeat(selectedAppId, loadVaultState)} disabled={uiStatus.loading || isExpired}>
                                         <div className={`quick-action-circle ${isExpired ? 'disabled' : 'heartbeat'}`}>
                                             <Heart className="quick-action-icon" />
                                         </div>
                                         <span className="quick-action-label">Heartbeat</span>
                                     </button>
-                                    <button className="quick-action-btn" onClick={handleWithdraw} disabled={loading}>
+                                    <button className="quick-action-btn" onClick={handleWithdrawAction} disabled={uiStatus.loading}>
                                         <div className="quick-action-circle withdraw">
                                             <ArrowUpFromLine className="quick-action-icon" />
                                         </div>
@@ -913,7 +424,7 @@ export default function VaultPage() {
                                 </>
                             )}
                             {isBeneficiary && !vaultState.released && (
-                                <button className="quick-action-btn" onClick={handleClaim} disabled={loading || !canRelease}>
+                                <button className="quick-action-btn" onClick={() => handleClaim(selectedAppId, loadVaultState)} disabled={uiStatus.loading || !canRelease}>
                                     <div className={`quick-action-circle ${canRelease ? 'claim' : 'disabled'}`}>
                                         <Unlock className="quick-action-icon" />
                                     </div>
@@ -926,7 +437,7 @@ export default function VaultPage() {
                                 </div>
                                 <span className="quick-action-label">Copy Addr</span>
                             </button>
-                            <button className="quick-action-btn" onClick={handleScanForClaims} disabled={loading}>
+                            <button className="quick-action-btn" onClick={handleManualScan} disabled={uiStatus.loading}>
                                 <div className="quick-action-circle scan">
                                     <Search className="quick-action-icon" />
                                 </div>
@@ -934,7 +445,6 @@ export default function VaultPage() {
                             </button>
                         </div>
 
-                        {/* ===== CLAIM BANNER ===== */}
                         {isBeneficiary && canRelease && !vaultState.released && (
                             <div className="claim-banner">
                                 <div className="claim-banner-left">
@@ -944,16 +454,14 @@ export default function VaultPage() {
                                         <span className="claim-banner-sub">Timer expired — claim your funds</span>
                                     </div>
                                 </div>
-                                <button className="claim-banner-btn" onClick={handleClaim} disabled={loading}>
-                                    {loading ? <RefreshCw className="spinning claim-banner-btn-icon" /> : <Unlock className="claim-banner-btn-icon" />}
+                                <button className="claim-banner-btn" onClick={() => handleClaim(selectedAppId, loadVaultState)} disabled={uiStatus.loading}>
+                                    {uiStatus.loading ? <RefreshCw className="spinning claim-banner-btn-icon" /> : <Unlock className="claim-banner-btn-icon" />}
                                     <span>Claim Now</span>
                                 </button>
                             </div>
                         )}
 
-                        {/* ===== DASHBOARD SECTIONS (UNIFIED VIEW) ===== */}
                         <div className="dashboard-content">
-                            {/* Card Display */}
                             <div className="section-header">
                                 <CreditCard className="section-header-icon" />
                                 <span>Virtual Trust Card</span>
@@ -997,7 +505,6 @@ export default function VaultPage() {
                                 </div>
                             </div>
 
-                            {/* Countdown / Timer Section */}
                             <div className="section-header">
                                 <Timer className="section-header-icon" />
                                 <span>Heartbeat Countdown</span>
@@ -1008,7 +515,6 @@ export default function VaultPage() {
                                 </div>
                             </div>
 
-                            {/* Vault Details List */}
                             <div className="section-header">
                                 <FileText className="section-header-icon" />
                                 <span>Vault Configuration</span>
@@ -1055,7 +561,6 @@ export default function VaultPage() {
                         </div>
                     </div>
                 ) : (
-                    /* ===== EMPTY STATE ===== */
                     <div className="wallet-empty">
                         <div className="wallet-empty-icon-wrap">
                             <Shield className="wallet-empty-icon" />
@@ -1067,7 +572,7 @@ export default function VaultPage() {
                                 <Plus className="wallet-empty-btn-icon" />
                                 Create Vault
                             </button>
-                            <button className="wallet-empty-btn secondary" onClick={handleScanForClaims} disabled={loading}>
+                            <button className="wallet-empty-btn secondary" onClick={handleManualScan} disabled={uiStatus.loading}>
                                 <Search className="wallet-empty-btn-icon" />
                                 Scan Network
                             </button>
@@ -1075,44 +580,17 @@ export default function VaultPage() {
                     </div>
                 )}
 
-                {/* ======= TRANSACTION OVERLAY ======= */}
-                {loading && (
-                    <div className="wallet-overlay">
-                        <div className="overlay-card">
-                            <div className="overlay-spinner">
-                                <RefreshCw className="spinning overlay-icon" />
-                            </div>
-                            <h3>{txId?.includes('Step') ? 'Vault Action' : 'Waiting for Wallet'}</h3>
-                            <p>{txId ? txId : 'Please check your Pera Wallet to sign and proceed.'}</p>
+                <TransactionOverlay
+                    loading={uiStatus.loading}
+                    txId={uiStatus.txId}
+                    onCancel={resetStatus}
+                />
 
-                            <div className="overlay-actions">
-                                <button className="overlay-btn primary" onClick={() => window.location.href = 'pera://'}>
-                                    <Wallet size={16} />
-                                    <span>Open Pera Wallet</span>
-                                </button>
-                                <button className="overlay-btn secondary" onClick={resetLoadingState}>
-                                    <X size={16} />
-                                    <span>Cancel Request</span>
-                                </button>
-                            </div>
-
-                            <div className="overlay-hint">
-                                If the wallet doesn't open automatically, use the button above.
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* ======= STATUS TOAST ======= */}
-                {(txId || error) && (
-                    <div className={`wallet-toast ${error ? 'error' : 'success'}`}>
-                        {error ? <AlertTriangle className="toast-icon" /> : <CheckCircle className="toast-icon" />}
-                        <span className="toast-text">{error || txId}</span>
-                        <button className="toast-close" onClick={() => { setError(''); setTxId('') }}>
-                            <X className="toast-close-icon" />
-                        </button>
-                    </div>
-                )}
+                <StatusToast
+                    error={uiStatus.error}
+                    txId={uiStatus.txId}
+                    onClose={resetStatus}
+                />
             </div>
         </div>
     )

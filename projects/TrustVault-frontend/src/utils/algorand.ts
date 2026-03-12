@@ -20,61 +20,20 @@ export const APP_ID = 755263236
 // Note prefix for automatic discovery
 export const VAULT_NOTE_PREFIX = 'TrustVault:v1:beneficiary:'
 
-// Function to discover vaults where the user is either the creator or beneficiary
-export const discoverVaults = async (address: string): Promise<bigint[]> => {
-    try {
-        const foundIds = new Set<string>()
+// --- PERFORMANCE CACHE ---
+const fetchCache: Record<string, { data: any, timestamp: number }> = {}
+const CACHE_DURATION = 2000 // 2 seconds
 
-        // Helper to process transactions
-        const processTxs = (txs: any[]) => {
-            txs.forEach((tx: any) => {
-                const appId = tx['application-transaction']?.['application-id']
-                if (appId && appId > 0) foundIds.add(appId.toString())
-            })
-        }
-
-        // Run searches in parallel for speed
-        const [createdApps, involvedTxs, supabaseOwnerIds, supabaseBenIds] = await Promise.all([
-            indexerClient.searchForApplications().creator(address).do().catch((e: any) => {
-                console.warn('Creator search failed:', e)
-                return { applications: [] }
-            }),
-            indexerClient.searchForTransactions().address(address).txType('appl').do().catch((e: any) => {
-                console.warn('Involved txs search failed:', e)
-                return { transactions: [] }
-            }),
-            import('./supabase').then(mod => mod.getVaultsByOwner(address)).catch(() => [] as string[]),
-            import('./supabase').then(mod => mod.getVaultsByBeneficiary(address)).catch(() => [] as string[])
-        ])
-
-        if (createdApps.applications) {
-            createdApps.applications.forEach((app: any) => {
-                if (app.id > 0) foundIds.add(app.id.toString())
-            })
-        }
-        processTxs(involvedTxs.transactions || [])
-
-        supabaseOwnerIds.forEach((id: string) => foundIds.add(id))
-        supabaseBenIds.forEach((id: string) => foundIds.add(id))
-
-        // Also include locally cached vault IDs
-        if (typeof window !== 'undefined') {
-            const cached = localStorage.getItem(`trustvault_ids_${address}`)
-            if (cached) {
-                try {
-                    const parsed = JSON.parse(cached)
-                    Array.isArray(parsed) && parsed.forEach((id: string) => foundIds.add(id))
-                } catch (e) { /* ignore */ }
-            }
-        }
-
-        const scanResults = Array.from(foundIds).map(id => BigInt(id))
-        console.log(`Discovery for ${address}: Found ${scanResults.length} vault(s)`)
-        return scanResults.sort((a, b) => Number(b - a)) // Latest first
-    } catch (error) {
-        console.error('Discovery engine failed:', error)
-        return []
+function getCached<T>(key: string): T | null {
+    const cached = fetchCache[key]
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        return cached.data as T
     }
+    return null
+}
+
+function setCache(key: string, data: any) {
+    fetchCache[key] = { data, timestamp: Date.now() }
 }
 
 // Type for claimable vault (beneficiary auto-discovery)
@@ -83,108 +42,85 @@ export interface ClaimableVault {
     state: VaultState
 }
 
-// Discover vaults where the user is listed as beneficiary AND timer has expired
-// Uses Supabase (primary), note-prefix, localStorage, and Indexer as discovery methods
-export const discoverBeneficiaryVaults = async (address: string): Promise<ClaimableVault[]> => {
+// Discover all vaults related to a user (as owner or beneficiary)
+// Returns unique IDs, sorted by latest first
+export const discoverAllRelatedVaults = async (address: string): Promise<bigint[]> => {
+    const cacheKey = `discovery_${address}`
+    const cached = getCached<bigint[]>(cacheKey)
+    if (cached) return cached
+
     try {
+        console.log(`[Discovery] Starting unified scan for ${address.slice(0, 8)}...`)
         const foundIds = new Set<string>()
-        console.log(`[BeneficiaryScan] Starting scan for ${address.slice(0, 8)}...`)
 
-        // Run ALL discovery methods in parallel for speed
-        const [supabaseIds, noteTxs, involvedTxs] = await Promise.all([
-            // Method 0: Supabase cloud registry (PRIMARY — cross-device)
-            // Query with BOTH cases to handle any casing mismatches
-            import('./supabase').then(async (mod) => {
-                const upper = await mod.getVaultsByBeneficiary(address.toUpperCase()).catch(() => [] as string[])
-                const original = await mod.getVaultsByBeneficiary(address).catch(() => [] as string[])
-                return [...new Set([...upper, ...original])]
-            }).catch(() => [] as string[]),
-
-            // Method 1: Note-prefix search (blockchain — finds bootstrap txns)
-            indexerClient.searchForTransactions()
-                .notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address))
-                .do()
-                .catch(() => ({ transactions: [] })),
-
-            // Method 2: Address-involved txn search (fallback)
-            indexerClient.searchForTransactions().address(address).txType('appl')
-                .do()
-                .catch(() => ({ transactions: [] }))
+        // Run primary discovery methods in parallel
+        const [createdApps, involvedTxs, noteTxs, supabaseOwner, supabaseBen] = await Promise.all([
+            indexerClient.searchForApplications().creator(address).do().catch(() => ({ applications: [] })),
+            indexerClient.searchForTransactions().address(address).txType('appl').do().catch(() => ({ transactions: [] })),
+            indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address)).do().catch(() => ({ transactions: [] })),
+            import('./supabase').then(m => m.getVaultsByOwner(address)).catch(() => []),
+            import('./supabase').then(m => m.getVaultsByBeneficiary(address)).catch(() => [])
         ])
 
-        // Add Supabase results
-        supabaseIds.forEach(id => foundIds.add(id))
-        console.log(`[BeneficiaryScan] Supabase: ${supabaseIds.length} vault(s)`)
+        // 1. Creator search
+        createdApps.applications?.forEach((app: any) => app.id > 0 && foundIds.add(app.id.toString()))
 
-        // Add note-prefix results
-        const noteTransactions = (noteTxs as any).transactions || []
-        noteTransactions.forEach((tx: any) => {
+        // 2. Tx history search
+        const allTxs = [...(involvedTxs.transactions || []), ...(noteTxs.transactions || [])]
+        allTxs.forEach((tx: any) => {
             const appId = tx['application-transaction']?.['application-id']
             if (appId && appId > 0) foundIds.add(appId.toString())
         })
-        console.log(`[BeneficiaryScan] Note-prefix: ${noteTransactions.length} tx(s)`)
 
-        // Add address search results
-        const addrTransactions = (involvedTxs as any).transactions || []
-        addrTransactions.forEach((tx: any) => {
-            const appId = tx['application-transaction']?.['application-id']
-            if (appId && appId > 0) foundIds.add(appId.toString())
-        })
-        console.log(`[BeneficiaryScan] Address-involved: ${addrTransactions.length} tx(s)`)
+        // 3. Supabase results
+        supabaseOwner.forEach((id: string) => foundIds.add(id))
+        supabaseBen.forEach((id: string) => foundIds.add(id))
 
-        // Method 3: localStorage fallback
+        // 4. Local storage fallbacks
         if (typeof window !== 'undefined') {
-            try {
-                const registry = localStorage.getItem('trustvault_beneficiary_registry')
-                if (registry) {
-                    const map: Record<string, string[]> = JSON.parse(registry)
-                        ; (map[address.toUpperCase()] || []).forEach(id => foundIds.add(id))
-                        ; (map[address] || []).forEach(id => foundIds.add(id))
-                }
-            } catch (e) { /* ignore */ }
-            try {
-                const cached = localStorage.getItem(`trustvault_ids_${address}`)
-                if (cached) JSON.parse(cached).forEach((id: string) => foundIds.add(id))
-            } catch (e) { /* ignore */ }
+            const cachedIds = localStorage.getItem(`trustvault_ids_${address}`)
+            if (cachedIds) {
+                try {
+                    const parsed = JSON.parse(cachedIds)
+                    Array.isArray(parsed) && parsed.forEach((id: string) => foundIds.add(id))
+                } catch (e) { }
+            }
         }
 
-        const allIds = Array.from(foundIds).filter(id => id && id !== '0').map(id => BigInt(id))
-        if (allIds.length === 0) {
-            console.log(`[BeneficiaryScan] No candidate vaults found at all`)
-            return []
-        }
+        const scanResults = Array.from(foundIds).filter(id => id && id !== '0').map(id => BigInt(id))
+        const sorted = scanResults.sort((a, b) => Number(b - a))
 
-        console.log(`[BeneficiaryScan] Checking ${allIds.length} candidate vault(s)...`)
+        setCache(cacheKey, sorted)
+        console.log(`[Discovery] Found ${sorted.length} unique vault(s)`)
+        return sorted
+    } catch (e) {
+        console.error('[Discovery] Unified scan failed:', e)
+        return []
+    }
+}
 
-        // Fetch ALL vault states in parallel
-        const states = await Promise.all(
-            allIds.map(id => fetchVaultState(id).catch(() => null))
-        )
+// Optimized version for just finding claimable vaults for beneficiary
+export const discoverBeneficiaryVaults = async (address: string): Promise<ClaimableVault[]> => {
+    try {
+        const allIds = await discoverAllRelatedVaults(address)
+        if (allIds.length === 0) return []
 
+        // Fetch states in parallel
+        const states = await Promise.all(allIds.map(id => fetchVaultState(id)))
         const now = Math.floor(Date.now() / 1000)
         const results: ClaimableVault[] = []
 
         states.forEach((state, idx) => {
-            if (!state) {
-                console.log(`[BeneficiaryScan] Vault #${allIds[idx]}: state fetch failed (skipped)`)
-                return
-            }
-
-            const beneficiaryMatch = (state.beneficiary || '').toUpperCase() === address.toUpperCase()
-            const isExpired = now >= (state.lastHeartbeat + state.lockDuration)
-            const notReleased = !state.released
-
-            console.log(`[BeneficiaryScan] Vault #${allIds[idx]}: beneficiary=${beneficiaryMatch ? '✓' : '✗'} expired=${isExpired ? '✓' : '✗'} released=${state.released ? 'YES' : 'no'}`)
-
-            if (beneficiaryMatch && isExpired && notReleased) {
+            if (state &&
+                state.beneficiary.toUpperCase() === address.toUpperCase() &&
+                !state.released &&
+                now >= (state.lastHeartbeat + state.lockDuration)) {
                 results.push({ appId: allIds[idx], state })
             }
         })
 
-        console.log(`[BeneficiaryScan] ✅ ${results.length} CLAIMABLE vault(s)!`)
         return results
-    } catch (error) {
-        console.error('[BeneficiaryScan] Fatal error:', error)
+    } catch (e) {
         return []
     }
 }
@@ -228,10 +164,16 @@ export const checkAccountBalance = async (address: string, requiredMicroAlgos: n
 
 // Get vault's ALGO balance
 export const getVaultBalance = async (appId: bigint): Promise<number> => {
+    const cacheKey = `balance_${appId.toString()}`
+    const cached = getCached<number>(cacheKey)
+    if (cached !== null) return cached
+
     try {
         const appAddress = getAppAddress(appId)
         const info = await algodClient.accountInformation(appAddress).do()
-        return Number(info.amount || 0) / 1_000_000
+        const balance = Number(info.amount || 0) / 1_000_000
+        setCache(cacheKey, balance)
+        return balance
     } catch (e) {
         return 0
     }
@@ -313,6 +255,10 @@ export interface VaultState {
 
 // Fetch contract state
 export async function fetchVaultState(appId: number | bigint): Promise<VaultState | null> {
+    const cacheKey = `state_${appId.toString()}`
+    const cached = getCached<VaultState>(cacheKey)
+    if (cached) return cached
+
     try {
         const appInfo = await algodClient.getApplicationByID(appId).do()
         const globalState = appInfo.params?.globalState || []
@@ -330,13 +276,15 @@ export async function fetchVaultState(appId: number | bigint): Promise<VaultStat
             }
         })
 
-        return {
+        const result: VaultState = {
             owner: String(state[STATE_KEYS.OWNER] || senderAddr),
             beneficiary: String(state[STATE_KEYS.BENEFICIARY] || ''),
             lockDuration: Number(state[STATE_KEYS.LOCK_DURATION]) || 0,
             lastHeartbeat: Number(state[STATE_KEYS.LAST_HEARTBEAT]) || 0,
             released: state[STATE_KEYS.RELEASED] === 1
         }
+        setCache(cacheKey, result)
+        return result
     } catch (error) {
         console.error('Failed to fetch vault state:', error)
         return null

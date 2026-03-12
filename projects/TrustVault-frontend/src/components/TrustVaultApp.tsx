@@ -6,7 +6,7 @@ import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClien
 import { SnackbarProvider, useSnackbar } from 'notistack'
 
 const TrustVaultApp = () => {
-  const { activeAddress, activeWallet, signer } = useWallet()
+  const { activeAddress, transactionSigner } = useWallet()
   const { enqueueSnackbar } = useSnackbar()
   const [openWalletModal, setOpenWalletModal] = useState(false)
   const [appId, setAppId] = useState<number>(parseInt(import.meta.env.VITE_APP_ID) || 0)
@@ -21,7 +21,7 @@ const TrustVaultApp = () => {
   const [loading, setLoading] = useState(false)
 
   const algodConfig = getAlgodConfigFromViteEnvironment()
-  const algodClient = new algosdk.Algodv2(algodConfig.token, algodConfig.server, algodConfig.port)
+  const algodClient = new algosdk.Algodv2(algodConfig.token as string, algodConfig.server, algodConfig.port)
 
   const fetchContractState = async () => {
     if (!appId) return
@@ -29,7 +29,7 @@ const TrustVaultApp = () => {
     try {
       const appInfo = await algodClient.getApplicationByID(appId).do()
       // Handle different algosdk versions - check both property names
-      const globalState = appInfo.params?.globalState || appInfo.params?.['global-state'] || appInfo['params']?.['global-state']
+      const globalState = (appInfo.params as any)?.globalState || (appInfo.params as any)?.['global-state']
 
       if (!globalState) {
         console.error('Could not find global state. App info:', appInfo)
@@ -70,6 +70,7 @@ const TrustVaultApp = () => {
       const interval = setInterval(fetchContractState, 10000) // Refresh every 10s
       return () => clearInterval(interval)
     }
+    return undefined
   }, [appId])
 
   useEffect(() => {
@@ -84,6 +85,7 @@ const TrustVaultApp = () => {
     } else {
       setTimeLeft(0)
     }
+    return undefined
   }, [contractState])
 
   const formatTime = (seconds: number) => {
@@ -106,7 +108,7 @@ const TrustVaultApp = () => {
       // Since we don't have the ABI TS client generated for this specific setup easily available in frontend yet without running codegen
       // We will use algosdk.Method 
 
-      const method = new algosdk.Method({
+      const method = new algosdk.ABIMethod({
         name: "auto_release",
         args: [],
         returns: { type: "void" }
@@ -116,7 +118,7 @@ const TrustVaultApp = () => {
         appID: appId,
         method: method,
         sender: activeAddress,
-        signer: signer,
+        signer: transactionSigner,
         suggestedParams: suggestedParams,
         methodArgs: []
       })
@@ -139,7 +141,7 @@ const TrustVaultApp = () => {
       const atc = new algosdk.AtomicTransactionComposer()
       const suggestedParams = await algodClient.getTransactionParams().do()
 
-      const method = new algosdk.Method({
+      const method = new algosdk.ABIMethod({
         name: "deposit",
         args: [],
         returns: { type: "void" }
@@ -149,7 +151,7 @@ const TrustVaultApp = () => {
         appID: appId,
         method: method,
         sender: activeAddress,
-        signer: signer,
+        signer: transactionSigner,
         suggestedParams: suggestedParams,
         methodArgs: []
       })
@@ -169,7 +171,7 @@ const TrustVaultApp = () => {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-10 border-b border-slate-700 pb-4">
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500">
-            TrustVault³ (Legacy MVP)
+            TrustVault<sup className="topbar-brand-sup">3</sup> (Legacy MVP)
           </h1>
           <button
             className="btn btn-outline btn-info gap-2"
