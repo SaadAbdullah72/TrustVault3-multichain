@@ -117,12 +117,6 @@ export default function VaultPage() {
         }
     }
 
-    const handleDirectClaim = async (appId: bigint) => {
-        await handleClaim(appId, () => {
-            handleManualScan()
-        })
-    }
-
     const handleDeleteVaultId = (id: bigint) => {
         const updated = userVaults.filter(v => v !== id)
         setUserVaults(updated)
