@@ -63,9 +63,16 @@ export default function VaultPage() {
         setSelectedAppId,
         claimableVaults,
         vaultRoles,
-        handleManualScan,
-        handleDirectClaim
+        isDiscovering,
+        isScanningClaims,
+        handleManualScan
     } = useVaultDiscovery(activeAddress)
+
+    const handleDirectClaim = async (appId: bigint) => {
+        await handleClaim(appId, () => {
+            handleManualScan()
+        })
+    }
 
     const {
         vaultState,
