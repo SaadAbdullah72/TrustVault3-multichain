@@ -1,0 +1,24 @@
+SECTION: MAINNET DEPLOYMENT COSTS,,,,,
+Item,Cost (One-time USD),Recurring (Monthly USD),Category,Description,Priority
+Professional Smart Contract Audit,"15,000 - 25,000",0,Security,Mandatory audit for user trust and safety,CRITICAL
+Bot Incentive Pool (Decentralized Scanning),0,"100 - 300",Operations,Pays bots to monitor and trigger claims,HIGH
+Mainnet ALGO Reserve (MBR),"500 - 1,000",0,On-chain,Initial ALGO for contract and account MBR,CRITICAL
+Infrastructure (Vercel & Nodes),0,"50 - 100",Cloud,Enterprise grade uptime and node reliability,MEDIUM
+Custom Domain & SSL,20,5,Brand,trustvault.xyz or .io for project identity,LOW
+,,,,,
+SUB-TOTAL MINIMUM ESTIMATE,~$16,520,"~$155 - $405",,,,
+,,,,,
+,,,,,
+SECTION: ALGORAND MAINNET ON-CHAIN FEES,,,,,
+Action,Cost (ALGO),Who Pays?,Type,Notes,
+Vault Deployment (App Creation),0.45,User,One-time,"Covers App MBR & Schema",
+Heartbeat / Update,0.001,User,Per Action,Standard network gas fee,
+Claim Trigger (Bot Incentive),0.05,User,Per Claim,Paid to the bot that triggers the release,
+Withdrawal / Fund Management,0.001,User,Per Action,Standard network gas fee,
+,,,,,
+,,,,,
+SECTION: MONETIZATION & FEES (REVENUE MODEL),,,,,
+Fee Type,Proposed Amount,Source,Frequency,Expected Margin,
+Claim Success Fee,1.00%,Total Vault Value,Per successful claim,High,
+Heartbeat Surcharge,0.01 ALGO,User,Per heartbeat,Low,
+Vault Creation Fee,10.00 ALGO,User,One-time per vault,Medium,

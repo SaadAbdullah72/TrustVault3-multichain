@@ -1,0 +1,27 @@
+SECTION 1: INITIAL LAUNCH BUDGET (ONE-TIME COSTS),,,,,
+Item ID,Description,Category,Priority,Cost (USD),Notes
+BT-001,Stakeholder Security Audit,Security,CRITICAL,"$20,000.00",Mandatory for Trust
+BT-002,Mainnet Liquidity Reserve,On-chain,HIGH,"$1,000.00",Fee & MBR capital
+BT-003,Legal Entity & Setup,Legal,MEDIUM,"$3,000.00",Optional but recommended
+BT-004,Custom Domain & SSL (3 Years),Brand,LOW,$60.00,trustvault.xyz
+,,,,,
+TOTAL INITIAL INVESTMENT REQUIRED,,,,$24060,
+,,,,,
+,,,,,
+SECTION 2: MONTHLY OPERATIONAL EXPENSES (OPEX),,,,,
+Expense ID,Description,Category,Frequency,Cost (USD),Purpose
+OP-001,Bot Incentive Treasury,Operations,Monthly,$200.00,Pays for decentralized claims
+OP-002,Enterprise RPC Nodes,Cloud,Monthly,$80.00,Mainnet reliability
+OP-003,Frontend Hosting (Vercel Pro),Cloud,Monthly,$20.00,Team & Traffic scaling
+,,,,,
+TOTAL ESTIMATED MONTHLY OPEX,,,,300,
+,,,,,
+,,,,,
+SECTION 3: ON-CHAIN FEE MATRIX (ALGO),,,,,
+Action,Cost (ALGO),Who Pays?,Recipient,Status,
+Initialize Vault,0.45,User,Network MBR,Required,
+Heartbeat Sync,0.001,User,Validator,Required,
+Claim Initiation,0.05,User,Worker Bot,Required,
+Protocol Success Fee,1.00%,User,Treasury,Revenue,
+,,,,,
+--- DOCUMENT END ---,,,,,
