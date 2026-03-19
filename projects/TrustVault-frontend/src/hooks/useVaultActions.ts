@@ -1,21 +1,13 @@
+/**
+ * useVaultActions — Chain-agnostic vault operations.
+ * Uses the ChainAdapter from ChainContext instead of direct algosdk calls.
+ */
 import { useState, useCallback } from 'react'
-import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk from 'algosdk'
-import {
-    deployVault,
-    callHeartbeat,
-    callAutoRelease,
-    callWithdraw,
-    getAppAddress,
-    checkAccountBalance,
-    saveBeneficiaryMapping,
-    algodClient,
-    VAULT_NOTE_PREFIX
-} from '../utils/algorand'
-import { saveVaultToRegistry } from '../utils/supabase'
+import { useChain } from '../contexts/ChainContext'
 
 export const useVaultActions = () => {
-    const { wallets, transactionSigner, activeAddress } = useWallet()
+    const { adapter, walletAddress, connectWallet, disconnectWallet } = useChain()
+
     const [uiStatus, setUIStatus] = useState({
         loading: false,
         error: '',
@@ -33,130 +25,67 @@ export const useVaultActions = () => {
     const handleConnect = useCallback(async () => {
         try {
             updateStatus({ loading: true, error: '' })
-            const pera = wallets.find(w => w.id === 'pera') || wallets[0]
-            if (!pera) throw new Error('No wallet provider found')
-
-            try {
-                await pera.disconnect()
-                await new Promise(resolve => setTimeout(resolve, 800))
-            } catch (err) {
-                console.warn('Initial disconnect check (can ignore):', err)
-            }
-
-            try {
-                await pera.connect()
-            } catch (connectError: any) {
-                if (connectError.message?.includes('Session currently connected')) {
-                    console.log('Detected ghost session, performing emergency disconnect and retry...')
-                    await pera.disconnect().catch(() => { })
-                    await new Promise(resolve => setTimeout(resolve, 1500))
-                    await pera.connect()
-                } else {
-                    throw connectError
-                }
-            }
+            await connectWallet()
         } catch (e: any) {
             console.error('Connection aborted:', e)
             updateStatus({ error: e.message || 'Connection failed. Please try again.' })
         } finally {
             updateStatus({ loading: false })
         }
-    }, [wallets, updateStatus])
+    }, [connectWallet, updateStatus])
+
+    const handleDisconnect = useCallback(async () => {
+        await disconnectWallet()
+    }, [disconnectWallet])
 
     const handleCreateVault = useCallback(async (
         beneficiaryInput: string,
         lockDurationInput: string,
         depositInput: string,
-        onSuccess: (appId: bigint) => void
+        onSuccess: (vaultId: string) => void
     ) => {
-        if (!activeAddress) return
+        if (!walletAddress) return
         if (!beneficiaryInput || !lockDurationInput || !depositInput) {
             updateStatus({ error: 'Please fill all fields' })
             return
         }
 
-        updateStatus({ loading: true, error: '', txId: 'Checking balance...' })
+        const duration = Number(lockDurationInput)
+        const deposit = parseFloat(depositInput)
+
+        if (isNaN(duration) || duration <= 0) {
+            updateStatus({ error: 'Invalid lock duration. Please enter a positive number.' })
+            return
+        }
+
+        if (isNaN(deposit) || deposit <= 0) {
+            updateStatus({ error: 'Invalid deposit amount. Please enter a positive number.' })
+            return
+        }
+
+        updateStatus({ loading: true, error: '', txId: 'Creating vault...' })
         try {
-            const depositMicro = Math.round(parseFloat(depositInput) * 1_000_000)
-            const totalNeeded = depositMicro + 500_000
-            const balCheck = await checkAccountBalance(activeAddress, totalNeeded)
-            if (!balCheck.ok) {
-                updateStatus({
-                    error: `Insufficient balance! You have ${(balCheck.balance / 1_000_000).toFixed(2)} ALGO but need ~${(balCheck.needed / 1_000_000).toFixed(2)} ALGO.`,
-                    loading: false,
-                    txId: ''
-                })
-                return
-            }
+            const vaultId = await adapter.createVault(
+                beneficiaryInput.trim(),
+                duration,
+                deposit,
+                (msg: string) => updateStatus({ txId: msg })
+            )
 
-            updateStatus({ txId: 'Step 1/2: Deploying Vault...' })
-            const appId = await deployVault(activeAddress, transactionSigner)
-            if (!appId) throw new Error('Deployment failed')
-
-            updateStatus({ txId: 'Step 1/2 Complete! Finalizing (3s)...' })
-            await new Promise(resolve => setTimeout(resolve, 3000))
-
-            updateStatus({ txId: 'Step 2/2: Setting up & Funding...' })
-            await new Promise(resolve => setTimeout(resolve, 500))
-
-            const appAddress = getAppAddress(appId)
-            const suggestedParams = await algodClient.getTransactionParams().do()
-            const method = new algosdk.ABIMethod({
-                name: 'bootstrap',
-                args: [{ name: 'beneficiary', type: 'address' }, { name: 'lock_duration', type: 'uint64' }],
-                returns: { type: 'void' }
-            })
-
-            const encodedNote = new TextEncoder().encode(VAULT_NOTE_PREFIX + beneficiaryInput.trim())
-            const bootstrapTxn = algosdk.makeApplicationCallTxnFromObject({
-                sender: activeAddress,
-                appIndex: Number(appId),
-                onComplete: algosdk.OnApplicationComplete.NoOpOC,
-                suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
-                appArgs: [
-                    method.getSelector(),
-                    algosdk.decodeAddress(beneficiaryInput.trim()).publicKey,
-                    algosdk.encodeUint64(Number(lockDurationInput))
-                ],
-                accounts: [beneficiaryInput.trim()],
-                note: encodedNote
-            })
-
-            const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-                sender: activeAddress,
-                receiver: appAddress,
-                amount: depositMicro,
-                suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
-            })
-
-            const txns = [bootstrapTxn, payTxn]
-            algosdk.assignGroupID(txns)
-            const signedTxns = await transactionSigner(txns, [0, 1])
-            await algodClient.sendRawTransaction(signedTxns).do()
-            await algosdk.waitForConfirmation(algodClient, bootstrapTxn.txID().toString(), 4)
-
-            updateStatus({ txId: 'Vault established! Finalizing secure registry...' })
-            saveBeneficiaryMapping(beneficiaryInput.trim(), appId)
-            const synced = await saveVaultToRegistry(appId.toString(), beneficiaryInput, activeAddress)
-
-            updateStatus({
-                txId: synced ? 'Vault established! ✨' : 'Vault created! (Registry sync delayed)'
-            })
-
-            onSuccess(appId)
+            updateStatus({ txId: 'Vault established! ✨' })
+            onSuccess(vaultId)
         } catch (e: any) {
             updateStatus({ error: e.message || 'Creation failed', txId: '' })
         } finally {
             updateStatus({ loading: false })
         }
-    }, [activeAddress, transactionSigner, updateStatus])
+    }, [walletAddress, adapter, updateStatus])
 
-    const handleHeartbeat = useCallback(async (appId: bigint, onComplete?: () => void) => {
-        if (!activeAddress || !appId) return
-        updateStatus({ loading: true, error: '', txId: 'Step 1/1: Processing Heartbeat...' })
+    const handleHeartbeat = useCallback(async (vaultId: string, onComplete?: () => void) => {
+        if (!walletAddress || !vaultId) return
+        updateStatus({ loading: true, error: '', txId: 'Processing Heartbeat...' })
         try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callHeartbeat(appId, activeAddress, transactionSigner)
+            const id = await adapter.heartbeat(vaultId)
             updateStatus({ txId: `Heartbeat confirmed! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
@@ -164,14 +93,13 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [activeAddress, transactionSigner, updateStatus])
+    }, [walletAddress, adapter, updateStatus])
 
-    const handleClaim = useCallback(async (appId: bigint, onComplete?: () => void) => {
-        if (!activeAddress || !appId) return
-        updateStatus({ loading: true, error: '', txId: 'Step 1/1: Claiming Inheritance funds...' })
+    const handleClaim = useCallback(async (vaultId: string, onComplete?: () => void) => {
+        if (!walletAddress || !vaultId) return
+        updateStatus({ loading: true, error: '', txId: 'Claiming Inheritance funds...' })
         try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callAutoRelease(appId, activeAddress, transactionSigner)
+            const id = await adapter.autoRelease(vaultId)
             updateStatus({ txId: `Inheritance claimed successfully! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
@@ -179,14 +107,13 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [activeAddress, transactionSigner, updateStatus])
+    }, [walletAddress, adapter, updateStatus])
 
-    const handleWithdraw = useCallback(async (appId: bigint, amount: number, onComplete?: () => void) => {
-        if (!activeAddress || !appId) return
-        updateStatus({ loading: true, error: '', txId: 'Step 1/1: Processing Withdrawal...' })
+    const handleWithdraw = useCallback(async (vaultId: string, amount: number, onComplete?: () => void) => {
+        if (!walletAddress || !vaultId) return
+        updateStatus({ loading: true, error: '', txId: 'Processing Withdrawal...' })
         try {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const id = await callWithdraw(appId, amount, activeAddress, transactionSigner)
+            const id = await adapter.withdraw(vaultId, amount)
             updateStatus({ txId: `Funds Withdrawn! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
@@ -194,14 +121,7 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [activeAddress, transactionSigner, updateStatus])
-
-    const handleDisconnect = useCallback(async () => {
-        const active = wallets.find(w => w.isActive)
-        if (active) {
-            await active.disconnect()
-        }
-    }, [wallets])
+    }, [walletAddress, adapter, updateStatus])
 
     return {
         uiStatus,

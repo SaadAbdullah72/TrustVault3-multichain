@@ -1,103 +1,131 @@
+/**
+ * useVaultDiscovery — Chain-agnostic vault discovery.
+ * Uses the ChainAdapter from ChainContext.
+ */
 import { useState, useCallback, useEffect } from 'react'
-import {
-    discoverAllRelatedVaults,
-    discoverBeneficiaryVaults,
-    fetchVaultState,
-    ClaimableVault
-} from '../utils/algorand'
+import { useChain } from '../contexts/ChainContext'
+import { ClaimableVault, VaultState } from '../adapters/types'
 
-export const useVaultDiscovery = (activeAddress: string | null) => {
-    const [userVaults, setUserVaults] = useState<bigint[]>([])
-    const [selectedAppId, setSelectedAppId] = useState<bigint | null>(null)
+export const useVaultDiscovery = () => {
+    const { adapter, walletAddress, currentChain } = useChain()
+
+    const [userVaults, setUserVaults] = useState<string[]>([])
+    const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
     const [claimableVaults, setClaimableVaults] = useState<ClaimableVault[]>([])
     const [vaultRoles, setVaultRoles] = useState<Record<string, 'owner' | 'beneficiary'>>({})
     const [isDiscovering, setIsDiscovering] = useState(false)
     const [isScanningClaims, setIsScanningClaims] = useState(false)
 
     const loadUserVaults = useCallback(async () => {
-        if (!activeAddress) return
+        if (!walletAddress) return
         setIsDiscovering(true)
         try {
-            const ids = await discoverAllRelatedVaults(activeAddress)
+            const ids = await adapter.discoverVaults(walletAddress)
+            
+            // Also find vaults where user is beneficiary to show them in the list
+            const claimables = await adapter.discoverClaimableVaults(walletAddress)
+            const claimableIds = claimables.map(c => c.vaultId)
+            
+            // Merge and deduplicate
+            const allIds = Array.from(new Set([...ids, ...claimableIds]))
 
-            // Filter out released/dead vaults
-            const activeVaults: bigint[] = []
-            const states = await Promise.all(
-                ids.map(id => fetchVaultState(id).catch(() => null))
-            )
-
+            // Fetch states to filter released and determine roles
+            const activeVaults: string[] = []
             const roles: Record<string, 'owner' | 'beneficiary'> = {}
 
-            ids.forEach((id, idx) => {
+            const states = await Promise.all(
+                allIds.map(id => adapter.fetchVaultState(id).catch(() => null))
+            )
+
+            allIds.forEach((id, idx) => {
                 const state = states[idx]
                 if (!state || !state.released) {
                     activeVaults.push(id)
                 }
-                if (state) {
-                    roles[id.toString()] = state.owner.toUpperCase() === activeAddress.toUpperCase() ? 'owner' : 'beneficiary'
+                if (state && walletAddress) {
+                    let isOwner = false
+                    if (currentChain.type === 'solana') {
+                        isOwner = state.owner === walletAddress
+                    } else {
+                        isOwner = state.owner.toUpperCase() === walletAddress.toUpperCase()
+                    }
+                    roles[id] = isOwner ? 'owner' : 'beneficiary'
                 }
             })
 
             setUserVaults(activeVaults)
             setVaultRoles(roles)
-            localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(activeVaults.map(id => id.toString())))
+            setClaimableVaults(claimables)
 
-            if (activeVaults.length > 0 && selectedAppId === null) {
-                setSelectedAppId(activeVaults[0])
+            // ONLY set selectedVaultId if none is currently selected 
+            // This prevents the infinite loop when setSelectedVaultId is called
+            if (activeVaults.length > 0) {
+                setSelectedVaultId(prev => (prev === null ? activeVaults[0] : prev))
             }
         } catch (e) {
             console.error('Discovery error', e)
         } finally {
             setIsDiscovering(false)
         }
-    }, [activeAddress, selectedAppId])
+    }, [walletAddress, adapter, currentChain.type]) // Removed selectedVaultId from deps
 
     const scanForClaimableVaults = useCallback(async () => {
-        if (!activeAddress) return
+        if (!walletAddress) return
         setIsScanningClaims(true)
         try {
-            const vaults = await discoverBeneficiaryVaults(activeAddress)
+            const vaults = await adapter.discoverClaimableVaults(walletAddress)
             setClaimableVaults(vaults)
+            
+            // Sync userVaults if new ones are found
+            setUserVaults(prev => {
+                const currentIds = new Set(prev)
+                const toAdd = vaults.map(v => v.vaultId).filter(id => !currentIds.has(id))
+                return toAdd.length > 0 ? [...prev, ...toAdd] : prev
+            })
         } catch (e) {
             console.error('Beneficiary scan error', e)
         } finally {
             setIsScanningClaims(false)
         }
-    }, [activeAddress])
+    }, [walletAddress, adapter])
 
-    // Auto-scan on connect + every 30 seconds
+    // Reset on chain change
     useEffect(() => {
-        if (activeAddress) {
+        setUserVaults([])
+        setSelectedVaultId(null)
+        setClaimableVaults([])
+        setVaultRoles({})
+    }, [currentChain.id])
+
+    // Auto-scan on connect + every 60 seconds (increased from 30 to reduce load)
+    useEffect(() => {
+        if (walletAddress) {
             loadUserVaults()
-            scanForClaimableVaults()
-            const interval = setInterval(scanForClaimableVaults, 30000)
+            // scanForClaimableVaults() // Already covered in loadUserVaults
+            const interval = setInterval(scanForClaimableVaults, 60000)
             return () => clearInterval(interval)
         } else {
             setUserVaults([])
-            setSelectedAppId(null)
+            setSelectedVaultId(null)
             setClaimableVaults([])
             return undefined
         }
-    }, [activeAddress, loadUserVaults, scanForClaimableVaults])
+    }, [walletAddress, loadUserVaults, scanForClaimableVaults])
 
     const handleManualScan = useCallback(async () => {
         await loadUserVaults()
-        await scanForClaimableVaults()
-    }, [loadUserVaults, scanForClaimableVaults])
+        // scanForClaimableVaults() // Already covered in loadUserVaults
+    }, [loadUserVaults])
 
     return {
         userVaults,
         setUserVaults,
-        selectedAppId,
-        setSelectedAppId,
+        selectedVaultId,
+        setSelectedVaultId,
         claimableVaults,
-        setClaimableVaults,
         vaultRoles,
-        setVaultRoles,
         isDiscovering,
         isScanningClaims,
-        loadUserVaults,
-        scanForClaimableVaults,
         handleManualScan
     }
 }

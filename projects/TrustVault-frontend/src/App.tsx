@@ -1,8 +1,11 @@
 import { NetworkId, WalletId, WalletManager, WalletProvider } from '@txnlab/use-wallet-react'
 import { SnackbarProvider } from 'notistack'
 import VaultPage from './pages/VaultPage'
+import { ChainProvider } from './contexts/ChainContext'
+import { SolanaWalletProvider } from './components/SolanaWalletProvider'
+import './styles/chain-switcher.css'
 
-// Configure wallet manager
+// Configure Algorand wallet manager
 const walletManager = new WalletManager({
   wallets: [
     {
@@ -26,10 +29,14 @@ const walletManager = new WalletManager({
 
 export default function App() {
   return (
-    <WalletProvider manager={walletManager}>
-      <SnackbarProvider maxSnack={3}>
-        <VaultPage />
-      </SnackbarProvider>
-    </WalletProvider>
+    <SolanaWalletProvider>
+      <WalletProvider manager={walletManager}>
+        <ChainProvider>
+          <SnackbarProvider maxSnack={3}>
+            <VaultPage />
+          </SnackbarProvider>
+        </ChainProvider>
+      </WalletProvider>
+    </SolanaWalletProvider>
   )
 }

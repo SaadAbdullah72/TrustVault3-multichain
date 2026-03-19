@@ -1,13 +1,10 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useWallet } from '@txnlab/use-wallet-react'
-import {
-    getAppAddress,
-    VaultState,
-} from '../utils/algorand'
+import { useChain } from '../contexts/ChainContext'
 import Countdown from '../components/Countdown'
 import ConnectScreen from '../components/ConnectScreen'
 import TransactionOverlay from '../components/TransactionOverlay'
 import StatusToast from '../components/StatusToast'
+import ChainSwitcher from '../components/ChainSwitcher'
 import { useVaultActions } from '../hooks/useVaultActions'
 import { useVaultDiscovery } from '../hooks/useVaultDiscovery'
 import { useVaultState } from '../hooks/useVaultState'
@@ -41,7 +38,7 @@ import {
 } from 'lucide-react'
 
 export default function VaultPage() {
-    const { wallets, activeAddress } = useWallet()
+    const { walletAddress, currentChain, adapter, isConnected } = useChain()
 
     // --- Modular Hooks ---
     const {
@@ -59,17 +56,17 @@ export default function VaultPage() {
     const {
         userVaults,
         setUserVaults,
-        selectedAppId,
-        setSelectedAppId,
+        selectedVaultId,
+        setSelectedVaultId,
         claimableVaults,
         vaultRoles,
         isDiscovering,
         isScanningClaims,
         handleManualScan
-    } = useVaultDiscovery(activeAddress)
+    } = useVaultDiscovery()
 
-    const handleDirectClaim = async (appId: bigint) => {
-        await handleClaim(appId, () => {
+    const handleDirectClaim = async (vaultId: string) => {
+        await handleClaim(vaultId, () => {
             handleManualScan()
         })
     }
@@ -78,7 +75,7 @@ export default function VaultPage() {
         vaultState,
         vaultBalance,
         loadVaultState
-    } = useVaultState(selectedAppId)
+    } = useVaultState(selectedVaultId)
 
     // --- Page Local State ---
     const [showCreateForm, setShowCreateForm] = useState(false)
@@ -93,9 +90,31 @@ export default function VaultPage() {
     const [isInteracting, setIsInteracting] = useState(false)
 
     // --- Derived State ---
-    const vaultAddress = useMemo(() => selectedAppId ? getAppAddress(selectedAppId) : '', [selectedAppId])
-    const isOwner = useMemo(() => activeAddress && String(vaultState?.owner || '').toUpperCase() === activeAddress.toUpperCase(), [activeAddress, vaultState])
-    const isBeneficiary = useMemo(() => activeAddress && String(vaultState?.beneficiary || '').toUpperCase() === activeAddress.toUpperCase(), [activeAddress, vaultState])
+    const vaultAddress = useMemo(() => selectedVaultId ? adapter.getVaultAddress(selectedVaultId) : '', [selectedVaultId, adapter])
+    const isOwner = useMemo(() => {
+        if (!walletAddress || !vaultState?.owner) return false;
+        
+        const owner = String(vaultState.owner)
+        const wallet = String(walletAddress)
+        
+        // Solana is case-sensitive, EVM is not
+        if (currentChain.type === 'solana') {
+            return owner === wallet
+        }
+        return owner.toUpperCase() === wallet.toUpperCase()
+    }, [walletAddress, vaultState, currentChain, selectedVaultId])
+
+    const isBeneficiary = useMemo(() => {
+        if (!walletAddress || !vaultState?.beneficiary) return false;
+        
+        const ben = String(vaultState.beneficiary)
+        const wallet = String(walletAddress)
+        
+        if (currentChain.type === 'solana') {
+            return ben === wallet
+        }
+        return ben.toUpperCase() === wallet.toUpperCase()
+    }, [walletAddress, vaultState, currentChain])
 
     const now = Math.floor(Date.now() / 1000)
     const canRelease = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
@@ -111,27 +130,24 @@ export default function VaultPage() {
     const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
     const handleCreateVaultSubmit = async () => {
-        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (appId) => {
-            setSelectedAppId(appId)
+        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (vaultId) => {
+            setSelectedVaultId(vaultId)
             setShowCreateForm(false)
         })
     }
 
     const handleWithdrawAction = async () => {
-        const amountStr = window.prompt('Enter amount to withdraw (ALGO):')
+        const amountStr = window.prompt(`Enter amount to withdraw (${currentChain.nativeCurrency.symbol}):`)
         if (amountStr) {
-            await handleWithdraw(selectedAppId!, parseFloat(amountStr), loadVaultState)
+            await handleWithdraw(selectedVaultId!, parseFloat(amountStr), loadVaultState)
         }
     }
 
-    const handleDeleteVaultId = (id: bigint) => {
+    const handleDeleteVaultId = (id: string) => {
         const updated = userVaults.filter(v => v !== id)
         setUserVaults(updated)
-        if (activeAddress) {
-            localStorage.setItem(`trustvault_ids_${activeAddress}`, JSON.stringify(updated.map(v => v.toString())))
-        }
-        if (selectedAppId === id) {
-            setSelectedAppId(updated.length > 0 ? updated[0] : null)
+        if (selectedVaultId === id) {
+            setSelectedVaultId(updated.length > 0 ? updated[0] : null)
         }
     }
 
@@ -157,9 +173,10 @@ export default function VaultPage() {
         setIsInteracting(false)
     }
 
-    if (!activeAddress) {
-        return <ConnectScreen onConnect={handleConnect} wallets={wallets} loading={uiStatus.loading} error={uiStatus.error} />
+    if (!isConnected) {
+        return <ConnectScreen onConnect={handleConnect} wallets={[]} loading={uiStatus.loading} error={uiStatus.error} />
     }
+
     return (
         <div className="wallet-shell">
             <div className="wallet-container">
@@ -173,8 +190,9 @@ export default function VaultPage() {
                     </div>
 
                     <div className="topbar-right">
-                        <div className="network-badge">
-                            <CircleDot className="network-dot" />
+                        <ChainSwitcher />
+                        <div className="network-badge" style={{ borderColor: currentChain.color + '44' }}>
+                            <CircleDot className="network-dot" style={{ color: currentChain.color }} />
                             <span>Testnet</span>
                         </div>
                         <button
@@ -195,7 +213,7 @@ export default function VaultPage() {
                         </div>
                         <div className="vault-selector-info">
                             <span className="vault-selector-label">
-                                {selectedAppId ? `Vault #${selectedAppId.toString()}` : 'No Vault Selected'}
+                                {selectedVaultId ? `Vault #${selectedVaultId.slice(0, 8)}...` : 'No Vault Selected'}
                             </span>
                             <span className="vault-selector-addr">
                                 {vaultAddress ? formatAddr(vaultAddress) : 'Select or create a vault'}
@@ -207,7 +225,7 @@ export default function VaultPage() {
                     {showVaultSelector && (
                         <div className="vault-selector-dropdown">
                             <div className="vault-dropdown-header">
-                                <span>My Vaults</span>
+                                <span>My Vaults ({currentChain.name})</span>
                                 <button onClick={handleManualScan} className="vault-dropdown-scan" disabled={uiStatus.loading || isDiscovering}>
                                     <RefreshCw className={`vault-dropdown-scan-icon ${isDiscovering ? 'spinning' : ''}`} />
                                 </button>
@@ -215,30 +233,30 @@ export default function VaultPage() {
                             {userVaults.length === 0 && (
                                 <div className="vault-dropdown-empty">
                                     <Shield className="vault-dropdown-empty-icon" />
-                                    <span>No vaults found</span>
+                                    <span>No vaults found on {currentChain.name}</span>
                                 </div>
                             )}
                             {userVaults.map(id => (
-                                <div key={id.toString()} className={`vault-dropdown-row ${selectedAppId === id ? 'active' : ''}`}>
+                                <div key={id} className={`vault-dropdown-row ${selectedVaultId === id ? 'active' : ''}`}>
                                     <button
                                         className="vault-dropdown-item"
-                                        onClick={() => { setSelectedAppId(id); setShowVaultSelector(false) }}
+                                        onClick={() => { setSelectedVaultId(id); setShowVaultSelector(false) }}
                                     >
                                         <div className="vault-dropdown-item-avatar">
                                             <Shield className="vault-dropdown-item-icon" />
                                         </div>
                                         <div className="vault-dropdown-item-info">
                                             <div className="vault-dropdown-item-header">
-                                                <span className="vault-dropdown-item-name">Vault #{id.toString()}</span>
-                                                {vaultRoles[id.toString()] && (
-                                                    <span className={`vault-dropdown-item-badge ${vaultRoles[id.toString()]}`}>
-                                                        {vaultRoles[id.toString()]}
+                                                <span className="vault-dropdown-item-name">Vault #{id.length > 12 ? id.slice(0, 8) + '...' : id}</span>
+                                                {vaultRoles[id] && (
+                                                    <span className={`vault-dropdown-item-badge ${vaultRoles[id]}`}>
+                                                        {vaultRoles[id]}
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="vault-dropdown-item-addr">{formatAddr(getAppAddress(id))}</span>
+                                            <span className="vault-dropdown-item-addr">{formatAddr(adapter.getVaultAddress(id))}</span>
                                         </div>
-                                        {selectedAppId === id && <CheckCircle className="vault-dropdown-item-check" />}
+                                        {selectedVaultId === id && <CheckCircle className="vault-dropdown-item-check" />}
                                     </button>
                                     <button
                                         className="vault-dropdown-delete"
@@ -263,9 +281,9 @@ export default function VaultPage() {
                     )}
 
                     <div className="wallet-address-bar">
-                        <div className="wallet-address-dot" />
-                        <span className="wallet-address-text">{formatAddr(activeAddress)}</span>
-                        <button className="wallet-address-copy" onClick={() => copyToClipboard(activeAddress)} title="Copy Address">
+                        <div className="wallet-address-dot" style={{ background: currentChain.color }} />
+                        <span className="wallet-address-text">{formatAddr(walletAddress!)}</span>
+                        <button className="wallet-address-copy" onClick={() => copyToClipboard(walletAddress!)} title="Copy Address">
                             {copied ? <CheckCircle className="copy-icon copied" /> : <Copy className="copy-icon" />}
                         </button>
                     </div>
@@ -280,19 +298,29 @@ export default function VaultPage() {
                             <span className="claim-notification-badge">{claimableVaults.length}</span>
                         </div>
                         {claimableVaults.map((vault) => (
-                            <div key={vault.appId.toString()} className="claim-card">
+                            <div key={vault.vaultId} className="claim-card">
                                 <div className="claim-card-info">
-                                    <span className="claim-card-id">Vault #{vault.appId.toString()}</span>
+                                    <span className="claim-card-id">Vault #{vault.vaultId.length > 12 ? vault.vaultId.slice(0, 8) + '...' : vault.vaultId}</span>
                                     <span className="claim-card-status">Timer Expired</span>
                                 </div>
-                                <button
-                                    onClick={() => handleClaim(vault.appId, loadVaultState)}
-                                    disabled={uiStatus.loading}
-                                    className="claim-card-btn"
-                                >
-                                    <Unlock className="claim-card-btn-icon" />
-                                    {uiStatus.loading ? 'Claiming...' : 'Claim'}
-                                </button>
+                                <div className="claim-card-actions">
+                                    <button
+                                        onClick={() => setSelectedVaultId(vault.vaultId)}
+                                        className="claim-card-view-btn"
+                                        title="View Vault"
+                                    >
+                                        <Eye className="claim-card-btn-icon" />
+                                        View
+                                    </button>
+                                    <button
+                                        onClick={() => handleClaim(vault.vaultId, loadVaultState)}
+                                        disabled={uiStatus.loading}
+                                        className="claim-card-btn"
+                                    >
+                                        <Unlock className="claim-card-btn-icon" />
+                                        {uiStatus.loading && selectedVaultId === vault.vaultId ? 'Claiming...' : 'Claim'}
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -313,7 +341,7 @@ export default function VaultPage() {
                                 <button onClick={() => setShowCreateForm(false)} className="wallet-form-back">
                                     <ChevronLeft />
                                 </button>
-                                <span className="wallet-form-title">Create New Vault</span>
+                                <span className="wallet-form-title">Create Vault on {currentChain.name}</span>
                                 <div style={{ width: 24 }} />
                             </div>
                             <div className="wallet-form-body">
@@ -326,7 +354,7 @@ export default function VaultPage() {
                                         value={beneficiaryInput}
                                         onChange={(e) => setBeneficiaryInput(e.target.value)}
                                         className="wallet-input"
-                                        placeholder="ALGO address..."
+                                        placeholder={currentChain.type === 'evm' ? '0x... address' : 'Address...'}
                                     />
                                 </div>
                                 <div className="wallet-form-row">
@@ -345,7 +373,7 @@ export default function VaultPage() {
                                     <div className="wallet-input-group">
                                         <label className="wallet-input-label">
                                             <Wallet className="wallet-label-icon" />
-                                            Deposit (ALGO)
+                                            Deposit ({currentChain.nativeCurrency.symbol})
                                         </label>
                                         <input
                                             type="number"
@@ -361,7 +389,7 @@ export default function VaultPage() {
                                     ) : (
                                         <Shield className="submit-icon" />
                                     )}
-                                    <span>{uiStatus.loading ? 'Deploying...' : 'Deploy & Fund Vault'}</span>
+                                    <span>{uiStatus.loading ? 'Deploying...' : `Deploy on ${currentChain.name}`}</span>
                                 </button>
                             </div>
                         </div>
@@ -372,9 +400,9 @@ export default function VaultPage() {
                 {isDiscovering ? (
                     <div className="wallet-loading">
                         <div className="wallet-loading-spinner" />
-                        <span className="wallet-loading-text">Syncing with blockchain...</span>
+                        <span className="wallet-loading-text">Syncing with {currentChain.name}...</span>
                     </div>
-                ) : selectedAppId && vaultState ? (
+                ) : selectedVaultId && vaultState ? (
                     <div className="wallet-main-content">
                         <div className="balance-section">
                             <div className="balance-label">
@@ -385,7 +413,7 @@ export default function VaultPage() {
                             </div>
                             <div className="balance-amount">
                                 {showBalanceHidden ? '••••••' : vaultBalance.toFixed(4)}
-                                <span className="balance-currency">ALGO</span>
+                                <span className="balance-currency">{currentChain.nativeCurrency.symbol}</span>
                             </div>
                             <div className="role-badges" style={{ justifyContent: 'center', marginTop: 8 }}>
                                 {isOwner && (
@@ -410,7 +438,7 @@ export default function VaultPage() {
                         <div className="quick-actions">
                             {isOwner && !vaultState.released && (
                                 <>
-                                    <button className="quick-action-btn" onClick={() => handleHeartbeat(selectedAppId, loadVaultState)} disabled={uiStatus.loading || isExpired}>
+                                    <button className="quick-action-btn" onClick={() => handleHeartbeat(selectedVaultId, loadVaultState)} disabled={uiStatus.loading || isExpired}>
                                         <div className={`quick-action-circle ${isExpired ? 'disabled' : 'heartbeat'}`}>
                                             <Heart className="quick-action-icon" />
                                         </div>
@@ -425,7 +453,7 @@ export default function VaultPage() {
                                 </>
                             )}
                             {isBeneficiary && !vaultState.released && (
-                                <button className="quick-action-btn" onClick={() => handleClaim(selectedAppId, loadVaultState)} disabled={uiStatus.loading || !canRelease}>
+                                <button className="quick-action-btn" onClick={() => handleClaim(selectedVaultId, loadVaultState)} disabled={uiStatus.loading || !canRelease}>
                                     <div className={`quick-action-circle ${canRelease ? 'claim' : 'disabled'}`}>
                                         <Unlock className="quick-action-icon" />
                                     </div>
@@ -455,7 +483,7 @@ export default function VaultPage() {
                                         <span className="claim-banner-sub">Timer expired — claim your funds</span>
                                     </div>
                                 </div>
-                                <button className="claim-banner-btn" onClick={() => handleClaim(selectedAppId, loadVaultState)} disabled={uiStatus.loading}>
+                                <button className="claim-banner-btn" onClick={() => handleClaim(selectedVaultId, loadVaultState)} disabled={uiStatus.loading}>
                                     {uiStatus.loading ? <RefreshCw className="spinning claim-banner-btn-icon" /> : <Unlock className="claim-banner-btn-icon" />}
                                     <span>Claim Now</span>
                                 </button>
@@ -490,11 +518,11 @@ export default function VaultPage() {
                                     <div className="card-tab-info">
                                         <div className="card-tab-info-row">
                                             <span className="card-tab-info-label">Card Holder</span>
-                                            <span className="card-tab-info-value">{activeAddress ? formatAddr(activeAddress) : '-'}</span>
+                                            <span className="card-tab-info-value">{walletAddress ? formatAddr(walletAddress) : '-'}</span>
                                         </div>
                                         <div className="card-tab-info-row">
-                                            <span className="card-tab-info-label">Vault ID</span>
-                                            <span className="card-tab-info-value">#{selectedAppId?.toString()}</span>
+                                            <span className="card-tab-info-label">Network</span>
+                                            <span className="card-tab-info-value" style={{ color: currentChain.color }}>{currentChain.name}</span>
                                         </div>
                                         <div className="card-tab-info-row">
                                             <span className="card-tab-info-label">Vault Status</span>
@@ -541,6 +569,10 @@ export default function VaultPage() {
                                         </div>
                                     </div>
                                     <div className="detail-item">
+                                        <span className="detail-label">Network</span>
+                                        <span className="detail-value" style={{ color: currentChain.color }}>{currentChain.name}</span>
+                                    </div>
+                                    <div className="detail-item">
                                         <span className="detail-label">Last Heartbeat</span>
                                         <span className="detail-value">
                                             {new Date(vaultState.lastHeartbeat * 1000).toLocaleTimeString()}
@@ -566,8 +598,8 @@ export default function VaultPage() {
                         <div className="wallet-empty-icon-wrap">
                             <Shield className="wallet-empty-icon" />
                         </div>
-                        <h3 className="wallet-empty-title">No Vault Selected</h3>
-                        <p className="wallet-empty-desc">Create a new vault or scan the network to find your vaults.</p>
+                        <h3 className="wallet-empty-title">No Vault on {currentChain.name}</h3>
+                        <p className="wallet-empty-desc">Create a new vault or scan {currentChain.name} network to find your vaults.</p>
                         <div className="wallet-empty-actions">
                             <button className="wallet-empty-btn primary" onClick={() => setShowCreateForm(true)}>
                                 <Plus className="wallet-empty-btn-icon" />

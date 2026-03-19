@@ -12,4 +12,22 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    include: [
+      '@solana/web3.js',
+      '@solana/wallet-adapter-base',
+      '@solana/wallet-adapter-react',
+      '@solana/wallet-adapter-react-ui',
+      '@solana/wallet-adapter-wallets',
+      '@coral-xyz/anchor',
+    ],
+    esbuildOptions: {
+      sourcemap: false,
+    },
+  },
+  server: {
+    hmr: {
+      overlay: false,
+    },
+  },
 })

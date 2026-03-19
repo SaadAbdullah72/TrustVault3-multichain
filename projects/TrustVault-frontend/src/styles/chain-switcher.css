@@ -1,0 +1,242 @@
+/* ========== CHAIN SWITCHER ========== */
+.chain-switcher {
+    position: relative;
+    z-index: 50;
+}
+
+.chain-switcher-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(15, 30, 36, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.chain-switcher-trigger:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--chain-color, rgba(255, 255, 255, 0.2));
+}
+
+.chain-switcher-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.chain-switcher-name {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chain-switcher-chevron {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+
+.chain-switcher-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+.chain-switcher-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+}
+
+.chain-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.chain-dropdown-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chain-dropdown-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: var(--bg-elevated);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+}
+
+.chain-dropdown-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-primary);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.chain-search-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+.chain-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+}
+
+.chain-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.chain-dropdown-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.chain-dropdown-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chain-dropdown-list::-webkit-scrollbar-thumb {
+    background: var(--border-hover);
+    border-radius: 4px;
+}
+
+.chain-group-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.chain-group-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--accent-amber);
+}
+
+.chain-group-evm-badge {
+    background: rgba(98, 126, 234, 0.2);
+    color: #627EEA;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 9px;
+}
+
+.chain-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chain-row:not(:disabled):hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.chain-row.active {
+    background: rgba(20, 184, 166, 0.08);
+}
+
+.chain-row.coming-soon {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chain-row-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.chain-row-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chain-row-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.chain-row-currency {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.chain-active-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+    box-shadow: 0 0 8px var(--accent-teal);
+}
+
+.chain-coming-soon-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.chain-dropdown-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}

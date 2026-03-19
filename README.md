@@ -2,16 +2,16 @@
   <img src="projects/TrustVault-frontend/public/logo.svg" alt="TrustVault Logo" width="120" height="120" />
 </p>
 
-<h1 align="center">🛡️ TrustVault — Autonomous Inheritance Protocol</h1>
+<h1 align="center">🛡️ TrustVault³ — Multichain Inheritance Protocol</h1>
 
 <p align="center">
-  <strong>Decentralized, trustless, and fully autonomous digital asset inheritance on the Algorand blockchain.</strong>
+  <strong>Decentralized, trustless, and fully autonomous digital asset inheritance across Algorand, Solana, and EVM chains.</strong>
 </p>
 
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#smart-contract">Smart Contract</a> •
+  <a href="#smart-contracts">Smart Contracts</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#how-it-works">How It Works</a> •
@@ -21,36 +21,38 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Algorand-Blockchain-black?style=for-the-badge&logo=algorand&logoColor=white" alt="Algorand" />
-  <img src="https://img.shields.io/badge/PyTEAL-Smart%20Contract-blue?style=for-the-badge&logo=python&logoColor=white" alt="PyTEAL" />
-  <img src="https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Solana-Blockchain-9945FF?style=for-the-badge&logo=solana&logoColor=white" alt="Solana" />
+  <img src="https://img.shields.io/badge/Ethereum-EVM-blue?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum" />
+  <img src="https://img.shields.io/badge/Anchor-Solana%20Framework-00DC82?style=for-the-badge" alt="Anchor" />
   <img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/AlgoKit-CLI-00DC82?style=for-the-badge" alt="AlgoKit" />
-  <img src="https://img.shields.io/badge/AVM-v8-purple?style=for-the-badge" alt="AVM v8" />
 </p>
 
 ---
 
 ## 🔍 Overview
 
-**TrustVault** is a fully decentralized **autonomous inheritance protocol** deployed on the Algorand blockchain. It solves the critical problem of **digital asset transfer upon death or prolonged inactivity** — without relying on any centralized intermediary, lawyer, or third-party custodian.
+**TrustVault³** is a fully decentralized **multichain autonomous inheritance protocol**. It solves the critical problem of **digital asset transfer upon death or prolonged inactivity** — without relying on any centralized intermediary, lawyer, or third-party custodian.
 
 The protocol operates on a simple but powerful **Dead Man's Switch** mechanism:
 
 > 💀 If the vault owner stops sending periodic **heartbeat** signals within a configurable time window, the smart contract autonomously releases all locked funds to the pre-designated **beneficiary**.
 
-No oracles. No trusted third parties. Pure on-chain logic.
+### Supported Ecosystems
+- **Algorand**: PyTEAL Contracts (AVM v8)
+- **Solana**: Anchor/Rust Programs (PDA Architecture)
+- **EVM (Coming Soon)**: Solidity Smart Contracts
 
 ---
 
 ## ✨ Features
 
 ### 🔐 Core Protocol
-- **🏦 Vault Creation** — Deploy a personal inheritance vault with a single transaction
-- **💓 Heartbeat Mechanism** — Owner periodically signals "I'm alive" to reset the inactivity timer
-- **⏰ Configurable Lock Duration** — Set custom inactivity periods (minutes, hours, days, months)
-- **🔓 Autonomous Release** — Smart contract auto-releases funds to beneficiary when the timer expires
-- **💸 Owner Withdrawals** — Vault owner can freely withdraw funds while active
-- **📥 Deposit Anytime** — Anyone can deposit ALGO into a vault at any time
+- **🏦 Multichain Vaults** — Deploy inheritance vaults on Algorand and Solana.
+- **💓 Heartbeat Mechanism** — Owner periodically signals "I'm alive" to reset the inactivity timer.
+- **⏰ Flexible Timers** — Set custom inactivity periods from minutes to years.
+- **🔓 Autonomous Release** — Smart contracts auto-release funds to beneficiary when the timer expires.
+- **💸 Non-Custodial** — Owner retains full control and withdrawal rights while active.
+- **📥 Open Deposits** — Anyone can contribute to a vault's legacy.
 
 ### 🌐 Frontend Application
 - **🎨 Premium UI** — Dark-themed glassmorphic interface with neural network animated background
@@ -62,10 +64,10 @@ No oracles. No trusted third parties. Pure on-chain logic.
 - **☁️ Cloud Registry** — Vault metadata stored on Supabase for cross-device vault discovery
 
 ### 🛡️ Security
-- **Zero-Trust Architecture** — No admin keys, no backdoors, no upgrade paths
-- **On-Chain Verification** — All operations validated by AVM bytecode
-- **Owner-Only Operations** — Only the vault creator can heartbeat or withdraw
-- **Immutable Beneficiary** — Once set during bootstrap, the beneficiary cannot be changed
+- **Zero-Trust Architecture** — No admin keys, no backdoors, no upgrade paths.
+- **On-Chain Verification** — All operations validated by native blockchain bytecode (TEAL/Solana BPF).
+- **Owner-Only Operations** — Only the vault creator can heartbeat or withdraw funds.
+- **Immutable Beneficiary** — Once set during bootstrap, the beneficiary cannot be changed.
 
 ---
 
@@ -74,49 +76,47 @@ No oracles. No trusted third parties. Pure on-chain logic.
 ```
 TrustVault/
 ├── projects/
-│   ├── TrustVault-contracts/          # Smart Contract (PyTEAL)
+│   ├── TrustVault-contracts/          # Algorand Smart Contracts (PyTEAL)
 │   │   └── smart_contracts/
 │   │       └── trust_vault/
 │   │           ├── contract.py        # Core vault logic (AVM v8)
-│   │           ├── deploy.py          # Deployment script
-│   │           └── deploy_config.py   # Network configuration
+│   │           └── deploy.py          # Deployment script
 │   │
-│   └── TrustVault-frontend/           # React Frontend (TypeScript)
+│   ├── solana/                         # Solana Programs (Anchor/Rust)
+│   │   ├── programs/trust_vault/src/lib.rs # Program logic
+│   │   └── Anchor.toml                # Anchor configuration
+│   │
+│   └── TrustVault-frontend/           # Unified React Frontend (TypeScript)
 │       └── src/
-│           ├── pages/
-│           │   └── VaultPage.tsx       # Main vault dashboard (725 lines)
-│           ├── components/
-│           │   ├── NeuralBackground.tsx   # Animated canvas background
-│           │   ├── Countdown.tsx          # Live countdown timer
-│           │   ├── VaultStatus.tsx        # Vault status indicator
-│           │   ├── ConnectWallet.tsx      # Wallet connection modal
-│           │   └── ...
-│           └── utils/
-│               ├── algorand.ts         # Blockchain interaction layer
-│               ├── supabase.ts         # Cloud registry functions
-│               └── constants.ts        # App configuration
+│           ├── adapters/               # Chain-agnostic adapters
+│           │   ├── algorandAdapter.ts
+│           │   └── solanaAdapter.ts
+│           ├── contexts/
+│           │   └── ChainContext.tsx    # Multichain state provider
+│           └── pages/
+│               └── VaultPage.tsx       # Unified dashboard
 │
-├── artifacts/                          # Compiled TEAL bytecode
-│   ├── approval.teal                   # Approval program
-│   ├── clear.teal                      # Clear state program
-│   └── contract.json                   # ABI contract spec
-│
+├── artifacts/                          # Compiled contract artifacts
 └── .github/workflows/                  # CI/CD pipelines
 ```
 
 ---
 
-## 📜 Smart Contract
+## 📜 Smart Contracts
 
-The `AutoInheritanceVault` contract is written in **PyTEAL** and compiled to **AVM v8 bytecode** (TEAL). It implements 5 core methods:
+### Algorand (PyTEAL)
+The vault logic is implemented in **PyTEAL** and compiled to AVM v8 bytecode. It manages state via Global State on the account.
+
+### Solana (Anchor/Rust)
+Implemented using the **Anchor Framework**. It uses **Program Derived Addresses (PDAs)** to store vault data securely, mapped to the owner's public key.
 
 | Method | Access | Description |
 |--------|--------|-------------|
-| `bootstrap(beneficiary, lock_duration)` | Creator | Initialize vault with beneficiary address and inactivity timer |
-| `deposit()` | Anyone | Deposit ALGO into the vault |
-| `heartbeat()` | Owner Only | Reset the inactivity timer ("I'm still alive") |
-| `withdraw(amount)` | Owner Only | Withdraw a specific amount of ALGO |
-| `auto_release()` | Anyone | Trigger autonomous fund release when timer expires |
+| `initialize` | Creator | (Solana) Create vault PDA and set beneficiary/timer |
+| `bootstrap` | Creator | (Algorand) Initialize vault state |
+| `heartbeat` | Owner Only | Reset the inactivity timer |
+| `withdraw` | Owner Only | Withdraw funds from the vault |
+| `auto_release` | Anyone | Trigger fund release to beneficiary |
 
 ### Global State Schema
 
@@ -177,43 +177,43 @@ IF (current_time >= last_heartbeat + lock_duration) AND (released == 0):
 
 ### Prerequisites
 
-- [Python 3.12+](https://www.python.org/downloads/)
 - [Node.js 18+](https://nodejs.org/)
-- [Docker](https://www.docker.com/) (for LocalNet)
-- [AlgoKit CLI 2.0+](https://github.com/algorandfoundation/algokit-cli#install)
+- [Rust](https://www.rust-lang.org/tools/install) (for Solana programs)
+- [Solana CLI](https://docs.solana.com/working-with-solana/install-solana-cli-tools)
+- [Anchor CLI](https://www.anchor-lang.com/docs/installation)
+- [AlgoKit CLI](https://github.com/algorandfoundation/algokit-cli) (for Algorand)
+- [Docker](https://www.docker.com/) (for Algorand LocalNet)
 
 ### Installation
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/SaadAbdullah72/TrustVault3.git
-cd TrustVault3
+git clone https://github.com/SaadAbdullah72/TrustVault3-multichain.git
+cd TrustVault3-multichain
 
-# 2. Bootstrap all dependencies
+# 2. Setup Algorand (Optional)
 algokit project bootstrap all
 
-# 3. Setup environment for LocalNet
-cd projects/TrustVault-contracts
-algokit generate env-file -a target_network localnet
+# 3. Setup Solana
+cd projects/solana
+anchor build
 
-# 4. Start local Algorand network
-algokit localnet start
-
-# 5. Build smart contracts
-algokit project run build
-
-# 6. Start frontend dev server
+# 4. Start Frontend
 cd ../TrustVault-frontend
+npm install
 npm run dev
 ```
 
-### Quick Deploy to TestNet
+### Deployment
 
+#### Solana
 ```bash
-# Set up TestNet environment
-algokit generate env-file -a target_network testnet
+cd projects/solana
+anchor deploy --provider.cluster testnet
+```
 
-# Deploy contracts
+#### Algorand
+```bash
 algokit project deploy testnet
 ```
 

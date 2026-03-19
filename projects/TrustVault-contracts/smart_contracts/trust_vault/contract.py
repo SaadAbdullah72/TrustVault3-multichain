@@ -1,21 +1,6 @@
 import os
 from pyteal import *
 
-# Mnemonic / Meme Phrase:
-# 1 rib 14 carbon
-# 2 couple 15 flame
-# 3 must 16 horse
-# 4 write 17 cause
-# 5 struggle 18 message
-# 6 eyebrow 19 ship
-# 7 spell 20 family
-# 8 boring 21 silver
-# 9 shell 22 violin
-# 10 blur 23 always
-# 11 among 24 abstract
-# 12 seek 25 vote
-# 13 spoon
-
 # Global States
 owner_key = Bytes("Owner")
 beneficiary_key = Bytes("Beneficiary")
