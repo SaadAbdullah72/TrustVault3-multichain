@@ -54,10 +54,9 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         const foundIds = new Set<string>()
 
         // Run primary discovery methods in parallel
-        const [createdApps, involvedTxs, noteTxs, supabaseOwner, supabaseBen] = await Promise.all([
+        const [createdApps, involvedTxs, supabaseOwner, supabaseBen] = await Promise.all([
             indexerClient.searchForApplications().creator(address).do().catch(() => ({ applications: [] })),
             indexerClient.searchForTransactions().address(address).txType('appl').do().catch(() => ({ transactions: [] })),
-            indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address)).do().catch(() => ({ transactions: [] })),
             import('./supabase').then(m => m.getVaultsByOwner(address)).catch(() => []),
             import('./supabase').then(m => m.getVaultsByBeneficiary(address)).catch(() => [])
         ])
@@ -66,17 +65,25 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         createdApps.applications?.forEach((app: any) => app.id > 0 && foundIds.add(app.id.toString()))
 
         // 2. Tx history search
-        const allTxs = [...(involvedTxs.transactions || []), ...(noteTxs.transactions || [])]
+        const allTxs = [...(involvedTxs.transactions || [])]
         allTxs.forEach((tx: any) => {
             const appId = tx['application-transaction']?.['application-id']
             if (appId && appId > 0) foundIds.add(appId.toString())
         })
 
-        // 3. Supabase results
+        // 3. notePrefix search (REDUNDANT but fallback) - Use shorter prefix to avoid 500 error
+        const shortPrefix = VAULT_NOTE_PREFIX + address.slice(0, 4)
+        const notePrefixTxs: any = await indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(shortPrefix)).do().catch(() => ({ transactions: [] }))
+        notePrefixTxs.transactions?.forEach((tx: any) => {
+            const appId = tx['application-transaction']?.['application-id']
+            if (appId && appId > 0) foundIds.add(appId.toString())
+        })
+
+        // 4. Supabase results
         supabaseOwner.forEach((id: string) => foundIds.add(id))
         supabaseBen.forEach((id: string) => foundIds.add(id))
 
-        // 4. Local storage fallbacks
+        // 5. Local storage fallbacks
         if (typeof window !== 'undefined') {
             const cachedIds = localStorage.getItem(`trustvault_ids_${address}`)
             if (cachedIds) {
@@ -91,7 +98,7 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         const sorted = scanResults.sort((a, b) => Number(b - a))
 
         setCache(cacheKey, sorted)
-        console.log(`[Discovery] Found ${sorted.length} unique vault(s)`)
+        console.log(`[Discovery] Found ${sorted.length} unique vault(s) for Algorand`)
         return sorted
     } catch (e) {
         console.error('[Discovery] Unified scan failed:', e)
@@ -102,23 +109,33 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
 // Optimized version for just finding claimable vaults for beneficiary
 export const discoverBeneficiaryVaults = async (address: string): Promise<ClaimableVault[]> => {
     try {
+        console.log(`[Discovery] Scanning for beneficiary vaults for ${address}...`)
         const allIds = await discoverAllRelatedVaults(address)
-        if (allIds.length === 0) return []
+        if (allIds.length === 0) {
+            console.log('[Discovery] No related vaults found for beneficiary.')
+            return []
+        }
 
         // Fetch states in parallel
         const states = await Promise.all(allIds.map(id => fetchVaultState(id)))
         const results: ClaimableVault[] = []
 
         states.forEach((state, idx) => {
-            if (state &&
-                state.beneficiary.toUpperCase() === address.toUpperCase() &&
-                !state.released) {
-                results.push({ appId: allIds[idx], state })
+            if (state) {
+                const benMatch = state.beneficiary.toUpperCase() === address.toUpperCase()
+                console.log(`[Vault #${allIds[idx]}] Ben: ${state.beneficiary.slice(0, 8)}... Match: ${benMatch}, Released: ${state.released}`)
+                if (benMatch && !state.released) {
+                    results.push({ appId: allIds[idx], state })
+                }
+            } else {
+                console.warn(`[Vault #${allIds[idx]}] Failed to fetch state.`)
             }
         })
 
+        console.log(`[Discovery] Total beneficiary vaults found: ${results.length}`)
         return results
     } catch (e) {
+        console.error('[Discovery] Beneficiary discovery failed:', e)
         return []
     }
 }
