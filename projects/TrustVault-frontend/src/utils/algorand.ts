@@ -107,14 +107,12 @@ export const discoverBeneficiaryVaults = async (address: string): Promise<Claima
 
         // Fetch states in parallel
         const states = await Promise.all(allIds.map(id => fetchVaultState(id)))
-        const now = Math.floor(Date.now() / 1000)
         const results: ClaimableVault[] = []
 
         states.forEach((state, idx) => {
             if (state &&
                 state.beneficiary.toUpperCase() === address.toUpperCase() &&
-                !state.released &&
-                now >= (state.lastHeartbeat + state.lockDuration)) {
+                !state.released) {
                 results.push({ appId: allIds[idx], state })
             }
         })

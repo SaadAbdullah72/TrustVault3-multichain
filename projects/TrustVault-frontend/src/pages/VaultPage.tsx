@@ -297,32 +297,41 @@ export default function VaultPage() {
                             <span className="claim-notification-title">Incoming Inheritance</span>
                             <span className="claim-notification-badge">{claimableVaults.length}</span>
                         </div>
-                        {claimableVaults.map((vault) => (
-                            <div key={vault.vaultId} className="claim-card">
-                                <div className="claim-card-info">
-                                    <span className="claim-card-id">Vault #{vault.vaultId.length > 12 ? vault.vaultId.slice(0, 8) + '...' : vault.vaultId}</span>
-                                    <span className="claim-card-status">Timer Expired</span>
+                        {claimableVaults.map((vault) => {
+                            const isExpired = !vault.state.released && Date.now() / 1000 >= (vault.state.lastHeartbeat + vault.state.lockDuration)
+                            return (
+                                <div key={vault.vaultId} className="claim-card">
+                                    <div className="claim-card-info">
+                                        <div className="claim-card-id-row">
+                                            <span className="claim-card-id">Vault #{vault.vaultId.length > 12 ? vault.vaultId.slice(0, 8) + '...' : vault.vaultId}</span>
+                                            <span className={`claim-card-status-pill ${isExpired ? 'expired' : 'active'}`}>
+                                                {isExpired ? 'Ready to Claim' : 'Incoming'}
+                                            </span>
+                                        </div>
+                                        <span className="claim-card-status">{isExpired ? 'Inactivity timer has expired.' : 'Timer still active.'}</span>
+                                    </div>
+                                    <div className="claim-card-actions">
+                                        <button
+                                            onClick={() => { setSelectedVaultId(vault.vaultId); setShowVaultSelector(false) }}
+                                            className="claim-card-view-btn"
+                                            title="View Vault"
+                                        >
+                                            <Eye className="claim-card-btn-icon" />
+                                            View
+                                        </button>
+                                        <button
+                                            onClick={() => handleClaim(vault.vaultId, loadVaultState)}
+                                            disabled={uiStatus.loading || !isExpired}
+                                            className={`claim-card-btn ${isExpired ? 'pulse-gold' : 'disabled'}`}
+                                            title={isExpired ? 'Claim this vault now' : 'Wait for timer to expire'}
+                                        >
+                                            <Unlock className="claim-card-btn-icon" />
+                                            {uiStatus.loading && selectedVaultId === vault.vaultId ? 'Claiming...' : 'Claim'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="claim-card-actions">
-                                    <button
-                                        onClick={() => setSelectedVaultId(vault.vaultId)}
-                                        className="claim-card-view-btn"
-                                        title="View Vault"
-                                    >
-                                        <Eye className="claim-card-btn-icon" />
-                                        View
-                                    </button>
-                                    <button
-                                        onClick={() => handleClaim(vault.vaultId, loadVaultState)}
-                                        disabled={uiStatus.loading}
-                                        className="claim-card-btn"
-                                    >
-                                        <Unlock className="claim-card-btn-icon" />
-                                        {uiStatus.loading && selectedVaultId === vault.vaultId ? 'Claiming...' : 'Claim'}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
 
