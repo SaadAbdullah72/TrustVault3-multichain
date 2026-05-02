@@ -58,29 +58,29 @@ export default function Countdown({ lastHeartbeat, lockDuration, released, compa
 
     if (compact) {
         return (
-            <span style={{ fontSize: '14px', fontWeight: 700, color: timeLeft === 0 ? '#ef4444' : '#fff' }}>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: timeLeft === 0 ? '#ef4444' : '#0f172a' }}>
                 {released ? '0s' : formatTime(timeLeft)}
             </span>
         )
     }
 
     const size = 160
-    const strokeWidth = 6
+    const strokeWidth = 8
     const radius = (size - strokeWidth) / 2
     const circumference = 2 * Math.PI * radius
     const strokeDashoffset = circumference - (progress / 100) * circumference
 
     if (released) {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '20px 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
                 <div style={{ width: size, height: size, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(16,185,129,0.1)" strokeWidth={strokeWidth} />
-                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#10b981" strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={0} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
+                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={strokeWidth} />
+                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#22c55e" strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={0} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
                     </svg>
                     <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <CheckCircle style={{ width: 28, height: 28, color: '#10b981' }} />
-                        <span style={{ fontSize: '16px', fontWeight: 800, color: '#10b981', letterSpacing: '1px' }}>RELEASED</span>
+                        <CheckCircle size={32} color="#22c55e" />
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#22c55e', letterSpacing: '1px' }}>RELEASED</span>
                     </div>
                 </div>
             </div>
@@ -88,18 +88,18 @@ export default function Countdown({ lastHeartbeat, lockDuration, released, compa
     }
 
     const isExpired = timeLeft === 0
-    const accentColor = isExpired ? '#ef4444' : 'var(--nb-accent)'
+    const accentColor = isExpired ? '#ef4444' : '#38bdf8'
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '20px 0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '10px 0' }}>
             <div style={{ width: size, height: size, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={strokeWidth} />
-                    <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={accentColor} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease', filter: `drop-shadow(0 0 6px ${accentColor}50)` }} />
+                    <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={strokeWidth} />
+                    <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={accentColor} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
                 </svg>
                 <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                    <span style={{ fontSize: '10px', color: 'var(--nb-text-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{isExpired ? 'Expired' : 'Time Left'}</span>
-                    <span style={{ fontSize: '22px', fontWeight: 900, fontFamily: "'Inter', monospace", color: isExpired ? '#ef4444' : '#f1f5f9', letterSpacing: '-0.5px' }}>{formatTime(timeLeft)}</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{isExpired ? 'Expired' : 'Time Left'}</span>
+                    <span style={{ fontSize: '24px', fontWeight: 800, color: isExpired ? '#ef4444' : '#0f172a', letterSpacing: '-0.5px' }}>{formatTime(timeLeft)}</span>
                 </div>
             </div>
         </div>

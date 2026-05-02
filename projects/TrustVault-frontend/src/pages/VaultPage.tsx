@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { 
     Asterisk, 
     LogOut, 
@@ -10,7 +10,8 @@ import {
     CheckCircle,
     Timer,
     AlertCircle,
-    ArrowLeft
+    ArrowLeft,
+    ChevronRight
 } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import { useVaultActions } from '../hooks/useVaultActions'
@@ -176,7 +177,7 @@ export const VaultPage: React.FC = () => {
 
     return (
         <div className="wallet-shell">
-            <div className="wallet-container" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="wallet-container">
                 
                 {/* Global Overlays */}
                 <TransactionOverlay 
@@ -185,30 +186,41 @@ export const VaultPage: React.FC = () => {
                     onCancel={() => {}} 
                 />
 
-                {/* Header with Switcher & Logout */}
+                {/* Header Section (Floating on top of Dashboard's gradient) */}
                 {!showCreateForm && (
-                    <div style={{ padding: '24px 24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+                    <div style={{ 
+                        padding: '32px 24px 0', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        zIndex: 100,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        color: '#fff'
+                    }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--nb-glass-border)' }}>
-                                <Asterisk size={18} />
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Asterisk size={18} color="#fff" />
                             </div>
-                            <span style={{ fontWeight: 800, letterSpacing: '-0.5px', fontSize: '15px' }}>TRUSTVAULT</span>
+                            <span style={{ fontWeight: 800, fontSize: '15px' }}>TRUSTVAULT</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <ChainSwitcher />
-                            <button onClick={handleDisconnect} style={{ background: 'none', border: 'none', color: 'var(--nb-text-dim)', cursor: 'pointer', padding: '4px' }}>
-                                <LogOut size={18} />
+                            <button onClick={handleDisconnect} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.6, cursor: 'pointer' }}>
+                                <LogOut size={20} />
                             </button>
                         </div>
                     </div>
                 )}
 
-                {/* Main Content */}
+                {/* Main Content Area */}
                 <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
                     {isDiscovering ? (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-                            <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.05)', borderTopColor: 'var(--nb-accent)', borderRadius: '50%' }}></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--nb-text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Syncing Ledger...</span>
+                            <div className="spinner" style={{ width: '40px', height: '40px' }}></div>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8' }}>SYNCING VAULTS</span>
                         </div>
                     ) : selectedVaultId && vaultState ? (
                         <VaultDashboard
@@ -228,20 +240,20 @@ export const VaultPage: React.FC = () => {
                         />
                     ) : (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
-                            <div style={{ width: '80px', height: '80px', margin: '0 auto 32px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--nb-glass-border)' }}>
-                                <Shield size={40} color="var(--nb-text-dim)" />
+                            <div style={{ width: '80px', height: '80px', margin: '0 auto 32px', background: '#f8fafc', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
+                                <Shield size={40} color="#94a3b8" />
                             </div>
-                            <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '16px', lineHeight: 1.1 }}>SECURE YOUR<br />LEGACY</h2>
-                            <p className="nb-desc" style={{ marginBottom: '40px' }}>Create your first decentralized inheritance vault on {currentChain.name}.</p>
+                            <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '16px', color: '#000' }}>YOUR LEGACY<br />STARTS HERE</h2>
+                            <p style={{ color: '#64748b', marginBottom: '40px' }}>Secure your assets for the next generation on {currentChain.name}.</p>
                             <button className="nb-btn-primary" style={{ width: '100%' }} onClick={() => setShowCreateForm(true)}>
                                 <Plus size={20} />
-                                Establish New Vault
+                                Create New Vault
                             </button>
                         </div>
                     )}
                 </div>
 
-                {/* Account / Vault Switcher */}
+                {/* Account Selector (VaultDropdown) */}
                 {!showCreateForm && (
                     <VaultDropdown
                         currentChain={currentChain}
@@ -265,50 +277,47 @@ export const VaultPage: React.FC = () => {
                     />
                 )}
 
-                {/* Create Form Overlay */}
+                {/* Create Form Overlay (Light Theme) */}
                 {showCreateForm && (
-                    <div style={{ position: 'absolute', inset: 0, zIndex: 200, background: 'var(--nb-bg)', display: 'flex', flexDirection: 'column', padding: '32px' }}>
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 200, background: '#fff', display: 'flex', flexDirection: 'column', padding: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
-                            <button onClick={() => setShowCreateForm(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
-                            <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '1px' }}>ESTABLISH VAULT</span>
+                            <button onClick={() => setShowCreateForm(false)} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
+                            <span style={{ fontWeight: 800, fontSize: '13px', color: '#000' }}>ESTABLISH VAULT</span>
                             <div style={{ width: 24 }} />
                         </div>
 
                         <div style={{ flex: 1 }}>
                             <div style={{ marginBottom: '24px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--nb-text-dim)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Beneficiary Address</label>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
                                 <input 
                                     value={beneficiaryInput}
                                     onChange={(e) => setBeneficiaryInput(e.target.value)}
                                     placeholder="Enter address..."
-                                    className="nb-input"
-                                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '18px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                    style={{ width: '100%', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }}
                                 />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '40px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--nb-text-dim)', marginBottom: '12px', textTransform: 'uppercase' }}>Security (Sec)</label>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Timer (Sec)</label>
                                     <input 
                                         type="number"
                                         value={lockDurationInput}
                                         onChange={(e) => setLockDurationInput(e.target.value)}
-                                        className="nb-input"
-                                        style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '18px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                        style={{ width: '100%', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }}
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--nb-text-dim)', marginBottom: '12px', textTransform: 'uppercase' }}>Initial (SOL)</label>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Deposit ({currentChain.nativeCurrency.symbol})</label>
                                     <input 
                                         type="number"
                                         value={depositInput}
                                         onChange={(e) => setDepositInput(e.target.value)}
-                                        className="nb-input"
-                                        style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '18px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                        style={{ width: '100%', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }}
                                     />
                                 </div>
                             </div>
                             <button className="nb-btn-primary" style={{ width: '100%', padding: '20px' }} onClick={handleCreateVaultSubmit}>
-                                Initiate Protection System
+                                Initiate Protection
                             </button>
                         </div>
                     </div>
@@ -317,7 +326,5 @@ export const VaultPage: React.FC = () => {
         </div>
     )
 }
-
-import { useMemo } from 'react'
 
 export default VaultPage
