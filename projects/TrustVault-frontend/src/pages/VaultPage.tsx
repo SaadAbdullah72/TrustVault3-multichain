@@ -38,14 +38,15 @@ import {
     Timer,
     Eye,
     EyeOff,
-    FileText
+    FileText,
+    Asterisk,
+    MoreHorizontal
 } from 'lucide-react'
 
 export default function VaultPage() {
     const { t } = useTranslation()
-    const { walletAddress, currentChain, adapter, isConnected } = useChain()
+    const { walletAddress, currentChain, adapter, isConnected, connecting } = useChain()
 
-    // --- Modular Hooks ---
     const {
         uiStatus,
         updateStatus,
@@ -70,19 +71,12 @@ export default function VaultPage() {
         handleManualScan
     } = useVaultDiscovery()
 
-    const handleDirectClaim = async (vaultId: string) => {
-        await handleClaim(vaultId, () => {
-            handleManualScan()
-        })
-    }
-
     const {
         vaultState,
         vaultBalance,
         loadVaultState
     } = useVaultState(selectedVaultId)
 
-    // --- Page Local State ---
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [beneficiaryInput, setBeneficiaryInput] = useState('')
     const [lockDurationInput, setLockDurationInput] = useState('60')
@@ -90,40 +84,27 @@ export default function VaultPage() {
 
     const [showVaultSelector, setShowVaultSelector] = useState(false)
     const [copied, setCopied] = useState(false)
-    const [showBalanceHidden, setShowBalanceHidden] = useState(false)
 
-    // --- Derived State ---
     const vaultAddress = useMemo(() => selectedVaultId ? adapter.getVaultAddress(selectedVaultId) : '', [selectedVaultId, adapter])
+    
     const isOwner = useMemo(() => {
         if (!walletAddress || !vaultState?.owner) return false;
-
         const owner = String(vaultState.owner)
         const wallet = String(walletAddress)
-
-        // Solana is case-sensitive, EVM is not
-        if (currentChain.type === 'solana') {
-            return owner === wallet
-        }
-        return owner.toUpperCase() === wallet.toUpperCase()
-    }, [walletAddress, vaultState, currentChain, selectedVaultId])
+        return currentChain.type === 'solana' ? owner === wallet : owner.toUpperCase() === wallet.toUpperCase()
+    }, [walletAddress, vaultState, currentChain])
 
     const isBeneficiary = useMemo(() => {
         if (!walletAddress || !vaultState?.beneficiary) return false;
-
         const ben = String(vaultState.beneficiary)
         const wallet = String(walletAddress)
-
-        if (currentChain.type === 'solana') {
-            return ben === wallet
-        }
-        return ben.toUpperCase() === wallet.toUpperCase()
+        return currentChain.type === 'solana' ? ben === wallet : ben.toUpperCase() === wallet.toUpperCase()
     }, [walletAddress, vaultState, currentChain])
 
     const now = Math.floor(Date.now() / 1000)
-    const canRelease = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
     const isExpired = !!(vaultState && !vaultState.released && (now >= (vaultState.lastHeartbeat || 0) + (vaultState.lockDuration || 0)))
+    const canRelease = isExpired
 
-    // --- Handlers ---
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text)
         setCopied(true)
@@ -132,270 +113,163 @@ export default function VaultPage() {
 
     const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
-    const handleCreateVaultSubmit = async () => {
-        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (vaultId) => {
-            setSelectedVaultId(vaultId)
-            setShowCreateForm(false)
-        })
-    }
-
-    const handleWithdrawAction = async () => {
-        const amountStr = window.prompt(`Enter amount to withdraw (${currentChain.nativeCurrency.symbol}):`)
-        if (amountStr) {
-            await handleWithdraw(selectedVaultId!, parseFloat(amountStr), loadVaultState)
-        }
-    }
-
-    const handleDeleteVaultId = (id: string) => {
-        const updated = userVaults.filter(v => v !== id)
-        setUserVaults(updated)
-        if (selectedVaultId === id) {
-            setSelectedVaultId(updated.length > 0 ? updated[0] : null)
-        }
-    }
-
     if (!isConnected) {
-        return <ConnectScreen onConnect={handleConnect} wallets={[]} loading={uiStatus.loading} error={uiStatus.error} />
+        return (
+            <div className="wallet-shell">
+                <div className="wallet-container glass-effect">
+                    <ConnectScreen onConnect={handleConnect} connecting={uiStatus.loading} />
+                </div>
+            </div>
+        )
     }
 
     return (
         <div className="wallet-shell">
-            <div className="wallet-container">
-                {/* ======= TOP NAV BAR ======= */}
-                <div className="wallet-topbar">
-                    <div className="topbar-left">
-                        <div className="topbar-logo">
-                            <img src="/logo.svg" alt="TrustVault³" className="topbar-logo-img" />
-                        </div>
-                        <span className="topbar-brand">TrustVault<sup className="topbar-brand-sup">3</sup></span>
-                    </div>
-
-                    <div className="topbar-right">
-                        <SettingsSwitcher />
-                        <ChainSwitcher />
-                        <div className="network-badge" style={{ borderColor: currentChain.color + '44' }}>
-                            <CircleDot className="network-dot" style={{ color: currentChain.color }} />
-                            <span>Testnet</span>
-                        </div>
-                        <button
-                            onClick={handleDisconnect}
-                            className="topbar-disconnect"
-                            title="Disconnect"
-                        >
-                            <LogOut className="topbar-disconnect-icon" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* ======= ACCOUNT HEADER ======= */}
-                <VaultDropdown
-                    currentChain={currentChain}
-                    userVaults={userVaults}
-                    vaultRoles={vaultRoles}
-                    selectedVaultId={selectedVaultId}
-                    setSelectedVaultId={setSelectedVaultId}
-                    adapter={adapter}
-                    handleDeleteVaultId={handleDeleteVaultId}
-                    isDiscovering={isDiscovering}
-                    handleManualScan={handleManualScan}
-                    uiStatus={uiStatus}
-                    setShowCreateForm={setShowCreateForm}
-                    showVaultSelector={showVaultSelector}
-                    setShowVaultSelector={setShowVaultSelector}
-                    vaultAddress={vaultAddress}
-                    walletAddress={walletAddress}
-                    copied={copied}
-                    copyToClipboard={copyToClipboard}
-                    formatAddr={formatAddr}
-                />
-
-                {/* ======= NOTIFICATIONS ======= */}
-                {claimableVaults.length > 0 && (
-                    <div className="claim-notification">
-                        <div className="claim-notification-header">
-                            <Bell className="claim-bell" />
-                            <span className="claim-notification-title">Incoming Inheritance</span>
-                            <span className="claim-notification-badge">{claimableVaults.length}</span>
-                        </div>
-                        {claimableVaults.map((vault) => {
-                            const isExpired = !vault.state.released && Date.now() / 1000 >= (vault.state.lastHeartbeat + vault.state.lockDuration)
-                            return (
-                                <div key={vault.vaultId} className="claim-card">
-                                    <div className="claim-card-info">
-                                        <div className="claim-card-id-row">
-                                            <span className="claim-card-id">Vault #{vault.vaultId.length > 12 ? vault.vaultId.slice(0, 8) + '...' : vault.vaultId}</span>
-                                            <span className={`claim-card-status-pill ${isExpired ? 'expired' : 'active'}`}>
-                                                {isExpired ? 'Ready to Claim' : 'Incoming'}
-                                            </span>
-                                        </div>
-                                        <span className="claim-card-status">{isExpired ? 'Inactivity timer has expired.' : 'Timer still active.'}</span>
-                                    </div>
-                                    <div className="claim-card-actions">
-                                        <button
-                                            onClick={() => { setSelectedVaultId(vault.vaultId); setShowVaultSelector(false) }}
-                                            className="claim-card-view-btn"
-                                            title="View Vault"
-                                        >
-                                            <Eye className="claim-card-btn-icon" />
-                                            View
-                                        </button>
-                                        <button
-                                            onClick={() => handleClaim(vault.vaultId, loadVaultState)}
-                                            disabled={uiStatus.loading || !isExpired}
-                                            className={`claim-card-btn ${isExpired ? 'pulse-gold' : 'disabled'}`}
-                                            title={isExpired ? 'Claim this vault now' : 'Wait for timer to expire'}
-                                        >
-                                            <Unlock className="claim-card-btn-icon" />
-                                            {uiStatus.loading && selectedVaultId === vault.vaultId ? 'Claiming...' : 'Claim'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                )}
-
-                {isScanningClaims && claimableVaults.length === 0 && (
-                    <div className="scanning-indicator">
-                        <RefreshCw className="scanning-icon spinning" />
-                        <span>Scanning for claimable vaults...</span>
-                    </div>
-                )}
-
-                {/* ======= FORMS ======= */}
-                {showCreateForm && (
-                    <div className="wallet-form-overlay">
-                        <div className="wallet-form-card">
-                            <div className="wallet-form-header">
-                                <button onClick={() => setShowCreateForm(false)} className="wallet-form-back">
-                                    <ChevronLeft />
-                                </button>
-                                <span className="wallet-form-title">Create Vault on {currentChain.name}</span>
-                                <div style={{ width: 24 }} />
+            <div className="wallet-container glass-effect" style={{ display: 'flex', flexDirection: 'column' }}>
+                
+                {/* Header Section */}
+                {!showCreateForm && (
+                    <div style={{ padding: '24px 24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--nb-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Asterisk size={18} />
                             </div>
-                            <div className="wallet-form-body">
-                                <div className="wallet-input-group">
-                                    <label className="wallet-input-label">
-                                        <ArrowRight className="wallet-label-icon" />
-                                        {t('beneficiary_address')}
-                                    </label>
-                                    <input
-                                        value={beneficiaryInput}
-                                        onChange={(e) => setBeneficiaryInput(e.target.value)}
-                                        className="wallet-input"
-                                        placeholder={currentChain.type === 'evm' ? '0x... address' : 'Address...'}
-                                    />
-                                </div>
-                                <div className="wallet-form-row">
-                                    <div className="wallet-input-group">
-                                        <label className="wallet-input-label">
-                                            <Clock className="wallet-label-icon" />
-                                            {t('timer_seconds')}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={lockDurationInput}
-                                            onChange={(e) => setLockDurationInput(e.target.value)}
-                                            className="wallet-input"
-                                        />
-                                    </div>
-                                    <div className="wallet-input-group">
-                                        <label className="wallet-input-label">
-                                            <Wallet className="wallet-label-icon" />
-                                            {t('deposit')} ({currentChain.nativeCurrency.symbol})
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={depositInput}
-                                            onChange={(e) => setDepositInput(e.target.value)}
-                                            className="wallet-input"
-                                        />
-                                    </div>
-                                </div>
-                                <button onClick={handleCreateVaultSubmit} disabled={uiStatus.loading} className="wallet-form-submit">
-                                    {uiStatus.loading ? (
-                                        <RefreshCw className="spinning submit-icon" />
-                                    ) : (
-                                        <Shield className="submit-icon" />
-                                    )}
-                                    <span>{uiStatus.loading ? 'Deploying...' : t('deploy_on', { chain: currentChain.name })}</span>
-                                </button>
-                            </div>
+                            <span style={{ fontWeight: 800, letterSpacing: '-0.5px', fontSize: '15px' }}>TRUSTVAULT</span>
                         </div>
-                    </div>
-                )}
-
-                {/* ======= MAIN CONTENT ======= */}
-                {isDiscovering ? (
-                    <div className="wallet-loading">
-                        <div className="wallet-loading-spinner" />
-                        <span className="wallet-loading-text">{t('syncing', { chain: currentChain.name })}</span>
-                    </div>
-                ) : selectedVaultId && vaultState ? (
-                    <div className="wallet-main-content">
-                        {isBeneficiary && !isExpired && !isOwner ? (
-                            <div className="beneficiary-placeholder" style={{ padding: '40px 20px', textAlign: 'center', background: 'var(--stitch-surface)', borderRadius: '12px', border: '1px solid var(--stitch-surface-border)' }}>
-                                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Shield size={32} color="var(--stitch-accent)" />
-                                    </div>
-                                </div>
-                                <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--stitch-text)', marginBottom: '12px' }}>Vault Secured</h3>
-                                <p style={{ fontSize: '14px', color: 'var(--stitch-text-dim)', lineHeight: 1.6, marginBottom: '24px' }}>
-                                    You are the designated beneficiary for this vault. Its contents and controls will be revealed once the security timer expires.
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--stitch-bg-dark)', borderRadius: '8px' }}>
-                                    <Timer size={16} color="var(--stitch-text-dim)" />
-                                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--stitch-text)' }}>Monitoring Active</span>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <VaultDashboard
-                                    vaultState={vaultState}
-                                    vaultBalance={vaultBalance}
-                                    currentChain={currentChain}
-                                    vaultAddress={vaultAddress}
-                                    walletAddress={walletAddress}
-                                    isOwner={isOwner}
-                                    isBeneficiary={isBeneficiary}
-                                    isExpired={isExpired}
-                                    formatAddr={formatAddr}
-                                    copyToClipboard={copyToClipboard}
-                                />
-
-                                <VaultActions
-                                    isOwner={isOwner}
-                                    isBeneficiary={isBeneficiary}
-                                    isExpired={isExpired}
-                                    canRelease={canRelease}
-                                    vaultState={vaultState}
-                                    uiStatus={uiStatus}
-                                    selectedVaultId={selectedVaultId}
-                                    vaultAddress={vaultAddress}
-                                    handleHeartbeat={handleHeartbeat}
-                                    handleWithdrawAction={handleWithdrawAction}
-                                    handleClaim={handleClaim}
-                                    handleManualScan={handleManualScan}
-                                    loadVaultState={loadVaultState}
-                                    copyToClipboard={copyToClipboard}
-                                />
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <div className="wallet-empty">
-                        <div className="wallet-empty-icon-wrap">
-                            <Shield className="wallet-empty-icon" />
-                        </div>
-                        <h3 className="wallet-empty-title">{t('no_vault', { chain: currentChain.name })}</h3>
-                        <p className="wallet-empty-desc">{t('create_new_vault', { chain: currentChain.name })}</p>
-                        <div className="wallet-empty-actions">
-                            <button className="wallet-empty-btn primary" onClick={() => setShowCreateForm(true)}>
-                                <Plus className="wallet-empty-btn-icon" />
-                                {t('create_vault')}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <ChainSwitcher />
+                            <button onClick={handleDisconnect} style={{ background: 'none', border: 'none', color: 'var(--nb-text-dim)', cursor: 'pointer' }}>
+                                <LogOut size={18} />
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {/* Main Content Area */}
+                <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+                    {isDiscovering ? (
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+                            <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--nb-glass)', borderTopColor: 'var(--nb-accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--nb-text-dim)' }}>Accessing the Decentralized Layer...</span>
+                        </div>
+                    ) : selectedVaultId && vaultState ? (
+                        <div style={{ height: '100%' }}>
+                            {isBeneficiary && !isExpired && !isOwner ? (
+                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+                                    <div style={{ marginBottom: '32px' }}>
+                                        <div style={{ width: '80px', height: '80px', margin: '0 auto', background: 'var(--nb-glass)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--nb-glass-border)' }}>
+                                            <Shield size={40} color="var(--nb-accent)" />
+                                        </div>
+                                    </div>
+                                    <h2 className="nb-title" style={{ fontSize: '28px', marginBottom: '16px' }}>PROTECTED BY<br />TRUSTVAULT</h2>
+                                    <p className="nb-desc" style={{ marginBottom: '32px' }}>
+                                        You are a verified beneficiary. This vault is currently under protection and will be released automatically upon the security timer's expiration.
+                                    </p>
+                                    <div className="glass-card" style={{ padding: '20px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                                            <div className="pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
+                                            <span style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Monitoring System Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <VaultDashboard
+                                        vaultState={vaultState}
+                                        vaultBalance={vaultBalance}
+                                        currentChain={currentChain}
+                                        vaultAddress={vaultAddress}
+                                        walletAddress={walletAddress}
+                                        isOwner={isOwner}
+                                        isBeneficiary={isBeneficiary}
+                                        isExpired={isExpired}
+                                        formatAddr={formatAddr}
+                                        copyToClipboard={copyToClipboard}
+                                    />
+                                    
+                                    {isOwner && (
+                                        <div style={{ padding: '0 24px 24px' }}>
+                                            <button className="nb-btn-primary" style={{ width: '100%', marginBottom: '12px' }} onClick={handleHeartbeat}>
+                                                <Heart size={20} />
+                                                Send Heartbeat
+                                            </button>
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <button className="nb-btn-secondary" style={{ flex: 1, background: 'var(--nb-glass)', padding: '12px', borderRadius: '12px' }} onClick={handleWithdrawAction}>Withdraw</button>
+                                                <button className="nb-btn-secondary" style={{ flex: 1, background: 'var(--nb-glass)', padding: '12px', borderRadius: '12px' }} onClick={() => setShowVaultSelector(true)}>Switch Vault</button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {isBeneficiary && isExpired && !vaultState.released && (
+                                        <div style={{ padding: '0 24px 24px' }}>
+                                            <button className="nb-btn-primary" style={{ width: '100%', background: 'var(--nb-accent)', color: '#000' }} onClick={() => handleClaim(selectedVaultId!, loadVaultState)}>
+                                                <Unlock size={20} />
+                                                Claim Inheritance
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+                            <div style={{ width: '64px', height: '64px', margin: '0 auto 24px', background: 'var(--nb-glass)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Shield size={32} color="var(--nb-text-dim)" />
+                            </div>
+                            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>No Vault Found</h2>
+                            <p className="nb-desc" style={{ marginBottom: '32px' }}>Start your journey by creating a secure vault on {currentChain.name}.</p>
+                            <button className="nb-btn-primary" onClick={() => setShowCreateForm(true)}>
+                                <Plus size={20} />
+                                Create First Vault
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Form Overlay */}
+                {showCreateForm && (
+                    <div className="glass-effect" style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', padding: '32px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                            <button onClick={() => setShowCreateForm(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><ChevronLeft size={24} /></button>
+                            <span style={{ fontWeight: 800 }}>NEW VAULT</span>
+                            <div style={{ width: 24 }} />
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--nb-text-dim)', marginBottom: '8px', textTransform: 'uppercase' }}>Beneficiary Address</label>
+                                <input 
+                                    value={beneficiaryInput}
+                                    onChange={(e) => setBeneficiaryInput(e.target.value)}
+                                    placeholder="0x... or Solana Address"
+                                    style={{ width: '100%', background: 'var(--nb-glass)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '16px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--nb-text-dim)', marginBottom: '8px', textTransform: 'uppercase' }}>Timer (Sec)</label>
+                                    <input 
+                                        type="number"
+                                        value={lockDurationInput}
+                                        onChange={(e) => setLockDurationInput(e.target.value)}
+                                        style={{ width: '100%', background: 'var(--nb-glass)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '16px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--nb-text-dim)', marginBottom: '8px', textTransform: 'uppercase' }}>Deposit ({currentChain.nativeCurrency.symbol})</label>
+                                    <input 
+                                        type="number"
+                                        value={depositInput}
+                                        onChange={(e) => setDepositInput(e.target.value)}
+                                        style={{ width: '100%', background: 'var(--nb-glass)', border: '1px solid var(--nb-glass-border)', borderRadius: '16px', padding: '16px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button className="nb-btn-primary" style={{ width: '100%' }} onClick={handleCreateVaultSubmit} disabled={uiStatus.loading}>
+                            {uiStatus.loading ? 'DEPLOYING...' : 'INITIATE VAULT'}
+                        </button>
                     </div>
                 )}
 
@@ -411,6 +285,16 @@ export default function VaultPage() {
                     onClose={resetStatus}
                 />
             </div>
+
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                .pulse { animation: pulse-animation 2s infinite; }
+                @keyframes pulse-animation { 
+                    0% { transform: scale(0.95); opacity: 0.5; }
+                    50% { transform: scale(1.05); opacity: 1; }
+                    100% { transform: scale(0.95); opacity: 0.5; }
+                }
+            `}</style>
         </div>
     )
 }

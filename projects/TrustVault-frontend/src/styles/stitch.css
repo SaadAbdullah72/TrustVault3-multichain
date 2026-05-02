@@ -1,143 +1,271 @@
-/* Professional SaaS Design System */
+/* Premium Neobank Design System - Glassmorphic Aesthetic */
 
 :root {
-  /* Premium White/Zinc Theme */
-  --stitch-bg-dark: #f8fafc; /* Slate 50 */
-  --stitch-surface: #ffffff; /* White */
-  --stitch-surface-border: #e2e8f0; /* Slate 200 */
-  --stitch-primary: #0f172a; /* Slate 900 */
-  --stitch-primary-text: #ffffff; 
-  --stitch-secondary: #f1f5f9; /* Slate 100 */
-  --stitch-accent: #3b82f6; /* Blue 500 */
-  --stitch-text: #0f172a; /* Slate 900 */
-  --stitch-text-dim: #64748b; /* Slate 500 */
-  --stitch-radius: 16px;
-  --stitch-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Deep Fintech Palette */
+  --nb-bg-deep: #050a14;
+  --nb-bg-gradient: linear-gradient(135deg, #050a14 0%, #0f172a 50%, #1e1b4b 100%);
+  --nb-glass: rgba(255, 255, 255, 0.03);
+  --nb-glass-border: rgba(255, 255, 255, 0.08);
+  --nb-glass-heavy: rgba(15, 23, 42, 0.6);
+  
+  --nb-accent: #38bdf8; /* Sky Blue */
+  --nb-accent-glow: rgba(56, 189, 248, 0.3);
+  
+  --nb-text: #ffffff;
+  --nb-text-dim: #94a3b8;
+  
+  --nb-radius-lg: 32px;
+  --nb-radius-md: 20px;
+  --nb-radius-sm: 12px;
+  
+  --nb-transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  
+  /* Wallet Shell Variables */
   --wallet-width: 440px;
   
-  /* Overrides for main.css variables */
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-elevated: #f1f5f9;
-  --bg-input: #ffffff;
-  
-  --border-primary: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --border-active: #3b82f6;
-  
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  /* Overrides for legacy integration */
+  --bg-primary: transparent;
+  --bg-card: var(--nb-glass-heavy);
+  --border-primary: var(--nb-glass-border);
+  --text-primary: #ffffff;
+  --text-muted: var(--nb-text-dim);
 }
 
 @media (max-width: 480px) {
   :root {
     --wallet-width: 100%;
-    --stitch-radius: 0;
+    --nb-radius-lg: 0;
   }
-  .wallet-shell {
-    padding: 0;
-  }
-  .wallet-container {
-    height: 100vh;
-    border: none;
-  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background-color: var(--stitch-bg-dark);
-  background-image: none;
-  color: var(--stitch-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   margin: 0;
+  background: var(--nb-bg-deep);
+  color: var(--nb-text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow-x: hidden;
 }
 
+/* Glassmorphism Utilities */
+.glass-effect {
+  background: var(--nb-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--nb-glass-border);
+}
+
+.glass-card {
+  background: var(--nb-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--nb-glass-border);
+  border-radius: var(--nb-radius-md);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Layout */
 .wallet-shell {
-  background: var(--stitch-bg-dark);
   min-height: 100vh;
+  background: var(--nb-bg-gradient);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 16px;
+  padding: 20px;
+  position: relative;
+}
+
+/* Animated Background Glows */
+.wallet-shell::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--nb-accent-glow) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wallet-shell::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: 15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .wallet-container {
   width: var(--wallet-width);
-  background: var(--stitch-surface);
-  border: 1px solid var(--stitch-surface-border);
-  border-radius: var(--stitch-radius);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-  transition: var(--stitch-transition);
-  position: relative;
-}
-
-.wallet-topbar {
-  background: var(--stitch-surface);
-  border-bottom: 1px solid var(--stitch-surface-border);
-  padding: 16px 20px;
-}
-
-.topbar-brand {
-  color: var(--stitch-text);
-  font-weight: 800;
-  letter-spacing: -1px;
-}
-
-.vault-selector-trigger {
-  background: var(--stitch-secondary);
-  border: 1px solid var(--stitch-surface-border);
-  border-radius: 12px;
-}
-
-.vault-avatar {
-  background: var(--stitch-surface);
-  border: 1px solid var(--stitch-surface-border);
-}
-
-.section-card {
-  background: var(--stitch-surface);
-  border: 1px solid var(--stitch-surface-border);
-  border-radius: 16px;
-}
-
-.claim-banner {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-}
-
-.wallet-input {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: var(--stitch-text);
-}
-
-.vault-status-pill.secured {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-color: #dcfce7;
-}
-
-@keyframes scanMove {
-  0% { transform: translateY(0); opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { transform: translateY(180px); opacity: 0; }
-}
-
-.detail-list {
+  height: 860px;
+  max-height: 95vh;
+  background: rgba(10, 15, 25, 0.4);
+  border: 1px solid var(--nb-glass-border);
+  border-radius: var(--nb-radius-lg);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 480px) {
+  .wallet-container {
+    height: 100vh;
+    max-height: 100vh;
+    border: none;
+  }
+}
+
+/* Premium Buttons */
+.nb-btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 9999px;
+  padding: 18px 32px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--nb-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--stitch-surface-border);
+.nb-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
 }
 
-.detail-item:last-child {
-  border-bottom: none;
+.nb-btn-secondary {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--nb-transition);
+  opacity: 0.7;
+}
+
+.nb-btn-secondary:hover {
+  opacity: 1;
+}
+
+/* Typography */
+.nb-title {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+}
+
+.nb-desc {
+  font-size: 15px;
+  color: var(--nb-text-dim);
+  line-height: 1.6;
+}
+
+/* Dashboard Elements */
+.nb-balance-large {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin: 12px 0;
+}
+
+.nb-action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.nb-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--nb-glass);
+  border: 1px solid var(--nb-glass-border);
+  padding: 16px 8px;
+  border-radius: var(--nb-radius-md);
+  transition: var(--nb-transition);
+}
+
+.nb-action-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--nb-accent);
+}
+
+.nb-action-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.nb-action-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nb-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: transparent;
+  border-bottom: 1px solid var(--nb-glass-border);
+  transition: var(--nb-transition);
+}
+
+.nb-list-item:hover {
+  background: var(--nb-glass);
+}
+
+.nb-list-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--nb-glass);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nb-accent);
+}
+
+.nb-list-info {
+  flex: 1;
+}
+
+.nb-list-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.nb-list-subtitle {
+  font-size: 12px;
+  color: var(--nb-text-dim);
+}
+
+.nb-list-value {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
 }

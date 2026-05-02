@@ -1,150 +1,66 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { Asterisk } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
-import ChainSwitcher from './ChainSwitcher'
-import {
-    Lock,
-    Shield,
-    Heart,
-    Zap,
-    Wallet,
-    ChevronLeft,
-    ChevronRight,
-    CircleDot
-} from 'lucide-react'
 
 interface ConnectScreenProps {
-    onConnect: () => void
-    wallets?: any[]
-    loading: boolean
-    error?: string
+    onConnect: () => void;
+    connecting?: boolean;
 }
 
-
-export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, loading, error }) => {
-
-
+export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connecting }) => {
     const { currentChain } = useChain()
 
     return (
-        <div className="wallet-shell">
-            <div className="wallet-container wallet-connect-screen">
-                {/* ======= TOP NAV BAR FOR CONNECT SCREEN ======= */}
-                <div className="wallet-topbar" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100, background: 'transparent', borderBottom: 'none' }}>
-                    <div className="topbar-left">
-                    </div>
-                    <div className="topbar-right">
-                        <ChainSwitcher />
-                        <div className="network-badge" style={{ borderColor: currentChain.color + '44' }}>
-                            <CircleDot className="network-dot" style={{ color: currentChain.color }} />
-                            <span>Testnet</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Gradient orb background */}
-                <div className="connect-orb connect-orb-1" />
-                <div className="connect-orb connect-orb-2" />
-                <div className="connect-orb connect-orb-3" />
-
-                <div className="connect-content" style={{ marginTop: '40px' }}>
-                    <div className="connect-logo-wrap">
-                        <div className="connect-logo-glow" />
-                        <img src="/logo.svg" alt="TrustVault³" className="connect-logo-img" />
-                    </div>
-
-                    <h1 className="connect-title">TrustVault<sup className="connect-title-sup">3</sup></h1>
-                    <p className="connect-subtitle">Multichain Inheritance Protocol</p>
-
-                    {/* ====== SECURITY VISUALIZATION ====== */}
-                    <div className="security-visualization" style={{ 
-                        margin: '32px 0', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center',
-                        position: 'relative',
-                        width: '100%'
-                    }}>
-                        <div className="security-shield-wrap" style={{
-                            width: '180px',
-                            height: '180px',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '1px solid var(--stitch-surface-border)',
-                            position: 'relative',
-                            boxShadow: '0 0 40px rgba(0, 0, 0, 0.2)'
-                        }}>
-                            <div className="security-shield-glow" style={{
-                                position: 'absolute',
-                                inset: '10px',
-                                background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%)',
-                                borderRadius: '50%'
-                            }} />
-                            <Shield size={80} color="var(--stitch-text)" strokeWidth={1.5} />
-                            
-                            {/* Scanning effect */}
-                            <div className="security-scan-line" style={{
-                                position: 'absolute',
-                                top: '0',
-                                left: '0',
-                                right: '0',
-                                height: '2px',
-                                background: 'linear-gradient(90deg, transparent, var(--stitch-accent), transparent)',
-                                animation: 'scanMove 3s ease-in-out infinite'
-                            }} />
-                        </div>
-                        
-                        <div className="security-badge" style={{
-                            marginTop: '24px',
-                            background: 'var(--stitch-surface)',
-                            border: '1px solid var(--stitch-surface-border)',
-                            padding: '8px 16px',
-                            borderRadius: '20px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            color: 'var(--stitch-text-dim)'
-                        }}>
-                            <Lock size={14} color="var(--accent-emerald)" />
-                            <span>Encrypted Multichain Vaults</span>
-                        </div>
-                    </div>
-
-                    <div className="connect-features">
-                        <div className="connect-feature">
-                            <Lock className="connect-feature-icon" />
-                            <span>Secure Vaults</span>
-                        </div>
-                        <div className="connect-feature">
-                            <Heart className="connect-feature-icon" />
-                            <span>Heartbeat Timer</span>
-                        </div>
-                        <div className="connect-feature">
-                            <Zap className="connect-feature-icon" />
-                            <span>Auto Release</span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={onConnect}
-                        className="connect-btn"
-                        disabled={loading}
-                    >
-                        <Wallet className="connect-btn-icon" />
-                        <span>{loading ? 'Connecting...' : 'Connect Wallet'}</span>
-                    </button>
-
-                    {error && <p className="connect-error">{error}</p>}
-
-                    <p className="connect-footer">
-                        Secured on 20+ Blockchains
-                    </p>
+        <div className="connect-screen" style={{ 
+            height: '100%', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'flex-end', 
+            padding: '40px 32px',
+            background: 'radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 60%)'
+        }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ 
+                    width: '80px', 
+                    height: '80px', 
+                    background: 'rgba(255,255,255,0.05)', 
+                    borderRadius: '24px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginBottom: '40px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <Asterisk size={48} strokeWidth={1.5} />
                 </div>
             </div>
+
+            <div style={{ marginBottom: '48px' }}>
+                <h1 className="nb-title" style={{ marginBottom: '16px' }}>
+                    TOMORROW'S<br />TRUST IS HERE
+                </h1>
+                <p className="nb-desc" style={{ maxWidth: '300px' }}>
+                    Experience decentralized security reimagined for the digital age — secure, intuitive, and built for your future on {currentChain.name}.
+                </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <button className="nb-btn-primary" onClick={onConnect}>
+                    {connecting ? (
+                        <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid rgba(0,0,0,0.1)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                    ) : (
+                        <span>Become a Vault Owner</span>
+                    )}
+                </button>
+                
+                <button className="nb-btn-secondary" onClick={onConnect}>
+                    I Am Already a Customer
+                </button>
+            </div>
+
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+            `}</style>
         </div>
     )
 }

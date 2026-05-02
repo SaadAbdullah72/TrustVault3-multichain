@@ -1,4 +1,4 @@
-import { Shield, ChevronDown, CheckCircle, X, Plus, RefreshCw, Copy } from 'lucide-react'
+import { Shield, ChevronDown, CheckCircle, X, Plus, RefreshCw, Copy, Asterisk, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export interface VaultDropdownProps {
@@ -45,82 +45,79 @@ export default function VaultDropdown({
     const { t } = useTranslation()
 
     return (
-        <div className="wallet-account-header">
-            <div className="vault-selector-trigger" onClick={() => setShowVaultSelector(!showVaultSelector)}>
-                <div className="vault-avatar">
-                    <Shield className="vault-avatar-icon" />
-                </div>
-                <div className="vault-selector-info">
-                    <span className="vault-selector-label">
-                        {selectedVaultId ? `Vault #${selectedVaultId.slice(0, 8)}...` : 'No Vault Selected'}
-                    </span>
-                    <span className="vault-selector-addr">
-                        {vaultAddress ? formatAddr(vaultAddress) : 'Select or create a vault'}
-                    </span>
-                </div>
-                <ChevronDown className={`vault-selector-chevron ${showVaultSelector ? 'rotated' : ''}`} />
-            </div>
-
+        <div style={{ position: 'relative', zIndex: 50 }}>
             {showVaultSelector && (
-                <div className="vault-selector-dropdown">
-                    <div className="vault-dropdown-header">
-                        <span>{t('my_vaults', { chain: currentChain.name })}</span>
-                        <button onClick={handleManualScan} className="vault-dropdown-scan" disabled={uiStatus.loading || isDiscovering}>
-                            <RefreshCw className={`vault-dropdown-scan-icon ${isDiscovering ? 'spinning' : ''}`} />
-                        </button>
+                <div className="glass-effect" style={{ 
+                    position: 'absolute', 
+                    top: '0', 
+                    left: '24px', 
+                    right: '24px', 
+                    borderRadius: '24px', 
+                    padding: '24px',
+                    boxShadow: '0 40px 80px rgba(0,0,0,0.8)',
+                    zIndex: 100
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '1px' }}>MY VAULTS</span>
+                        <button onClick={() => setShowVaultSelector(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={20} /></button>
                     </div>
-                    {userVaults.length === 0 && (
-                        <div className="vault-dropdown-empty">
-                            <Shield className="vault-dropdown-empty-icon" />
-                            <span>{t('no_vault', { chain: currentChain.name })}</span>
-                        </div>
-                    )}
-                    {userVaults.map(id => (
-                        <div key={id} className={`vault-dropdown-row ${selectedVaultId === id ? 'active' : ''}`}>
-                            <button
-                                className="vault-dropdown-item"
-                                onClick={() => { setSelectedVaultId(id); setShowVaultSelector(false) }}
-                            >
-                                <div className="vault-dropdown-item-avatar">
-                                    <Shield className="vault-dropdown-item-icon" />
-                                </div>
-                                <div className="vault-dropdown-item-info">
-                                    <div className="vault-dropdown-item-header">
-                                        <span className="vault-dropdown-item-name">Vault #{id.length > 12 ? id.slice(0, 8) + '...' : id}</span>
-                                        {vaultRoles[id] && (
-                                            <span className={`vault-dropdown-item-badge ${vaultRoles[id]}`}>
-                                                {vaultRoles[id]}
-                                            </span>
-                                        )}
+
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {userVaults.map(id => (
+                            <div key={id} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <button 
+                                    onClick={() => { setSelectedVaultId(id); setShowVaultSelector(false) }}
+                                    style={{ 
+                                        flex: 1, 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '16px', 
+                                        padding: '16px', 
+                                        background: selectedVaultId === id ? 'var(--nb-glass)' : 'transparent',
+                                        border: `1px solid ${selectedVaultId === id ? 'var(--nb-accent)' : 'var(--nb-glass-border)'}`,
+                                        borderRadius: '16px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        color: '#fff'
+                                    }}
+                                >
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--nb-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Shield size={20} color={selectedVaultId === id ? 'var(--nb-accent)' : '#fff'} />
                                     </div>
-                                    <span className="vault-dropdown-item-addr">{formatAddr(adapter.getVaultAddress(id))}</span>
-                                </div>
-                                {selectedVaultId === id && <CheckCircle className="vault-dropdown-item-check" />}
-                            </button>
-                            <button
-                                className="vault-dropdown-delete"
-                                onClick={(e) => { e.stopPropagation(); handleDeleteVaultId(id) }}
-                                title="Remove from history"
-                            >
-                                <X size={14} />
-                            </button>
-                        </div>
-                    ))}
-                    <div className="vault-dropdown-actions">
-                        <button className="vault-dropdown-action-btn" onClick={() => { setShowCreateForm(true); setShowVaultSelector(false) }}>
-                            <Plus className="vault-dropdown-action-icon" />
-                            <span>{t('create_vault')}</span>
-                        </button>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '13px', fontWeight: 700 }}>Vault #{id.slice(0, 8)}</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--nb-text-dim)' }}>{formatAddr(adapter.getVaultAddress(id))}</div>
+                                    </div>
+                                    {selectedVaultId === id && <CheckCircle size={16} color="var(--nb-accent)" />}
+                                </button>
+                                <button onClick={() => handleDeleteVaultId(id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
+                            </div>
+                        ))}
                     </div>
+
+                    <button 
+                        onClick={() => { setShowCreateForm(true); setShowVaultSelector(false) }}
+                        style={{ width: '100%', marginTop: '24px', padding: '16px', borderRadius: '16px', border: '1px dashed var(--nb-glass-border)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
+                    >
+                        <Plus size={18} />
+                        Create New Vault
+                    </button>
                 </div>
             )}
 
-            <div className="wallet-address-bar">
-                <div className="wallet-address-dot" style={{ background: currentChain.color }} />
-                <span className="wallet-address-text">{walletAddress ? formatAddr(walletAddress) : ''}</span>
-                <button className="wallet-address-copy" onClick={() => copyToClipboard(walletAddress!)} title="Copy Address">
-                    {copied ? <CheckCircle className="copy-icon copied" /> : <Copy className="copy-icon" />}
-                </button>
+            <div style={{ padding: '0 24px', marginTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--nb-glass)', borderRadius: '14px', border: '1px solid var(--nb-glass-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--nb-text-dim)' }}>Connected Wallet</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700 }}>{walletAddress ? formatAddr(walletAddress) : ''}</span>
+                        <button onClick={() => copyToClipboard(walletAddress!)} style={{ background: 'none', border: 'none', color: 'var(--nb-text-dim)', cursor: 'pointer' }}>
+                            {copied ? <CheckCircle size={14} color="#22c55e" /> : <Copy size={14} />}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     )
