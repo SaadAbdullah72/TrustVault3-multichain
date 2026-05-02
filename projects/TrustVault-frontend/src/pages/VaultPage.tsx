@@ -113,6 +113,20 @@ export default function VaultPage() {
 
     const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
+    const handleCreateVaultSubmit = async () => {
+        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (vaultId) => {
+            setSelectedVaultId(vaultId)
+            setShowCreateForm(false)
+        })
+    }
+
+    const handleWithdrawAction = async () => {
+        const amountStr = window.prompt(`Enter amount to withdraw (${currentChain.nativeCurrency.symbol}):`)
+        if (amountStr) {
+            await handleWithdraw(selectedVaultId!, parseFloat(amountStr), loadVaultState)
+        }
+    }
+
     if (!isConnected) {
         return (
             <div className="wallet-shell">
