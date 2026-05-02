@@ -92,8 +92,6 @@ export default function VaultPage() {
     const [showVaultSelector, setShowVaultSelector] = useState(false)
     const [copied, setCopied] = useState(false)
     const [showBalanceHidden, setShowBalanceHidden] = useState(false)
-    const [tilt, setTilt] = useState({ x: 0, y: 0 })
-    const [isInteracting, setIsInteracting] = useState(false)
 
     // --- Derived State ---
     const vaultAddress = useMemo(() => selectedVaultId ? adapter.getVaultAddress(selectedVaultId) : '', [selectedVaultId, adapter])
@@ -155,28 +153,6 @@ export default function VaultPage() {
         if (selectedVaultId === id) {
             setSelectedVaultId(updated.length > 0 ? updated[0] : null)
         }
-    }
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const rotateX = (((e.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2)) * -15
-        const rotateY = (((e.clientX - rect.left) - (rect.width / 2)) / (rect.width / 2)) * 15
-        setTilt({ x: rotateX, y: rotateY })
-        setIsInteracting(true)
-    }
-
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const touch = e.touches[0]
-        const rotateX = (((touch.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2)) * -20
-        const rotateY = (((touch.clientX - rect.left) - (rect.width / 2)) / (rect.width / 2)) * 20
-        setTilt({ x: rotateX, y: rotateY })
-        setIsInteracting(true)
-    }
-
-    const resetTilt = () => {
-        setTilt({ x: 0, y: 0 })
-        setIsInteracting(false)
     }
 
     if (!isConnected) {

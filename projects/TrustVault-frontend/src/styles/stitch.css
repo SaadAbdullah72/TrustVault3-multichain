@@ -1,31 +1,42 @@
-/* Vibe Coded / Google Stitch Design System */
+/* Professional SaaS Design System */
 
 :root {
-  --stitch-bg-dark: #0a0a0c;
-  --stitch-surface: rgba(20, 20, 24, 0.65);
-  --stitch-surface-border: rgba(255, 255, 255, 0.08);
-  --stitch-primary: #8a2be2;
-  --stitch-secondary: #00d2ff;
-  --stitch-accent: #ff007f;
-  --stitch-glow: rgba(138, 43, 226, 0.4);
-  --stitch-glow-secondary: rgba(0, 210, 255, 0.4);
-  --stitch-text: #ffffff;
-  --stitch-text-dim: #a0a0a8;
-  --stitch-radius: 20px;
-  --stitch-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Minimalist Zinc/Slate Theme */
+  --stitch-bg-dark: #09090b; /* Zinc 950 */
+  --stitch-surface: #18181b; /* Zinc 900 */
+  --stitch-surface-border: #27272a; /* Zinc 800 */
+  --stitch-primary: #fafafa; /* Zinc 50 */
+  --stitch-primary-text: #09090b; 
+  --stitch-secondary: #27272a; /* Zinc 800 */
+  --stitch-accent: #3b82f6; /* Blue 500 */
+  --stitch-text: #fafafa;
+  --stitch-text-dim: #a1a1aa; /* Zinc 400 */
+  --stitch-radius: 12px;
+  --stitch-transition: all 0.2s ease-in-out;
+  
+  /* Overrides for main.css variables */
+  --bg-primary: #09090b;
+  --bg-secondary: #18181b;
+  --bg-card: #18181b;
+  --bg-elevated: #27272a;
+  --bg-input: #09090b;
+  
+  --border-primary: #27272a;
+  --border-hover: #3f3f46;
+  --border-active: #3b82f6;
+  
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 body {
   background-color: var(--stitch-bg-dark);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(138, 43, 226, 0.15), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(0, 210, 255, 0.15), transparent 25%);
+  background-image: none; /* Remove radial gradients */
   color: var(--stitch-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .wallet-shell {
-  background: transparent;
+  background: var(--stitch-bg-dark);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -35,75 +46,70 @@ body {
 
 .wallet-container {
   background: var(--stitch-surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--stitch-surface-border);
-  border-radius: calc(var(--stitch-radius) + 8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: var(--stitch-radius);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   transition: var(--stitch-transition);
 }
 
 .wallet-container:hover {
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 
-              0 0 40px var(--stitch-glow),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 
 .wallet-topbar {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--stitch-bg-dark);
   border-bottom: 1px solid var(--stitch-surface-border);
   padding: 16px 24px;
 }
 
 .topbar-brand {
-  background: linear-gradient(135deg, var(--stitch-text), var(--stitch-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  color: var(--stitch-text);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 .vault-selector-trigger {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--stitch-bg-dark);
   border: 1px solid var(--stitch-surface-border);
-  border-radius: var(--stitch-radius);
+  border-radius: 8px;
   transition: var(--stitch-transition);
 }
 
 .vault-selector-trigger:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  background: var(--stitch-surface);
+  border-color: var(--border-hover);
+  transform: none;
+  box-shadow: none;
 }
 
 .vault-avatar {
-  background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
-  box-shadow: 0 0 15px var(--stitch-glow);
+  background: var(--stitch-secondary);
+  box-shadow: none;
+  border: 1px solid var(--stitch-surface-border);
 }
 
 .wallet-address-bar {
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--stitch-bg-dark);
   border: 1px solid var(--stitch-surface-border);
-  border-radius: 50px;
+  border-radius: 8px;
 }
 
 .section-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--stitch-surface);
   border: 1px solid var(--stitch-surface-border);
-  border-radius: var(--stitch-radius);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  box-shadow: none;
+  backdrop-filter: none;
   transition: var(--stitch-transition);
 }
 
 .section-card:hover {
-  transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.1);
+  transform: none;
+  border-color: var(--border-hover);
+  box-shadow: none;
 }
 
 .quick-action-btn {
@@ -112,85 +118,199 @@ body {
 }
 
 .quick-action-btn:hover {
-  transform: scale(1.05) translateY(-5px);
+  transform: translateY(-2px);
 }
 
 .quick-action-circle {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  background: var(--stitch-secondary);
   border: 1px solid var(--stitch-surface-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: none;
   transition: var(--stitch-transition);
 }
 
 .quick-action-btn:hover .quick-action-circle {
-  border-color: var(--stitch-secondary);
-  box-shadow: 0 0 20px var(--stitch-glow-secondary);
-  background: rgba(0, 210, 255, 0.1);
+  border-color: var(--border-hover);
+  background: var(--border-hover);
+  box-shadow: none;
 }
 
 .claim-banner {
-  background: linear-gradient(90deg, rgba(138, 43, 226, 0.2), rgba(0, 210, 255, 0.2));
-  border: 1px solid var(--stitch-primary);
-  border-radius: var(--stitch-radius);
-  box-shadow: 0 0 30px var(--stitch-glow);
-  animation: pulse-glow 2s infinite alternate;
-}
-
-@keyframes pulse-glow {
-  0% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.3); }
-  100% { box-shadow: 0 0 40px rgba(0, 210, 255, 0.5); }
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--stitch-accent);
+  border-radius: 8px;
+  box-shadow: none;
+  animation: none;
 }
 
 .wallet-form-card {
   background: var(--stitch-surface);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 50px var(--stitch-glow);
+  border: 1px solid var(--stitch-surface-border);
+  box-shadow: var(--shadow-lg);
+  border-radius: 12px;
 }
 
 .wallet-form-submit {
-  background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
+  background: var(--stitch-primary);
+  color: var(--stitch-primary-text);
   border: none;
-  border-radius: 12px;
-  color: white;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px var(--stitch-glow);
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  box-shadow: none;
   transition: var(--stitch-transition);
 }
 
 .wallet-form-submit:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--stitch-glow-secondary);
+  transform: none;
+  background: #e4e4e7; /* Zinc 200 */
+  box-shadow: none;
 }
 
 .wallet-input {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--stitch-bg-dark);
   border: 1px solid var(--stitch-surface-border);
   color: var(--stitch-text);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .wallet-input:focus {
-  border-color: var(--stitch-secondary);
-  box-shadow: 0 0 10px var(--stitch-glow-secondary);
+  border-color: var(--stitch-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   outline: none;
 }
 
 .status-pill, .vault-status-pill {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--stitch-secondary);
   border: 1px solid var(--stitch-surface-border);
-  border-radius: 50px;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--stitch-text);
+}
+
+.vault-status-pill.secured {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80; /* Green 400 */
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.vault-status-pill.expired {
+  background: rgba(234, 179, 8, 0.1);
+  color: #facc15; /* Yellow 400 */
+  border-color: rgba(234, 179, 8, 0.2);
+}
+
+.vault-status-pill.released {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171; /* Red 400 */
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+.vault-avatar-icon {
+  animation: none;
 }
 
-.vault-avatar-icon {
-  animation: float 4s ease-in-out infinite;
+/* Remove glowing network badges */
+.network-badge {
+  background: var(--stitch-secondary) !important;
+  border: 1px solid var(--stitch-surface-border) !important;
+  color: var(--stitch-text) !important;
+  border-radius: 8px !important;
+}
+
+.network-dot {
+  animation: none !important;
+}
+
+.topbar-logo {
+  background: var(--stitch-primary) !important;
+}
+
+.topbar-logo-icon {
+  color: var(--stitch-primary-text) !important;
+}
+
+/* Clean up card tab showcase */
+.card-tab-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.card-tab-image-wrap {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.card-tab-inner {
+  transform: none !important;
+  transition: none !important;
+}
+
+.card-tab-image {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  height: auto;
+}
+
+.card-tab-info {
+  background: var(--stitch-bg-dark);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--stitch-surface-border);
+}
+
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--stitch-surface-border);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-label {
+  color: var(--stitch-text-dim);
+  font-size: 13px;
+}
+
+.detail-value {
+  color: var(--stitch-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.section-header {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--stitch-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.section-header-icon {
+  color: var(--stitch-text-dim);
+  width: 16px;
+  height: 16px;
 }
