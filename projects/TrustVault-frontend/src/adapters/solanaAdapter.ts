@@ -452,8 +452,12 @@ export class SolanaAdapter implements ChainAdapter {
                 lastHeartbeat: account.lastHeartbeat.toNumber(),
                 released: account.released
             }
-        } catch (e) { 
-            console.error('[SolanaAdapter] fetchVaultState failed for ID:', vaultId, e)
+        } catch (e: any) { 
+            if (e.message?.includes('Account does not exist')) {
+                console.warn('[SolanaAdapter] Vault account not yet initialized or has no data:', vaultId)
+            } else {
+                console.error('[SolanaAdapter] fetchVaultState failed for ID:', vaultId, e)
+            }
             return null 
         }
     }

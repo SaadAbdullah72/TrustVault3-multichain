@@ -1,5 +1,5 @@
 import React from 'react'
-import { Asterisk, ChevronRight, Shield, Globe, Lock } from 'lucide-react'
+import { Asterisk, ChevronRight, Shield, Lock } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import ChainSwitcher from './ChainSwitcher'
 
@@ -16,18 +16,18 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
             height: '100%', 
             display: 'flex', 
             flexDirection: 'column', 
-            background: '#fff',
+            background: '#FFFFFF',
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Background Accent */}
+            {/* Primary Gradient Header (Strictly Following User Config) */}
             <div style={{ 
                 position: 'absolute', 
                 top: 0, 
                 left: 0, 
                 right: 0, 
-                height: '45%', 
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                height: '42%', 
+                background: 'linear-gradient(180deg, #1E3C72 0%, #2A5298 100%)',
                 zIndex: 0
             }} />
 
@@ -36,7 +36,7 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
                 <ChainSwitcher />
             </div>
 
-            {/* Premium Asset Visual (Replaced Debit Card) */}
+            {/* Premium Asset Visual */}
             <div style={{ 
                 flex: 1, 
                 display: 'flex', 
@@ -44,68 +44,72 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
                 justifyContent: 'center', 
                 alignItems: 'center',
                 zIndex: 10,
-                padding: '20px'
+                padding: '20px',
+                marginTop: '20px'
             }}>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ 
                         position: 'absolute', 
-                        width: '280px', 
-                        height: '280px', 
-                        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%)',
-                        filter: 'blur(40px)',
-                        animation: 'pulse 4s infinite ease-in-out'
+                        width: '300px', 
+                        height: '300px', 
+                        background: 'radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(40px)'
                     }}></div>
                     <img 
                         src="/premium_vault_shield_3d_1777732196171.png" 
                         alt="Secure Vault" 
                         style={{ 
-                            width: '260px', 
+                            width: '240px', 
                             height: 'auto', 
                             zIndex: 1,
-                            filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))'
+                            filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))'
                         }} 
                     />
                 </div>
             </div>
 
-            {/* Bottom Content Area - Fixed Visibility */}
+            {/* Bottom Content Area (White Card Feel) */}
             <div style={{ 
-                padding: '32px 24px 40px', 
-                background: '#fff', 
+                padding: '40px 32px 48px', 
+                background: '#FFFFFF', 
                 zIndex: 10,
                 borderRadius: '32px 32px 0 0',
-                marginTop: '-32px',
+                marginTop: '-40px',
                 textAlign: 'center',
-                boxShadow: '0 -20px 40px rgba(0,0,0,0.05)'
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.08)'
             }}>
-                <div style={{ width: '40px', height: '4px', background: '#f1f5f9', borderRadius: '2px', margin: '0 auto 24px' }} />
+                <div style={{ width: '44px', height: '5px', background: '#E5E5EA', borderRadius: '3px', margin: '0 auto 32px' }} />
                 
-                <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#000', marginBottom: '12px', letterSpacing: '-1px', lineHeight: 1.1 }}>
+                <h1 style={{ fontSize: '32px', fontWeight: 800, color: '#1C1C1E', marginBottom: '16px', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
                     SECURE YOUR<br />DIGITAL LEGACY
                 </h1>
                 
-                <p style={{ fontSize: '14px', color: '#64748b', fontWeight: 500, lineHeight: 1.5, marginBottom: '32px', maxWidth: '280px', margin: '0 auto 32px' }}>
-                    The decentralized inheritance protocol for <b>{currentChain.name}</b>.
+                <p style={{ fontSize: '15px', color: '#8E8E93', fontWeight: 500, lineHeight: 1.6, marginBottom: '40px', maxWidth: '300px', margin: '0 auto 40px' }}>
+                    The world's first decentralized inheritance protocol for <b>{currentChain.name}</b>.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <button 
                         className="nb-btn-primary" 
                         onClick={onConnect}
                         disabled={connecting}
-                        style={{ width: '100%', padding: '18px', fontSize: '16px' }}
+                        style={{ width: '100%', padding: '20px', background: '#3B82F6', fontSize: '17px', fontWeight: 700 }}
                     >
                         {connecting ? (
-                            <div className="spinner" style={{ width: '20px', height: '20px' }}></div>
+                            <div className="spinner" style={{ width: '22px', height: '22px', borderTopColor: '#fff' }}></div>
                         ) : (
                             <>
-                                <span>Protect My Assets</span>
-                                <ChevronRight size={18} />
+                                <span>Get Started Now</span>
+                                <ChevronRight size={20} />
                             </>
                         )}
                     </button>
                     
-                    <button className="nb-btn-secondary" style={{ width: '100%', padding: '16px', border: 'none', background: '#f8fafc', color: '#64748b' }} onClick={onConnect}>
+                    <button 
+                        className="nb-btn-secondary" 
+                        style={{ width: '100%', padding: '18px', border: 'none', background: '#F2F2F7', color: '#8E8E93', fontWeight: 600 }} 
+                        onClick={onConnect}
+                    >
                         Access Existing Vault
                     </button>
                 </div>
@@ -113,11 +117,6 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
-                @keyframes pulse {
-                    0% { transform: scale(1); opacity: 0.5; }
-                    50% { transform: scale(1.1); opacity: 0.8; }
-                    100% { transform: scale(1); opacity: 0.5; }
-                }
             `}</style>
         </div>
     )

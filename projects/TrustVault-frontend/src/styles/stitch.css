@@ -1,22 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --nb-bg: #f8fafc;
-  --nb-header-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  --nb-accent: #38bdf8;
-  --nb-text: #0f172a;
-  --nb-text-dim: #64748b;
-  --nb-glass: rgba(255, 255, 255, 0.95);
-  --nb-glass-border: rgba(0, 0, 0, 0.05);
-  --nb-btn-bg: #0f172a;
-  --nb-btn-text: #ffffff;
-  --nb-radius: 24px;
+  /* Strictly following user's premium theme config */
+  --nb-primary-gradient: linear-gradient(180deg, #1E3C72 0%, #2A5298 100%);
+  --nb-bg: #F2F2F7;
+  --nb-card: #FFFFFF;
+  
+  --nb-text-primary: #1C1C1E;
+  --nb-text-secondary: #8E8E93;
+  --nb-text-muted: #C7C7CC;
+  --nb-text-light: #FFFFFF;
+  
+  --nb-accent: #3B82F6;
+  --nb-success: #16C784;
+  --nb-error: #FF3B30;
+  --nb-warning: #FF9500;
+  
+  --nb-radius-lg: 20px;
+  --nb-radius-md: 16px;
+  --nb-radius-sm: 12px;
+  
+  --nb-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
 body {
-  background: #f1f5f9;
-  color: var(--nb-text);
-  font-family: 'Inter', sans-serif;
+  background: var(--nb-bg);
+  color: var(--nb-text-primary);
+  font-family: 'Inter', -apple-system, sans-serif;
   margin: 0;
   height: 100vh;
   overflow: hidden;
@@ -37,8 +47,8 @@ body {
   max-width: 440px;
   height: 100%;
   max-height: 880px;
-  background: var(--nb-bg);
-  border-radius: 40px;
+  background: var(--nb-card);
+  border-radius: 32px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(0,0,0,0.1);
@@ -55,85 +65,74 @@ body {
   }
 }
 
-/* Premium Typography from Reference */
 .nb-title {
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -1px;
-  color: #fff;
 }
 
 .nb-balance-large {
   font-size: 48px;
   font-weight: 800;
-  letter-spacing: -1.5px;
-  color: var(--nb-text);
-  margin-bottom: 8px;
+  letter-spacing: -2px;
+  color: var(--nb-text-primary);
 }
 
-/* List Items like the "Transactions" in reference */
-.nb-list-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 20px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-  transition: transform 0.2s;
-  cursor: pointer;
-}
-
-.nb-list-item:active { transform: scale(0.98); }
-
-.nb-list-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--nb-text);
-}
-
-.nb-list-info { flex: 1; }
-.nb-list-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
-.nb-list-subtitle { font-size: 12px; color: #94a3b8; font-weight: 500; }
-.nb-list-value { font-size: 15px; font-weight: 700; color: #1e293b; }
-
-/* Buttons from Reference */
 .nb-btn-primary {
-  background: #000;
+  background: var(--nb-accent);
   color: #fff;
   border: none;
   padding: 18px 24px;
-  border-radius: 18px;
-  font-weight: 700;
+  border-radius: var(--nb-radius-md);
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nb-btn-primary:active { transform: scale(0.97); }
+
+.nb-btn-secondary {
+  background: #f2f2f7;
+  color: var(--nb-text-primary);
+  border: 1px solid #e5e5ea;
+  padding: 16px 24px;
+  border-radius: var(--nb-radius-md);
+  font-weight: 600;
   font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-.nb-btn-secondary {
-  background: #fff;
-  color: #000;
-  border: 1px solid #e2e8f0;
-  padding: 16px 24px;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 14px;
+.nb-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--nb-card);
+  border-radius: var(--nb-radius-md);
+  margin-bottom: 12px;
+  border: 1px solid #f2f2f7;
+  transition: all 0.2s;
+}
+
+.nb-list-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f2f2f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  cursor: pointer;
+  color: var(--nb-accent);
 }
 
 .spinner {
