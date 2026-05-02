@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Wallet, Timer, FileText, Copy, Heart, Unlock, ArrowUpRight, Asterisk, MoreHorizontal, Search, Bell, MessageCircle } from 'lucide-react'
+import { Eye, EyeOff, Shield, Wallet, Timer, FileText, Copy, Heart, Unlock, ArrowUpRight, Asterisk, MoreHorizontal, Search, Bell, MessageCircle, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
 
