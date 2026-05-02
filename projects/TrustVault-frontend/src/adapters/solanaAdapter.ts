@@ -370,6 +370,9 @@ export class SolanaAdapter implements ChainAdapter {
     }
 
     async heartbeat(vaultId: string): Promise<string> {
+        if (!vaultId || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) {
+            throw new Error(`Invalid Solana Vault ID: ${vaultId}`);
+        }
         const provider = new anchor.AnchorProvider(this.connection, this.wallet, {})
         const programId = new PublicKey(this.chain.testnet.factoryAddress!)
         const program = new anchor.Program({ ...idl, address: programId.toBase58() } as any, provider)
@@ -382,6 +385,9 @@ export class SolanaAdapter implements ChainAdapter {
     }
 
     async withdraw(vaultId: string, amount: number): Promise<string> {
+        if (!vaultId || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) {
+            throw new Error(`Invalid Solana Vault ID: ${vaultId}`);
+        }
         const provider = new anchor.AnchorProvider(this.connection, this.wallet, {})
         const programId = new PublicKey(this.chain.testnet.factoryAddress!)
         const program = new anchor.Program({ ...idl, address: programId.toBase58() } as any, provider)
@@ -394,6 +400,9 @@ export class SolanaAdapter implements ChainAdapter {
     }
 
     async autoRelease(vaultId: string): Promise<string> {
+        if (!vaultId || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) {
+            throw new Error(`Invalid Solana Vault ID: ${vaultId}`);
+        }
         const provider = new anchor.AnchorProvider(this.connection, this.wallet, {})
         const programId = new PublicKey(this.chain.testnet.factoryAddress!)
         const program = new anchor.Program({ ...idl, address: programId.toBase58() } as any, provider)
@@ -406,6 +415,9 @@ export class SolanaAdapter implements ChainAdapter {
     }
 
     async deposit(vaultId: string, amount: number): Promise<string> {
+        if (!vaultId || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) {
+            throw new Error(`Invalid Solana Vault ID: ${vaultId}`);
+        }
         const provider = new anchor.AnchorProvider(this.connection, this.wallet, {})
         const programId = new PublicKey(this.chain.testnet.factoryAddress!)
         const program = new anchor.Program({ ...idl, address: programId.toBase58() } as any, provider)
