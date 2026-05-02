@@ -463,16 +463,20 @@ export class SolanaAdapter implements ChainAdapter {
     }
 
     async getVaultBalance(vaultId: string): Promise<number> {
-        // Validate if vaultId is a valid base58 string first
-        if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) {
-            console.warn('[SolanaAdapter] Invalid Solana address for balance, returning 0:', vaultId)
+        if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(vaultId)) return 0
+
+        try {
+            const balance = await this.connection.getBalance(new PublicKey(vaultId))
+            const solBalance = balance / LAMPORTS_PER_SOL
+            
+            // The user wants to see exactly what they deposited. 
+            // PDA accounts have a tiny rent-exempt minimum (~0.002 SOL).
+            // We subtract a small epsilon so they see their exact deposit (e.g. 1.0 instead of 1.002)
+            const rentExemptMin = 0.00203928 // Approx rent for 89 bytes
+            return Math.max(0, solBalance - rentExemptMin)
+        } catch (e) {
             return 0
         }
-
-        const balance = await this.connection.getBalance(new PublicKey(vaultId))
-        const solBalance = balance / LAMPORTS_PER_SOL
-        // Subtract 0.15 SOL buffer (rent-exempt minimum) if it exists, to match user expectation
-        return Math.max(0, solBalance - 0.15)
     }
 
     getVaultAddress(vaultId: string): string { return vaultId }
