@@ -1,5 +1,5 @@
 import React from 'react'
-import { Asterisk, ChevronRight, Shield, Globe } from 'lucide-react'
+import { Asterisk, ChevronRight, Shield, Globe, Lock } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import ChainSwitcher from './ChainSwitcher'
 
@@ -20,23 +20,23 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Background Accent from Reference */}
+            {/* Background Accent */}
             <div style={{ 
                 position: 'absolute', 
                 top: 0, 
                 left: 0, 
                 right: 0, 
-                height: '40%', 
+                height: '45%', 
                 background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
                 zIndex: 0
             }} />
 
             {/* Top Network Selector */}
-            <div style={{ position: 'absolute', top: '32px', right: '32px', zIndex: 20 }}>
+            <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 20 }}>
                 <ChainSwitcher />
             </div>
 
-            {/* Premium Card Visual like Reference */}
+            {/* Premium Asset Visual (Replaced Debit Card) */}
             <div style={{ 
                 flex: 1, 
                 display: 'flex', 
@@ -44,78 +44,80 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
                 justifyContent: 'center', 
                 alignItems: 'center',
                 zIndex: 10,
-                padding: '40px'
+                padding: '20px'
             }}>
-                <div style={{ 
-                    width: '240px', 
-                    height: '340px', 
-                    background: 'linear-gradient(145deg, #1e293b, #000)', 
-                    borderRadius: '32px', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    boxShadow: '0 40px 80px rgba(0,0,0,0.3)',
-                    position: 'relative',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                    <Asterisk size={120} color="#fff" strokeWidth={1} />
-                    <div style={{ position: 'absolute', bottom: '32px', right: '32px', opacity: 0.8 }}>
-                        <span style={{ color: '#fff', fontSize: '14px', fontWeight: 700, fontStyle: 'italic' }}>Debit</span>
-                    </div>
-                    <div style={{ position: 'absolute', bottom: '32px', left: '32px', opacity: 0.4 }}>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff' }}></div>
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff', marginLeft: '-10px' }}></div>
-                        </div>
-                    </div>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ 
+                        position: 'absolute', 
+                        width: '280px', 
+                        height: '280px', 
+                        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(40px)',
+                        animation: 'pulse 4s infinite ease-in-out'
+                    }}></div>
+                    <img 
+                        src="/premium_vault_shield_3d_1777732196171.png" 
+                        alt="Secure Vault" 
+                        style={{ 
+                            width: '260px', 
+                            height: 'auto', 
+                            zIndex: 1,
+                            filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))'
+                        }} 
+                    />
                 </div>
             </div>
 
-            {/* Bottom Content Area */}
+            {/* Bottom Content Area - Fixed Visibility */}
             <div style={{ 
-                padding: '0 32px 48px', 
+                padding: '32px 24px 40px', 
                 background: '#fff', 
                 zIndex: 10,
-                borderRadius: '40px 40px 0 0',
-                marginTop: '-40px',
-                textAlign: 'center'
+                borderRadius: '32px 32px 0 0',
+                marginTop: '-32px',
+                textAlign: 'center',
+                boxShadow: '0 -20px 40px rgba(0,0,0,0.05)'
             }}>
-                <div style={{ width: '40px', height: '6px', background: '#f1f5f9', borderRadius: '3px', margin: '16px auto 32px' }} />
+                <div style={{ width: '40px', height: '4px', background: '#f1f5f9', borderRadius: '2px', margin: '0 auto 24px' }} />
                 
-                <h1 style={{ fontSize: '36px', fontWeight: 900, color: '#000', marginBottom: '16px', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
+                <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#000', marginBottom: '12px', letterSpacing: '-1px', lineHeight: 1.1 }}>
                     SECURE YOUR<br />DIGITAL LEGACY
                 </h1>
                 
-                <p style={{ fontSize: '15px', color: '#64748b', fontWeight: 500, lineHeight: 1.6, marginBottom: '40px', maxWidth: '300px', margin: '0 auto 40px' }}>
-                    The world's first decentralized inheritance protocol for <b>{currentChain.name}</b>.
+                <p style={{ fontSize: '14px', color: '#64748b', fontWeight: 500, lineHeight: 1.5, marginBottom: '32px', maxWidth: '280px', margin: '0 auto 32px' }}>
+                    The decentralized inheritance protocol for <b>{currentChain.name}</b>.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <button 
                         className="nb-btn-primary" 
                         onClick={onConnect}
                         disabled={connecting}
-                        style={{ width: '100%', padding: '20px' }}
+                        style={{ width: '100%', padding: '18px', fontSize: '16px' }}
                     >
                         {connecting ? (
                             <div className="spinner" style={{ width: '20px', height: '20px' }}></div>
                         ) : (
                             <>
-                                <span>Get Started</span>
+                                <span>Protect My Assets</span>
                                 <ChevronRight size={18} />
                             </>
                         )}
                     </button>
                     
-                    <button className="nb-btn-secondary" style={{ width: '100%', padding: '18px', border: 'none', background: '#f8fafc' }} onClick={onConnect}>
-                        Log In to Existing Vault
+                    <button className="nb-btn-secondary" style={{ width: '100%', padding: '16px', border: 'none', background: '#f8fafc', color: '#64748b' }} onClick={onConnect}>
+                        Access Existing Vault
                     </button>
                 </div>
             </div>
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 0.5; }
+                    50% { transform: scale(1.1); opacity: 0.8; }
+                    100% { transform: scale(1); opacity: 0.5; }
+                }
             `}</style>
         </div>
     )
