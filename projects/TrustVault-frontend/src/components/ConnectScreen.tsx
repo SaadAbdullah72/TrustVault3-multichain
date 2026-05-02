@@ -9,7 +9,6 @@ import {
     Wallet,
     ChevronLeft,
     ChevronRight,
-    CreditCard,
     CircleDot
 } from 'lucide-react'
 
@@ -20,24 +19,9 @@ interface ConnectScreenProps {
     error?: string
 }
 
-const cardImages = ['/trustvault-card.png', '/trustvault-card-angle.png', '/trustvault-card-back.png']
-const cardLabels = ['Front View', 'Angle View', 'Back View']
 
 export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, loading, error }) => {
-    const [cardSlide, setCardSlide] = useState<number>(0)
-    const [cardAutoPlay, setCardAutoPlay] = useState<boolean>(true)
 
-    // Auto-rotate card slider
-    useEffect(() => {
-        if (!cardAutoPlay) return
-        const interval = setInterval(() => {
-            setCardSlide((prev: number) => (prev + 1) % cardImages.length)
-        }, 3000)
-        return () => clearInterval(interval)
-    }, [cardAutoPlay])
-
-    const nextSlide = () => setCardSlide((prev) => (prev + 1) % cardImages.length)
-    const prevSlide = () => setCardSlide((prev) => (prev - 1 + cardImages.length) % cardImages.length)
 
     const { currentChain } = useChain()
 
@@ -71,48 +55,62 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, loading
                     <h1 className="connect-title">TrustVault<sup className="connect-title-sup">3</sup></h1>
                     <p className="connect-subtitle">Multichain Inheritance Protocol</p>
 
-                    {/* ====== 3D CREDIT CARD SLIDER ====== */}
-                    <div className="card-slider-section">
-                        <div className="card-slider-stage"
-                            onMouseEnter={() => setCardAutoPlay(false)}
-                            onMouseLeave={() => setCardAutoPlay(true)}
-                        >
-                            {/* Nav arrows */}
-                            <button className="card-slider-arrow left" onClick={prevSlide}>
-                                <ChevronLeft />
-                            </button>
-                            <button className="card-slider-arrow right" onClick={nextSlide}>
-                                <ChevronRight />
-                            </button>
-
-                            {/* Card images */}
-                            <div className="card-slider-viewport">
-                                <div className="card-slider-glow" />
-                                {cardImages.map((src, idx) => (
-                                    <img
-                                        key={idx}
-                                        src={src}
-                                        alt={cardLabels[idx]}
-                                        className={`card-slider-img ${idx === cardSlide ? 'active' : idx === (cardSlide - 1 + cardImages.length) % cardImages.length ? 'prev' : idx === (cardSlide + 1) % cardImages.length ? 'next' : 'hidden'}`}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Dots */}
-                            <div className="card-slider-dots">
-                                {cardImages.map((_, idx) => (
-                                    <button
-                                        key={idx}
-                                        className={`card-slider-dot ${idx === cardSlide ? 'active' : ''}`}
-                                        onClick={() => setCardSlide(idx)}
-                                    />
-                                ))}
-                            </div>
-                            <span className="card-slider-label">{cardLabels[cardSlide]}</span>
+                    {/* ====== SECURITY VISUALIZATION ====== */}
+                    <div className="security-visualization" style={{ 
+                        margin: '32px 0', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center',
+                        position: 'relative',
+                        width: '100%'
+                    }}>
+                        <div className="security-shield-wrap" style={{
+                            width: '180px',
+                            height: '180px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid var(--stitch-surface-border)',
+                            position: 'relative',
+                            boxShadow: '0 0 40px rgba(0, 0, 0, 0.2)'
+                        }}>
+                            <div className="security-shield-glow" style={{
+                                position: 'absolute',
+                                inset: '10px',
+                                background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%)',
+                                borderRadius: '50%'
+                            }} />
+                            <Shield size={80} color="var(--stitch-text)" strokeWidth={1.5} />
+                            
+                            {/* Scanning effect */}
+                            <div className="security-scan-line" style={{
+                                position: 'absolute',
+                                top: '0',
+                                left: '0',
+                                right: '0',
+                                height: '2px',
+                                background: 'linear-gradient(90deg, transparent, var(--stitch-accent), transparent)',
+                                animation: 'scanMove 3s ease-in-out infinite'
+                            }} />
                         </div>
-                        <div className="card-promo-badge">
-                            <CreditCard className="card-promo-badge-icon" />
-                            <span>Virtual Card Included</span>
+                        
+                        <div className="security-badge" style={{
+                            marginTop: '24px',
+                            background: 'var(--stitch-surface)',
+                            border: '1px solid var(--stitch-surface-border)',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            color: 'var(--stitch-text-dim)'
+                        }}>
+                            <Lock size={14} color="var(--accent-emerald)" />
+                            <span>Encrypted Multichain Vaults</span>
                         </div>
                     </div>
 

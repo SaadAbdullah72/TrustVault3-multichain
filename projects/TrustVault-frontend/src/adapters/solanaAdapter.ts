@@ -454,7 +454,9 @@ export class SolanaAdapter implements ChainAdapter {
         }
 
         const balance = await this.connection.getBalance(new PublicKey(vaultId))
-        return balance / LAMPORTS_PER_SOL
+        const solBalance = balance / LAMPORTS_PER_SOL
+        // Subtract 0.15 SOL buffer (rent-exempt minimum) if it exists, to match user expectation
+        return Math.max(0, solBalance - 0.15)
     }
 
     getVaultAddress(vaultId: string): string { return vaultId }

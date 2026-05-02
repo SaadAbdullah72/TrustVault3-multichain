@@ -2325,14 +2325,6 @@ body {
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(120deg,
-            transparent 30%,
-            rgba(45, 212, 191, 0.06) 45%,
-            rgba(124, 58, 237, 0.04) 55%,
-            transparent 70%);
-    animation: cardSheen 4s ease-in-out infinite;
-}
-
 @keyframes cardSheen {
 
     0%,

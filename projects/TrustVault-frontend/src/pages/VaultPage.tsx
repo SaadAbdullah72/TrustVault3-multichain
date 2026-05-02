@@ -35,7 +35,6 @@ import {
     ArrowUpFromLine,
     CircleDot,
     Bell,
-    CreditCard,
     Timer,
     Eye,
     EyeOff,
@@ -334,35 +333,55 @@ export default function VaultPage() {
                     </div>
                 ) : selectedVaultId && vaultState ? (
                     <div className="wallet-main-content">
-                        <VaultDashboard
-                            vaultState={vaultState}
-                            vaultBalance={vaultBalance}
-                            currentChain={currentChain}
-                            vaultAddress={vaultAddress}
-                            walletAddress={walletAddress}
-                            isOwner={isOwner}
-                            isBeneficiary={isBeneficiary}
-                            isExpired={isExpired}
-                            formatAddr={formatAddr}
-                            copyToClipboard={copyToClipboard}
-                        />
+                        {isBeneficiary && !isExpired && !isOwner ? (
+                            <div className="beneficiary-placeholder" style={{ padding: '40px 20px', textAlign: 'center', background: 'var(--stitch-surface)', borderRadius: '12px', border: '1px solid var(--stitch-surface-border)' }}>
+                                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Shield size={32} color="var(--stitch-accent)" />
+                                    </div>
+                                </div>
+                                <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--stitch-text)', marginBottom: '12px' }}>Vault Secured</h3>
+                                <p style={{ fontSize: '14px', color: 'var(--stitch-text-dim)', lineHeight: 1.6, marginBottom: '24px' }}>
+                                    You are the designated beneficiary for this vault. Its contents and controls will be revealed once the security timer expires.
+                                </p>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--stitch-bg-dark)', borderRadius: '8px' }}>
+                                    <Timer size={16} color="var(--stitch-text-dim)" />
+                                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--stitch-text)' }}>Monitoring Active</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <VaultDashboard
+                                    vaultState={vaultState}
+                                    vaultBalance={vaultBalance}
+                                    currentChain={currentChain}
+                                    vaultAddress={vaultAddress}
+                                    walletAddress={walletAddress}
+                                    isOwner={isOwner}
+                                    isBeneficiary={isBeneficiary}
+                                    isExpired={isExpired}
+                                    formatAddr={formatAddr}
+                                    copyToClipboard={copyToClipboard}
+                                />
 
-                        <VaultActions
-                            isOwner={isOwner}
-                            isBeneficiary={isBeneficiary}
-                            isExpired={isExpired}
-                            canRelease={canRelease}
-                            vaultState={vaultState}
-                            uiStatus={uiStatus}
-                            selectedVaultId={selectedVaultId}
-                            vaultAddress={vaultAddress}
-                            handleHeartbeat={handleHeartbeat}
-                            handleWithdrawAction={handleWithdrawAction}
-                            handleClaim={handleClaim}
-                            handleManualScan={handleManualScan}
-                            loadVaultState={loadVaultState}
-                            copyToClipboard={copyToClipboard}
-                        />
+                                <VaultActions
+                                    isOwner={isOwner}
+                                    isBeneficiary={isBeneficiary}
+                                    isExpired={isExpired}
+                                    canRelease={canRelease}
+                                    vaultState={vaultState}
+                                    uiStatus={uiStatus}
+                                    selectedVaultId={selectedVaultId}
+                                    vaultAddress={vaultAddress}
+                                    handleHeartbeat={handleHeartbeat}
+                                    handleWithdrawAction={handleWithdrawAction}
+                                    handleClaim={handleClaim}
+                                    handleManualScan={handleManualScan}
+                                    loadVaultState={loadVaultState}
+                                    copyToClipboard={copyToClipboard}
+                                />
+                            </>
+                        )}
                     </div>
                 ) : (
                     <div className="wallet-empty">
@@ -375,10 +394,6 @@ export default function VaultPage() {
                             <button className="wallet-empty-btn primary" onClick={() => setShowCreateForm(true)}>
                                 <Plus className="wallet-empty-btn-icon" />
                                 {t('create_vault')}
-                            </button>
-                            <button className="wallet-empty-btn secondary" onClick={handleManualScan} disabled={uiStatus.loading}>
-                                <Search className="wallet-empty-btn-icon" />
-                                {t('scan')}
                             </button>
                         </div>
                     </div>

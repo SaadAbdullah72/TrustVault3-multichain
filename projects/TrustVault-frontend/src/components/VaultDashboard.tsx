@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Wallet, CreditCard, Timer, FileText, Copy, Info } from 'lucide-react'
+import { Eye, EyeOff, Shield, Wallet, Timer, FileText, Copy, Info } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
 
@@ -33,61 +33,66 @@ export default function VaultDashboard({
 
     return (
         <>
-            <div className="balance-section">
-                <div className="balance-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <span style={{ color: 'var(--stitch-text-dim)', fontSize: '14px', fontWeight: 500 }}>{t('vault_balance')}</span>
-                    <button onClick={() => setShowBalanceHidden(!showBalanceHidden)} className="balance-eye-btn" style={{ background: 'none', border: 'none', color: 'var(--stitch-text-dim)', cursor: 'pointer' }}>
-                        {showBalanceHidden ? <EyeOff className="balance-eye-icon" size={16} /> : <Eye className="balance-eye-icon" size={16} />}
+            <div className="balance-section" style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--stitch-secondary)', borderRadius: '24px', margin: '0 20px' }}>
+                <div className="balance-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span style={{ color: 'var(--stitch-text-dim)', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>{t('vault_balance')}</span>
+                    <button onClick={() => setShowBalanceHidden(!showBalanceHidden)} className="balance-eye-btn" style={{ background: 'none', border: 'none', color: 'var(--stitch-text-dim)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        {showBalanceHidden ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                 </div>
-                <div className="balance-amount" style={{ fontSize: '40px', fontWeight: 700, margin: '8px 0', letterSpacing: '-1px' }}>
+                <div className="balance-amount" style={{ fontSize: '48px', fontWeight: 800, color: 'var(--stitch-text)', letterSpacing: '-2px', lineHeight: 1 }}>
                     {showBalanceHidden ? '••••••' : vaultBalance.toFixed(4)}
-                    <span className="balance-currency" style={{ fontSize: '20px', color: 'var(--stitch-text-dim)', marginLeft: '8px' }}>{currentChain.nativeCurrency.symbol}</span>
+                    <span style={{ fontSize: '18px', color: 'var(--stitch-text-dim)', marginLeft: '8px', fontWeight: 600 }}>{currentChain.nativeCurrency.symbol}</span>
                 </div>
-                <div className="role-badges" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
+                <div className="role-badges" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
                     {isOwner && (
-                        <div className="role-badge owner" style={{ background: 'var(--stitch-surface)', border: '1px solid var(--stitch-surface-border)', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Shield size={14} color="var(--accent-blue)" />
+                        <div className="status-pill" style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #dbeafe' }}>
+                            <Shield size={12} style={{ marginRight: '4px' }} />
                             <span>{t('owner')}</span>
                         </div>
                     )}
                     {isBeneficiary && (
-                        <div className="role-badge beneficiary" style={{ background: 'var(--stitch-surface)', border: '1px solid var(--stitch-surface-border)', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Wallet size={14} color="var(--accent-emerald)" />
+                        <div className="status-pill" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #dcfce7' }}>
+                            <Wallet size={12} style={{ marginRight: '4px' }} />
                             <span>{t('beneficiary')}</span>
                         </div>
                     )}
-                    <div className={`vault-status-pill ${vaultState.released ? 'released' : isExpired ? 'expired' : 'secured'}`}>
+                    <div className={`status-pill ${vaultState.released ? 'released' : isExpired ? 'expired' : 'secured'}`} style={{ 
+                        background: vaultState.released ? '#fef2f2' : isExpired ? '#fffbeb' : '#f0fdf4',
+                        color: vaultState.released ? '#dc2626' : isExpired ? '#d97706' : '#16a34a',
+                        border: '1px solid',
+                        borderColor: vaultState.released ? '#fee2e2' : isExpired ? '#fef3c7' : '#dcfce7'
+                    }}>
                         <span>{vaultState.released ? t('released') : isExpired ? t('timer_expired') : t('secured')}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="dashboard-content" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="dashboard-content" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '24px', padding: '0 20px 40px' }}>
                 
                 {/* Vault Overview Card */}
                 <div>
-                    <div className="section-header">
-                        <CreditCard className="section-header-icon" />
-                        <span>Vault Overview</span>
+                    <div className="section-header" style={{ marginBottom: '12px' }}>
+                        <Shield className="section-header-icon" size={16} style={{ color: 'var(--stitch-accent)' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 600 }}>Security Overview</span>
                     </div>
-                    <div className="section-card" style={{ padding: '16px' }}>
-                        <div className="detail-list">
-                            <div className="detail-item">
-                                <span className="detail-label">Network</span>
+                    <div className="section-card" style={{ padding: '20px', border: '1px solid var(--stitch-surface-border)', borderRadius: '16px' }}>
+                        <div className="detail-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Network Environment</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: currentChain.color }}></div>
-                                    <span className="detail-value">{currentChain.name}</span>
+                                    <span className="detail-value" style={{ fontSize: '13px', fontWeight: 600 }}>{currentChain.name}</span>
                                 </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Card Holder</span>
-                                <span className="detail-value" style={{ fontFamily: 'monospace' }}>{walletAddress ? formatAddr(walletAddress) : '-'}</span>
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Secured For</span>
+                                <span className="detail-value" style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 600 }}>{walletAddress ? formatAddr(walletAddress) : '-'}</span>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Vault Status</span>
-                                <span className="detail-value" style={{ color: vaultState.released ? 'var(--accent-red)' : 'var(--accent-emerald)' }}>
-                                    {vaultState.released ? 'Inactive' : 'Active'}
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Protection Status</span>
+                                <span className="detail-value" style={{ color: vaultState.released ? '#dc2626' : '#16a34a', fontSize: '13px', fontWeight: 700 }}>
+                                    {vaultState.released ? 'Inactive' : 'Active & Guarded'}
                                 </span>
                             </div>
                         </div>
@@ -96,50 +101,50 @@ export default function VaultDashboard({
 
                 {/* Heartbeat Countdown */}
                 <div>
-                    <div className="section-header">
-                        <Timer className="section-header-icon" />
-                        <span>Heartbeat Countdown</span>
+                    <div className="section-header" style={{ marginBottom: '12px' }}>
+                        <Timer className="section-header-icon" size={16} style={{ color: 'var(--stitch-accent)' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 600 }}>Heartbeat Countdown</span>
                     </div>
-                    <div className="section-card" style={{ padding: '24px' }}>
+                    <div className="section-card" style={{ padding: '24px', border: '1px solid var(--stitch-surface-border)', borderRadius: '16px', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
                         <Countdown lastHeartbeat={vaultState.lastHeartbeat} lockDuration={vaultState.lockDuration} released={vaultState.released} />
                     </div>
                 </div>
 
                 {/* Vault Configuration */}
                 <div>
-                    <div className="section-header">
-                        <FileText className="section-header-icon" />
-                        <span>Configuration</span>
+                    <div className="section-header" style={{ marginBottom: '12px' }}>
+                        <FileText className="section-header-icon" size={16} style={{ color: 'var(--stitch-accent)' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 600 }}>Configuration</span>
                     </div>
-                    <div className="section-card" style={{ padding: '16px' }}>
-                        <div className="detail-list">
-                            <div className="detail-item">
-                                <span className="detail-label">Vault Address</span>
+                    <div className="section-card" style={{ padding: '20px', border: '1px solid var(--stitch-surface-border)', borderRadius: '16px' }}>
+                        <div className="detail-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Vault Address</span>
                                 <div className="detail-value-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="detail-value" style={{ fontFamily: 'monospace' }}>{formatAddr(vaultAddress)}</span>
-                                    <button onClick={() => copyToClipboard(vaultAddress)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stitch-text-dim)' }}>
+                                    <span className="detail-value" style={{ fontFamily: 'monospace', fontSize: '13px' }}>{formatAddr(vaultAddress)}</span>
+                                    <button onClick={() => copyToClipboard(vaultAddress)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stitch-text-dim)', display: 'flex', alignItems: 'center' }}>
                                         <Copy size={14} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Beneficiary</span>
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Beneficiary</span>
                                 <div className="detail-value-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="detail-value" style={{ fontFamily: 'monospace' }}>{formatAddr(vaultState.beneficiary)}</span>
-                                    <button onClick={() => copyToClipboard(vaultState.beneficiary)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stitch-text-dim)' }}>
+                                    <span className="detail-value" style={{ fontFamily: 'monospace', fontSize: '13px' }}>{formatAddr(vaultState.beneficiary)}</span>
+                                    <button onClick={() => copyToClipboard(vaultState.beneficiary)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stitch-text-dim)', display: 'flex', alignItems: 'center' }}>
                                         <Copy size={14} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Last Heartbeat</span>
-                                <span className="detail-value">
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Last Heartbeat</span>
+                                <span className="detail-value" style={{ fontSize: '13px', fontWeight: 600 }}>
                                     {new Date(vaultState.lastHeartbeat * 1000).toLocaleTimeString()}
                                 </span>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Lock Period</span>
-                                <span className="detail-value">
+                            <div className="detail-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="detail-label" style={{ color: 'var(--stitch-text-dim)', fontSize: '13px' }}>Lock Period</span>
+                                <span className="detail-value" style={{ fontSize: '13px', fontWeight: 600 }}>
                                     {vaultState.lockDuration >= 86400
                                         ? `${Math.floor(vaultState.lockDuration / 86400)}d ${Math.floor((vaultState.lockDuration % 86400) / 3600)}h`
                                         : vaultState.lockDuration >= 3600
@@ -151,7 +156,6 @@ export default function VaultDashboard({
                         </div>
                     </div>
                 </div>
-
             </div>
         </>
     )

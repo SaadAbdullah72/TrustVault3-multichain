@@ -111,10 +111,6 @@ export default function VaultDropdown({
                             <Plus className="vault-dropdown-action-icon" />
                             <span>{t('create_vault')}</span>
                         </button>
-                        <button className="vault-dropdown-action-btn scan" onClick={handleManualScan} disabled={isDiscovering}>
-                            <RefreshCw className={`vault-dropdown-action-icon ${isDiscovering ? 'spinning' : ''}`} />
-                            <span>{t('full_scan')}</span>
-                        </button>
                     </div>
                 </div>
             )}
