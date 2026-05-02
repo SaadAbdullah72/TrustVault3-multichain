@@ -2861,6 +2861,23 @@ body {
 }
 
 /* ========== CLAIM NOTIFICATION (Inline scan results) ========== */
+.supabase-warning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 16px;
+    padding: 8px;
+    background: rgba(255, 100, 0, 0.05);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 100, 0, 0.1);
+}
+
+.warning-icon {
+    color: #ffa500;
+}
 .claim-notification {
     margin: 16px;
     padding: 16px;

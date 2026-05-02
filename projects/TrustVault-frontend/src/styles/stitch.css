@@ -1,0 +1,196 @@
+/* Vibe Coded / Google Stitch Design System */
+
+:root {
+  --stitch-bg-dark: #0a0a0c;
+  --stitch-surface: rgba(20, 20, 24, 0.65);
+  --stitch-surface-border: rgba(255, 255, 255, 0.08);
+  --stitch-primary: #8a2be2;
+  --stitch-secondary: #00d2ff;
+  --stitch-accent: #ff007f;
+  --stitch-glow: rgba(138, 43, 226, 0.4);
+  --stitch-glow-secondary: rgba(0, 210, 255, 0.4);
+  --stitch-text: #ffffff;
+  --stitch-text-dim: #a0a0a8;
+  --stitch-radius: 20px;
+  --stitch-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body {
+  background-color: var(--stitch-bg-dark);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(138, 43, 226, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(0, 210, 255, 0.15), transparent 25%);
+  color: var(--stitch-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.wallet-shell {
+  background: transparent;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.wallet-container {
+  background: var(--stitch-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--stitch-surface-border);
+  border-radius: calc(var(--stitch-radius) + 8px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: var(--stitch-transition);
+}
+
+.wallet-container:hover {
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 
+              0 0 40px var(--stitch-glow),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.wallet-topbar {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--stitch-surface-border);
+  padding: 16px 24px;
+}
+
+.topbar-brand {
+  background: linear-gradient(135deg, var(--stitch-text), var(--stitch-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.vault-selector-trigger {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--stitch-surface-border);
+  border-radius: var(--stitch-radius);
+  transition: var(--stitch-transition);
+}
+
+.vault-selector-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.vault-avatar {
+  background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
+  box-shadow: 0 0 15px var(--stitch-glow);
+}
+
+.wallet-address-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--stitch-surface-border);
+  border-radius: 50px;
+}
+
+.section-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--stitch-surface-border);
+  border-radius: var(--stitch-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  transition: var(--stitch-transition);
+}
+
+.section-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.1);
+}
+
+.quick-action-btn {
+  background: transparent;
+  transition: var(--stitch-transition);
+}
+
+.quick-action-btn:hover {
+  transform: scale(1.05) translateY(-5px);
+}
+
+.quick-action-circle {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--stitch-surface-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: var(--stitch-transition);
+}
+
+.quick-action-btn:hover .quick-action-circle {
+  border-color: var(--stitch-secondary);
+  box-shadow: 0 0 20px var(--stitch-glow-secondary);
+  background: rgba(0, 210, 255, 0.1);
+}
+
+.claim-banner {
+  background: linear-gradient(90deg, rgba(138, 43, 226, 0.2), rgba(0, 210, 255, 0.2));
+  border: 1px solid var(--stitch-primary);
+  border-radius: var(--stitch-radius);
+  box-shadow: 0 0 30px var(--stitch-glow);
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.3); }
+  100% { box-shadow: 0 0 40px rgba(0, 210, 255, 0.5); }
+}
+
+.wallet-form-card {
+  background: var(--stitch-surface);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 50px var(--stitch-glow);
+}
+
+.wallet-form-submit {
+  background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px var(--stitch-glow);
+  transition: var(--stitch-transition);
+}
+
+.wallet-form-submit:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 25px var(--stitch-glow-secondary);
+}
+
+.wallet-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--stitch-surface-border);
+  color: var(--stitch-text);
+  border-radius: 10px;
+}
+
+.wallet-input:focus {
+  border-color: var(--stitch-secondary);
+  box-shadow: 0 0 10px var(--stitch-glow-secondary);
+  outline: none;
+}
+
+.status-pill, .vault-status-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--stitch-surface-border);
+  border-radius: 50px;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.vault-avatar-icon {
+  animation: float 4s ease-in-out infinite;
+}

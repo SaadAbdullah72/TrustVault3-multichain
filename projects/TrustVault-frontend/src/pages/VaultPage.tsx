@@ -8,6 +8,11 @@ import ChainSwitcher from '../components/ChainSwitcher'
 import { useVaultActions } from '../hooks/useVaultActions'
 import { useVaultDiscovery } from '../hooks/useVaultDiscovery'
 import { useVaultState } from '../hooks/useVaultState'
+import { useTranslation } from 'react-i18next'
+import SettingsSwitcher from '../components/SettingsSwitcher'
+import VaultDropdown from '../components/VaultDropdown'
+import VaultDashboard from '../components/VaultDashboard'
+import VaultActions from '../components/VaultActions'
 import {
     Shield,
     Lock,
@@ -38,6 +43,7 @@ import {
 } from 'lucide-react'
 
 export default function VaultPage() {
+    const { t } = useTranslation()
     const { walletAddress, currentChain, adapter, isConnected } = useChain()
 
     // --- Modular Hooks ---
@@ -93,10 +99,10 @@ export default function VaultPage() {
     const vaultAddress = useMemo(() => selectedVaultId ? adapter.getVaultAddress(selectedVaultId) : '', [selectedVaultId, adapter])
     const isOwner = useMemo(() => {
         if (!walletAddress || !vaultState?.owner) return false;
-        
+
         const owner = String(vaultState.owner)
         const wallet = String(walletAddress)
-        
+
         // Solana is case-sensitive, EVM is not
         if (currentChain.type === 'solana') {
             return owner === wallet
@@ -106,10 +112,10 @@ export default function VaultPage() {
 
     const isBeneficiary = useMemo(() => {
         if (!walletAddress || !vaultState?.beneficiary) return false;
-        
+
         const ben = String(vaultState.beneficiary)
         const wallet = String(walletAddress)
-        
+
         if (currentChain.type === 'solana') {
             return ben === wallet
         }
@@ -190,6 +196,7 @@ export default function VaultPage() {
                     </div>
 
                     <div className="topbar-right">
+                        <SettingsSwitcher />
                         <ChainSwitcher />
                         <div className="network-badge" style={{ borderColor: currentChain.color + '44' }}>
                             <CircleDot className="network-dot" style={{ color: currentChain.color }} />
@@ -206,88 +213,26 @@ export default function VaultPage() {
                 </div>
 
                 {/* ======= ACCOUNT HEADER ======= */}
-                <div className="wallet-account-header">
-                    <div className="vault-selector-trigger" onClick={() => setShowVaultSelector(!showVaultSelector)}>
-                        <div className="vault-avatar">
-                            <Shield className="vault-avatar-icon" />
-                        </div>
-                        <div className="vault-selector-info">
-                            <span className="vault-selector-label">
-                                {selectedVaultId ? `Vault #${selectedVaultId.slice(0, 8)}...` : 'No Vault Selected'}
-                            </span>
-                            <span className="vault-selector-addr">
-                                {vaultAddress ? formatAddr(vaultAddress) : 'Select or create a vault'}
-                            </span>
-                        </div>
-                        <ChevronDown className={`vault-selector-chevron ${showVaultSelector ? 'rotated' : ''}`} />
-                    </div>
-
-                    {showVaultSelector && (
-                        <div className="vault-selector-dropdown">
-                            <div className="vault-dropdown-header">
-                                <span>My Vaults ({currentChain.name})</span>
-                                <button onClick={handleManualScan} className="vault-dropdown-scan" disabled={uiStatus.loading || isDiscovering}>
-                                    <RefreshCw className={`vault-dropdown-scan-icon ${isDiscovering ? 'spinning' : ''}`} />
-                                </button>
-                            </div>
-                            {userVaults.length === 0 && (
-                                <div className="vault-dropdown-empty">
-                                    <Shield className="vault-dropdown-empty-icon" />
-                                    <span>No vaults found on {currentChain.name}</span>
-                                </div>
-                            )}
-                            {userVaults.map(id => (
-                                <div key={id} className={`vault-dropdown-row ${selectedVaultId === id ? 'active' : ''}`}>
-                                    <button
-                                        className="vault-dropdown-item"
-                                        onClick={() => { setSelectedVaultId(id); setShowVaultSelector(false) }}
-                                    >
-                                        <div className="vault-dropdown-item-avatar">
-                                            <Shield className="vault-dropdown-item-icon" />
-                                        </div>
-                                        <div className="vault-dropdown-item-info">
-                                            <div className="vault-dropdown-item-header">
-                                                <span className="vault-dropdown-item-name">Vault #{id.length > 12 ? id.slice(0, 8) + '...' : id}</span>
-                                                {vaultRoles[id] && (
-                                                    <span className={`vault-dropdown-item-badge ${vaultRoles[id]}`}>
-                                                        {vaultRoles[id]}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <span className="vault-dropdown-item-addr">{formatAddr(adapter.getVaultAddress(id))}</span>
-                                        </div>
-                                        {selectedVaultId === id && <CheckCircle className="vault-dropdown-item-check" />}
-                                    </button>
-                                    <button
-                                        className="vault-dropdown-delete"
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteVaultId(id) }}
-                                        title="Remove from history"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            ))}
-                            <div className="vault-dropdown-actions">
-                                <button className="vault-dropdown-action-btn" onClick={() => { setShowCreateForm(true); setShowVaultSelector(false) }}>
-                                    <Plus className="vault-dropdown-action-icon" />
-                                    <span>Create Vault</span>
-                                </button>
-                                <button className="vault-dropdown-action-btn scan" onClick={handleManualScan} disabled={isDiscovering}>
-                                    <RefreshCw className={`vault-dropdown-action-icon ${isDiscovering ? 'spinning' : ''}`} />
-                                    <span>Full Scan</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="wallet-address-bar">
-                        <div className="wallet-address-dot" style={{ background: currentChain.color }} />
-                        <span className="wallet-address-text">{formatAddr(walletAddress!)}</span>
-                        <button className="wallet-address-copy" onClick={() => copyToClipboard(walletAddress!)} title="Copy Address">
-                            {copied ? <CheckCircle className="copy-icon copied" /> : <Copy className="copy-icon" />}
-                        </button>
-                    </div>
-                </div>
+                <VaultDropdown
+                    currentChain={currentChain}
+                    userVaults={userVaults}
+                    vaultRoles={vaultRoles}
+                    selectedVaultId={selectedVaultId}
+                    setSelectedVaultId={setSelectedVaultId}
+                    adapter={adapter}
+                    handleDeleteVaultId={handleDeleteVaultId}
+                    isDiscovering={isDiscovering}
+                    handleManualScan={handleManualScan}
+                    uiStatus={uiStatus}
+                    setShowCreateForm={setShowCreateForm}
+                    showVaultSelector={showVaultSelector}
+                    setShowVaultSelector={setShowVaultSelector}
+                    vaultAddress={vaultAddress}
+                    walletAddress={walletAddress}
+                    copied={copied}
+                    copyToClipboard={copyToClipboard}
+                    formatAddr={formatAddr}
+                />
 
                 {/* ======= NOTIFICATIONS ======= */}
                 {claimableVaults.length > 0 && (
@@ -357,7 +302,7 @@ export default function VaultPage() {
                                 <div className="wallet-input-group">
                                     <label className="wallet-input-label">
                                         <ArrowRight className="wallet-label-icon" />
-                                        Beneficiary Address
+                                        {t('beneficiary_address')}
                                     </label>
                                     <input
                                         value={beneficiaryInput}
@@ -370,7 +315,7 @@ export default function VaultPage() {
                                     <div className="wallet-input-group">
                                         <label className="wallet-input-label">
                                             <Clock className="wallet-label-icon" />
-                                            Timer (seconds)
+                                            {t('timer_seconds')}
                                         </label>
                                         <input
                                             type="number"
@@ -382,7 +327,7 @@ export default function VaultPage() {
                                     <div className="wallet-input-group">
                                         <label className="wallet-input-label">
                                             <Wallet className="wallet-label-icon" />
-                                            Deposit ({currentChain.nativeCurrency.symbol})
+                                            {t('deposit')} ({currentChain.nativeCurrency.symbol})
                                         </label>
                                         <input
                                             type="number"
@@ -398,7 +343,7 @@ export default function VaultPage() {
                                     ) : (
                                         <Shield className="submit-icon" />
                                     )}
-                                    <span>{uiStatus.loading ? 'Deploying...' : `Deploy on ${currentChain.name}`}</span>
+                                    <span>{uiStatus.loading ? 'Deploying...' : t('deploy_on', { chain: currentChain.name })}</span>
                                 </button>
                             </div>
                         </div>
@@ -409,214 +354,55 @@ export default function VaultPage() {
                 {isDiscovering ? (
                     <div className="wallet-loading">
                         <div className="wallet-loading-spinner" />
-                        <span className="wallet-loading-text">Syncing with {currentChain.name}...</span>
+                        <span className="wallet-loading-text">{t('syncing', { chain: currentChain.name })}</span>
                     </div>
                 ) : selectedVaultId && vaultState ? (
                     <div className="wallet-main-content">
-                        <div className="balance-section">
-                            <div className="balance-label">
-                                <span>Vault Balance</span>
-                                <button onClick={() => setShowBalanceHidden(!showBalanceHidden)} className="balance-eye-btn">
-                                    {showBalanceHidden ? <EyeOff className="balance-eye-icon" /> : <Eye className="balance-eye-icon" />}
-                                </button>
-                            </div>
-                            <div className="balance-amount">
-                                {showBalanceHidden ? '••••••' : vaultBalance.toFixed(4)}
-                                <span className="balance-currency">{currentChain.nativeCurrency.symbol}</span>
-                            </div>
-                            <div className="role-badges" style={{ justifyContent: 'center', marginTop: 8 }}>
-                                {isOwner && (
-                                    <div className="role-badge owner">
-                                        <Shield className="role-badge-icon" />
-                                        <span>Owner</span>
-                                    </div>
-                                )}
-                                {isBeneficiary && (
-                                    <div className="role-badge beneficiary">
-                                        <Wallet className="role-badge-icon" />
-                                        <span>Beneficiary</span>
-                                    </div>
-                                )}
-                                <div className={`vault-status-pill ${vaultState.released ? 'released' : isExpired ? 'expired' : 'secured'}`}>
-                                    <div className="status-dot" />
-                                    <span>{vaultState.released ? 'Released' : isExpired ? 'Timer Expired' : 'Secured'}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <VaultDashboard
+                            vaultState={vaultState}
+                            vaultBalance={vaultBalance}
+                            currentChain={currentChain}
+                            vaultAddress={vaultAddress}
+                            walletAddress={walletAddress}
+                            isOwner={isOwner}
+                            isBeneficiary={isBeneficiary}
+                            isExpired={isExpired}
+                            formatAddr={formatAddr}
+                            copyToClipboard={copyToClipboard}
+                        />
 
-                        <div className="quick-actions">
-                            {isOwner && !vaultState.released && (
-                                <>
-                                    <button className="quick-action-btn" onClick={() => handleHeartbeat(selectedVaultId, loadVaultState)} disabled={uiStatus.loading || isExpired}>
-                                        <div className={`quick-action-circle ${isExpired ? 'disabled' : 'heartbeat'}`}>
-                                            <Heart className="quick-action-icon" />
-                                        </div>
-                                        <span className="quick-action-label">Heartbeat</span>
-                                    </button>
-                                    <button className="quick-action-btn" onClick={handleWithdrawAction} disabled={uiStatus.loading}>
-                                        <div className="quick-action-circle withdraw">
-                                            <ArrowUpFromLine className="quick-action-icon" />
-                                        </div>
-                                        <span className="quick-action-label">Withdraw</span>
-                                    </button>
-                                </>
-                            )}
-                            {isBeneficiary && !vaultState.released && (
-                                <button className="quick-action-btn" onClick={() => handleClaim(selectedVaultId, loadVaultState)} disabled={uiStatus.loading || !canRelease}>
-                                    <div className={`quick-action-circle ${canRelease ? 'claim' : 'disabled'}`}>
-                                        <Unlock className="quick-action-icon" />
-                                    </div>
-                                    <span className="quick-action-label">{canRelease ? 'Claim' : 'Locked'}</span>
-                                </button>
-                            )}
-                            <button className="quick-action-btn" onClick={() => copyToClipboard(vaultAddress)}>
-                                <div className="quick-action-circle copy">
-                                    <Copy className="quick-action-icon" />
-                                </div>
-                                <span className="quick-action-label">Copy Addr</span>
-                            </button>
-                            <button className="quick-action-btn" onClick={handleManualScan} disabled={uiStatus.loading}>
-                                <div className="quick-action-circle scan">
-                                    <Search className="quick-action-icon" />
-                                </div>
-                                <span className="quick-action-label">Scan</span>
-                            </button>
-                        </div>
-
-                        {isBeneficiary && canRelease && !vaultState.released && (
-                            <div className="claim-banner">
-                                <div className="claim-banner-left">
-                                    <Bell className="claim-bell-icon" />
-                                    <div className="claim-banner-text">
-                                        <span className="claim-banner-title">Inheritance Ready</span>
-                                        <span className="claim-banner-sub">Timer expired — claim your funds</span>
-                                    </div>
-                                </div>
-                                <button className="claim-banner-btn" onClick={() => handleClaim(selectedVaultId, loadVaultState)} disabled={uiStatus.loading}>
-                                    {uiStatus.loading ? <RefreshCw className="spinning claim-banner-btn-icon" /> : <Unlock className="claim-banner-btn-icon" />}
-                                    <span>Claim Now</span>
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="dashboard-content">
-                            <div className="section-header">
-                                <CreditCard className="section-header-icon" />
-                                <span>Virtual Trust Card</span>
-                            </div>
-                            <div className="section-card">
-                                <div className="card-tab-showcase">
-                                    <div
-                                        className="card-tab-image-wrap"
-                                        onMouseMove={handleMouseMove}
-                                        onMouseLeave={resetTilt}
-                                        onTouchMove={handleTouchMove}
-                                        onTouchEnd={resetTilt}
-                                    >
-                                        <div
-                                            className="card-tab-inner"
-                                            style={{
-                                                '--rotateX': `${tilt.x}deg`,
-                                                '--rotateY': `${tilt.y}deg`
-                                            } as any}
-                                        >
-                                            <div className="card-tab-reflection" />
-                                            <img src="/trustvault-card.png" alt="TrustVault Virtual Card" className="card-tab-image" />
-                                        </div>
-                                    </div>
-                                    <div className="card-tab-info">
-                                        <div className="card-tab-info-row">
-                                            <span className="card-tab-info-label">Card Holder</span>
-                                            <span className="card-tab-info-value">{walletAddress ? formatAddr(walletAddress) : '-'}</span>
-                                        </div>
-                                        <div className="card-tab-info-row">
-                                            <span className="card-tab-info-label">Network</span>
-                                            <span className="card-tab-info-value" style={{ color: currentChain.color }}>{currentChain.name}</span>
-                                        </div>
-                                        <div className="card-tab-info-row">
-                                            <span className="card-tab-info-label">Vault Status</span>
-                                            <span className={`card-tab-info-value ${vaultState.released ? 'text-red' : 'text-green'}`}>
-                                                {vaultState.released ? 'Inactive' : 'Active'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="section-header">
-                                <Timer className="section-header-icon" />
-                                <span>Heartbeat Countdown</span>
-                            </div>
-                            <div className="section-card">
-                                <div className="countdown-section">
-                                    <Countdown lastHeartbeat={vaultState.lastHeartbeat} lockDuration={vaultState.lockDuration} released={vaultState.released} />
-                                </div>
-                            </div>
-
-                            <div className="section-header">
-                                <FileText className="section-header-icon" />
-                                <span>Vault Configuration</span>
-                            </div>
-                            <div className="section-card" style={{ padding: '0 16px' }}>
-                                <div className="detail-list">
-                                    <div className="detail-item">
-                                        <span className="detail-label">Vault Address</span>
-                                        <div className="detail-value-row">
-                                            <span className="detail-value mono truncate-text">{formatAddr(vaultAddress)}</span>
-                                            <button className="detail-copy" onClick={() => copyToClipboard(vaultAddress)}>
-                                                <Copy className="detail-copy-icon" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">Beneficiary</span>
-                                        <div className="detail-value-row">
-                                            <span className="detail-value mono truncate-text">{formatAddr(vaultState.beneficiary)}</span>
-                                            <button className="detail-copy" onClick={() => copyToClipboard(vaultState.beneficiary)}>
-                                                <Copy className="detail-copy-icon" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">Network</span>
-                                        <span className="detail-value" style={{ color: currentChain.color }}>{currentChain.name}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">Last Heartbeat</span>
-                                        <span className="detail-value">
-                                            {new Date(vaultState.lastHeartbeat * 1000).toLocaleTimeString()}
-                                        </span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">Lock Period</span>
-                                        <span className="detail-value">
-                                            {vaultState.lockDuration >= 86400
-                                                ? `${Math.floor(vaultState.lockDuration / 86400)}d ${Math.floor((vaultState.lockDuration % 86400) / 3600)}h`
-                                                : vaultState.lockDuration >= 3600
-                                                    ? `${Math.floor(vaultState.lockDuration / 3600)}h ${Math.floor((vaultState.lockDuration % 3600) / 60)}m`
-                                                    : `${Math.floor(vaultState.lockDuration / 60)}m ${vaultState.lockDuration % 60}s`
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <VaultActions
+                            isOwner={isOwner}
+                            isBeneficiary={isBeneficiary}
+                            isExpired={isExpired}
+                            canRelease={canRelease}
+                            vaultState={vaultState}
+                            uiStatus={uiStatus}
+                            selectedVaultId={selectedVaultId}
+                            vaultAddress={vaultAddress}
+                            handleHeartbeat={handleHeartbeat}
+                            handleWithdrawAction={handleWithdrawAction}
+                            handleClaim={handleClaim}
+                            handleManualScan={handleManualScan}
+                            loadVaultState={loadVaultState}
+                            copyToClipboard={copyToClipboard}
+                        />
                     </div>
                 ) : (
                     <div className="wallet-empty">
                         <div className="wallet-empty-icon-wrap">
                             <Shield className="wallet-empty-icon" />
                         </div>
-                        <h3 className="wallet-empty-title">No Vault on {currentChain.name}</h3>
-                        <p className="wallet-empty-desc">Create a new vault or scan {currentChain.name} network to find your vaults.</p>
+                        <h3 className="wallet-empty-title">{t('no_vault', { chain: currentChain.name })}</h3>
+                        <p className="wallet-empty-desc">{t('create_new_vault', { chain: currentChain.name })}</p>
                         <div className="wallet-empty-actions">
                             <button className="wallet-empty-btn primary" onClick={() => setShowCreateForm(true)}>
                                 <Plus className="wallet-empty-btn-icon" />
-                                Create Vault
+                                {t('create_vault')}
                             </button>
                             <button className="wallet-empty-btn secondary" onClick={handleManualScan} disabled={uiStatus.loading}>
                                 <Search className="wallet-empty-btn-icon" />
-                                Scan Network
+                                {t('scan')}
                             </button>
                         </div>
                     </div>
