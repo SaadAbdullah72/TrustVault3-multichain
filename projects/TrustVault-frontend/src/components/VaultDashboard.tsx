@@ -39,149 +39,147 @@ export default function VaultDashboard({
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#F2F2F7' }}>
-            {/* Strictly following User's Primary Gradient Header */}
+            {/* Compact Gradient Header */}
             <div style={{ 
                 background: 'linear-gradient(180deg, #1E3C72 0%, #2A5298 100%)', 
-                padding: '32px 24px 64px',
+                padding: '16px 20px 48px',
                 color: '#fff',
                 position: 'relative'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
-                            <Asterisk size={20} color="#fff" />
+                        <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Asterisk size={16} color="#fff" />
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>TRUSTVAULT</span>
+                        <span style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '0.5px' }}>TRUSTVAULT</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '20px', opacity: 0.8 }}>
-                        <Search size={22} />
-                        <Bell size={22} />
+                    <div style={{ display: 'flex', gap: '16px', opacity: 0.8 }}>
+                        <Search size={18} />
+                        <Bell size={18} />
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ width: '22px', height: '15px', background: '#3B82F6', borderRadius: '2px' }} />
-                        <span style={{ fontSize: '13px', fontWeight: 700 }}>ACTIVE VAULT</span>
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>
+                    <div style={{ width: '16px', height: '12px', background: '#3B82F6', borderRadius: '2px' }} />
+                    <span style={{ fontSize: '11px', fontWeight: 700 }}>ACTIVE VAULT</span>
                 </div>
             </div>
 
-            {/* Main Content Area (White Cards Strictly Following User Config) */}
+            {/* Main Content Area (Compact View) */}
             <div style={{ 
-                marginTop: '-32px', 
+                marginTop: '-24px', 
                 background: '#F2F2F7', 
-                borderRadius: '32px 32px 0 0', 
+                borderRadius: '24px 24px 0 0', 
                 flex: 1, 
-                padding: '32px 20px',
+                padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '24px',
+                gap: '16px',
                 overflowY: 'auto'
             }}>
-                {/* Balance Card (White Surface) */}
+                {/* Balance Card (Shrunk) */}
                 <div style={{ 
                     background: '#FFFFFF', 
-                    borderRadius: '24px', 
-                    padding: '28px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                    borderRadius: '20px', 
+                    padding: '20px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.04)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Available Funds</div>
-                    <div className="nb-balance-large" style={{ color: '#1C1C1E', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#8E8E93', letterSpacing: '0.5px', marginBottom: '4px', textTransform: 'uppercase' }}>Available Funds</div>
+                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#1C1C1E', letterSpacing: '-1px', marginBottom: '4px' }}>
                         {showBalanceHidden ? '••••••' : `$${(vaultBalance * 2000).toLocaleString()}`}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#3B82F6' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#3B82F6' }}>
                             {vaultBalance.toFixed(4)} {currentChain.nativeCurrency.symbol}
                         </span>
-                        <button onClick={() => setShowBalanceHidden(!showBalanceHidden)} style={{ background: 'none', border: 'none', color: '#8E8E93', cursor: 'pointer', padding: '4px' }}>
-                            {showBalanceHidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                        <button onClick={() => setShowBalanceHidden(!showBalanceHidden)} style={{ background: 'none', border: 'none', color: '#8E8E93', cursor: 'pointer' }}>
+                            {showBalanceHidden ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
                     </div>
                 </div>
 
-                {/* Main Actions (Primary Blue) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Main Actions (Compact Layout) */}
+                <div style={{ display: 'grid', gridTemplateColumns: isOwner ? '1fr' : '1fr', gap: '10px' }}>
                     {isOwner && (
                         <>
-                            <button className="nb-btn-primary" onClick={onHeartbeat} style={{ background: '#3B82F6', borderRadius: '18px', padding: '20px' }}>
-                                <Heart size={22} fill="#fff" />
-                                Send Protection Heartbeat
+                            <button className="nb-btn-primary" onClick={onHeartbeat} style={{ padding: '16px', borderRadius: '14px', fontSize: '15px' }}>
+                                <Heart size={18} fill="#fff" />
+                                Send Heartbeat
                             </button>
-                            <button className="nb-btn-secondary" onClick={onWithdraw} style={{ background: '#FFFFFF', border: '1px solid #E5E5EA', borderRadius: '18px', padding: '18px' }}>
-                                <ArrowUpRight size={20} color="#3B82F6" />
-                                Withdraw Funds
+                            <button className="nb-btn-secondary" onClick={onWithdraw} style={{ padding: '14px', borderRadius: '14px', fontSize: '14px', background: '#fff' }}>
+                                <ArrowUpRight size={16} color="#3B82F6" />
+                                Withdraw
                             </button>
                         </>
                     )}
 
                     {isBeneficiary && isExpired && !vaultState.released && (
-                        <button className="nb-btn-primary" style={{ background: '#16C784', borderRadius: '18px', padding: '20px' }} onClick={onClaim}>
-                            <Unlock size={22} fill="#fff" />
-                            Claim Inheritance Now
+                        <button className="nb-btn-primary" style={{ background: '#16C784', padding: '16px', borderRadius: '14px' }} onClick={onClaim}>
+                            <Unlock size={18} fill="#fff" />
+                            Claim Inheritance
                         </button>
                     )}
                 </div>
 
-                {/* Details Section (White List Items) */}
+                {/* Details Section (Compact List) */}
                 <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '0 4px' }}>
-                        <span style={{ fontSize: '18px', fontWeight: 800, color: '#1C1C1E' }}>Vault Protocol</span>
-                        <MoreHorizontal size={20} color="#8E8E93" />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '0 4px' }}>
+                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#1C1C1E' }}>Protocol Details</span>
+                        <MoreHorizontal size={18} color="#8E8E93" />
                     </div>
 
-                    <div className="nb-list-item" style={{ background: '#FFFFFF', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', borderRadius: '20px' }}>
-                        <div className="nb-list-icon" style={{ background: '#F2F2F7', color: '#3B82F6' }}><Timer size={24} /></div>
-                        <div className="nb-list-info">
-                            <div className="nb-list-title" style={{ color: '#1C1C1E', fontWeight: 700 }}>Security Timer</div>
-                            <div className="nb-list-subtitle" style={{ color: '#8E8E93' }}>Time remaining until release</div>
+                    <div className="nb-list-item" style={{ padding: '12px', marginBottom: '8px', borderRadius: '16px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                        <div className="nb-list-icon" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><Timer size={20} /></div>
+                        <div className="nb-list-info" style={{ gap: '1px' }}>
+                            <div className="nb-list-title" style={{ fontSize: '14px' }}>Security Timer</div>
+                            <div className="nb-list-subtitle" style={{ fontSize: '11px' }}>Release countdown</div>
                         </div>
-                        <div className="nb-list-value" style={{ color: '#1C1C1E' }}>
+                        <div className="nb-list-value">
                             <Countdown lastHeartbeat={vaultState.lastHeartbeat} lockDuration={vaultState.lockDuration} released={vaultState.released} compact />
                         </div>
                     </div>
 
-                    <div className="nb-list-item" style={{ background: '#FFFFFF', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', borderRadius: '20px' }}>
-                        <div className="nb-list-icon" style={{ background: '#F2F2F7', color: '#16C784' }}><Shield size={24} /></div>
+                    <div className="nb-list-item" style={{ padding: '12px', marginBottom: '8px', borderRadius: '16px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                        <div className="nb-list-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', color: '#16C784' }}><Shield size={20} /></div>
                         <div className="nb-list-info">
-                            <div className="nb-list-title" style={{ color: '#1C1C1E', fontWeight: 700 }}>Vault Status</div>
-                            <div className="nb-list-subtitle" style={{ color: '#8E8E93' }}>{vaultState.released ? 'Funds Released' : 'Monitoring Active'}</div>
+                            <div className="nb-list-title" style={{ fontSize: '14px' }}>Status</div>
+                            <div className="nb-list-subtitle" style={{ fontSize: '11px' }}>System health</div>
                         </div>
-                        <div className="nb-list-value" style={{ color: vaultState.released ? '#FF3B30' : '#16C784', fontWeight: 800 }}>
+                        <div className="nb-list-value" style={{ color: vaultState.released ? '#FF3B30' : '#16C784', fontSize: '13px', fontWeight: 800 }}>
                             {vaultState.released ? 'RELEASED' : 'SECURED'}
                         </div>
                     </div>
 
-                    <div className="nb-list-item" style={{ background: '#FFFFFF', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', borderRadius: '20px' }} onClick={() => copyToClipboard(vaultState.beneficiary)}>
-                        <div className="nb-list-icon" style={{ background: '#F2F2F7', color: '#3B82F6' }}><Wallet size={24} /></div>
+                    <div className="nb-list-item" style={{ padding: '12px', marginBottom: '8px', borderRadius: '16px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }} onClick={() => copyToClipboard(vaultState.beneficiary)}>
+                        <div className="nb-list-icon" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><Wallet size={20} /></div>
                         <div className="nb-list-info">
-                            <div className="nb-list-title" style={{ color: '#1C1C1E', fontWeight: 700 }}>Beneficiary</div>
-                            <div className="nb-list-subtitle" style={{ color: '#8E8E93' }}>Inheritance recipient</div>
+                            <div className="nb-list-title" style={{ fontSize: '14px' }}>Beneficiary</div>
+                            <div className="nb-list-subtitle" style={{ fontSize: '11px' }}>Recipient</div>
                         </div>
-                        <div className="nb-list-value" style={{ color: '#3B82F6' }}>
+                        <div className="nb-list-value" style={{ color: '#3B82F6', fontSize: '13px' }}>
                             {formatAddr(vaultState.beneficiary)}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Bottom Nav Simulation */}
+            {/* Subtle Bottom Nav */}
             <div style={{ 
-                padding: '16px 32px 32px', 
+                padding: '12px 32px 24px', 
                 background: '#FFFFFF', 
                 borderTop: '1px solid #E5E5EA',
                 display: 'flex', 
                 justifyContent: 'space-between',
                 alignItems: 'center'
             }}>
-                <Wallet size={26} color="#3B82F6" />
-                <Search size={26} color="#C7C7CC" />
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-48px', border: '6px solid #F2F2F7', boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)' }}>
-                    <Asterisk size={28} color="#fff" strokeWidth={3} />
+                <Wallet size={22} color="#3B82F6" />
+                <Search size={22} color="#C7C7CC" />
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-40px', border: '5px solid #F2F2F7', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)' }}>
+                    <Asterisk size={24} color="#fff" strokeWidth={3} />
                 </div>
-                <Timer size={26} color="#C7C7CC" />
-                <MoreHorizontal size={26} color="#C7C7CC" />
+                <Timer size={22} color="#C7C7CC" />
+                <MoreHorizontal size={22} color="#C7C7CC" />
             </div>
         </div>
     )
