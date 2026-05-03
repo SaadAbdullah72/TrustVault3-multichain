@@ -18,7 +18,8 @@ import {
     History,
     Menu,
     X,
-    ArrowRight
+    ArrowRight,
+    Code
 } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import { useVaultActions } from '../hooks/useVaultActions'
@@ -73,7 +74,7 @@ export const VaultPage: React.FC = () => {
 
     // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard'
     const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard'>('landing')
-    const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings'>('dashboard')
+    const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings' | 'api'>('dashboard')
 
     // Vault Data
     const [userVaults, setUserVaults] = useState<string[]>([])
@@ -302,6 +303,9 @@ export const VaultPage: React.FC = () => {
                         </button>
                         <button onClick={() => setCurrentTab('settings')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'settings' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'settings' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Settings size={20} /> Settings
+                        </button>
+                        <button onClick={() => setCurrentTab('api')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'api' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'api' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                            <Code size={20} /> API & SDK
                         </button>
                     </nav>
 

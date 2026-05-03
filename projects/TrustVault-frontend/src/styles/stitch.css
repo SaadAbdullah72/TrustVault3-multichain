@@ -18,14 +18,17 @@ body {
   background: var(--nb-bg);
   color: var(--nb-text-primary);
   font-family: 'Inter', -apple-system, sans-serif;
-  margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .app-shell {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -78,10 +81,12 @@ body {
 @media (max-width: 1023px) {
   .desktop-sidebar { display: none; }
   .wallet-container { 
-    height: 100vh; 
+    height: 100vh;
+    height: 100dvh;
     max-height: none; 
     border-radius: 0; 
     max-width: 100%;
+    border: none;
   }
 }
 

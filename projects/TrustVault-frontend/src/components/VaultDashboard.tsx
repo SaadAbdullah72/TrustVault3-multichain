@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight, Code } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
 import { Toast } from './Toast'
@@ -21,8 +21,8 @@ export interface VaultDashboardProps {
     onRefresh?: () => void;
     onBack?: () => void;
     uiStatus: any;
-    currentTab: 'dashboard' | 'security' | 'history' | 'settings';
-    setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'settings') => void;
+    currentTab: 'dashboard' | 'security' | 'history' | 'settings' | 'api';
+    setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'settings' | 'api') => void;
 }
 
 export default function VaultDashboard({
@@ -138,6 +138,53 @@ export default function VaultDashboard({
                             <div style={{ marginTop: '12px', background: '#080e17', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Network</div>
                                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{currentChain.name}</div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            case 'api':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '10px 0' }}>
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, #111e2f 0%, #0d1724 100%)', 
+                            padding: '32px 24px', 
+                            borderRadius: '24px', 
+                            border: '1px solid rgba(255,255,255,0.1)', 
+                            color: '#fff',
+                            textAlign: 'center',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%', filter: 'blur(30px)' }}></div>
+                            
+                            <div style={{ width: '64px', height: '64px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                                <Code size={32} color="#10b981" />
+                            </div>
+                            
+                            <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '12px' }}>TrustVault API & SDK</h3>
+                            <div style={{ display: 'inline-block', padding: '4px 12px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '20px', fontSize: '11px', fontWeight: 800, color: '#10b981', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                Coming Soon
+                            </div>
+                            
+                            <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.6, marginBottom: '32px', maxWidth: '340px', margin: '0 auto 32px' }}>
+                                We are building a powerful multi-chain SDK to bring decentralized inheritance to every Web3 application.
+                            </p>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: '#10b981', marginTop: '2px' }}><Shield size={18} /></div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: '14px' }}>Inheritance-as-a-Service</div>
+                                        <div style={{ fontSize: '12px', color: '#64748b' }}>Integrate dead man's switches into any wallet or game.</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: '#10b981', marginTop: '2px' }}><Activity size={18} /></div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: '14px' }}>Global Heartbeat Monitor</div>
+                                        <div style={{ fontSize: '12px', color: '#64748b' }}>Centralized monitoring with decentralized execution.</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -331,8 +378,12 @@ export default function VaultDashboard({
                     <span style={{ fontSize: '10px', fontWeight: 700 }}>Activity</span>
                 </button>
                 <button onClick={() => setCurrentTab('settings')} style={{ background: 'none', border: 'none', color: currentTab === 'settings' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <MoreHorizontal size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>More</span>
+                    <Settings size={22} />
+                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Settings</span>
+                </button>
+                <button onClick={() => setCurrentTab('api')} style={{ background: 'none', border: 'none', color: currentTab === 'api' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <Code size={22} />
+                    <span style={{ fontSize: '10px', fontWeight: 700 }}>API</span>
                 </button>
             </div>
 
