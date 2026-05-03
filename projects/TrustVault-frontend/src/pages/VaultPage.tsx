@@ -17,7 +17,8 @@ import {
     Settings,
     History,
     Menu,
-    X
+    X,
+    ArrowRight
 } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import { useVaultActions } from '../hooks/useVaultActions'
@@ -35,7 +36,8 @@ export const VaultPage: React.FC = () => {
         adapter, 
         walletAddress, 
         isConnected, 
-        disconnectWallet 
+        disconnectWallet,
+        connectWallet
     } = useChain()
 
     const {
@@ -48,11 +50,11 @@ export const VaultPage: React.FC = () => {
         handleWithdraw
     } = useVaultActions()
 
-    // Navigation State
-    const [viewMode, setViewMode] = useState<'landing' | 'app'>('landing')
+    // Explicit Navigation Step: 'landing' | 'connect' | 'dashboard'
+    const [step, setStep] = useState<'landing' | 'connect' | 'dashboard'>('landing')
     const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings'>('dashboard')
 
-    // Data State
+    // Vault Data
     const [userVaults, setUserVaults] = useState<string[]>([])
     const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
@@ -70,7 +72,7 @@ export const VaultPage: React.FC = () => {
 
     // Discover vaults
     const discoverVaults = useCallback(async () => {
-        if (!walletAddress) return
+        if (!walletAddress || walletAddress === 'undefined') return
         setIsDiscovering(true)
         try {
             const vaults = await adapter.discoverVaults(walletAddress)
@@ -78,31 +80,30 @@ export const VaultPage: React.FC = () => {
             
             if (vaults.length > 0 && !selectedVaultId) {
                 setSelectedVaultId(vaults[vaults.length - 1])
-            } else if (vaults.length === 0) {
-                setSelectedVaultId(null)
-                setVaultState(null)
             }
         } catch (e) {
-            console.error('Failed to discover vaults:', e)
+            console.error('Discovery failed:', e)
         } finally {
             setIsDiscovering(false)
         }
     }, [adapter, walletAddress, selectedVaultId])
 
     useEffect(() => {
-        if (isConnected) discoverVaults()
+        if (isConnected && walletAddress && walletAddress !== 'undefined') {
+            discoverVaults()
+        }
     }, [isConnected, currentChain.id, walletAddress, discoverVaults])
 
     // Load vault data
     const loadVaultState = useCallback(async () => {
-        if (!selectedVaultId) return
+        if (!selectedVaultId || !walletAddress || walletAddress === 'undefined') return
         try {
             const state = await adapter.fetchVaultState(selectedVaultId)
             const balance = await adapter.getVaultBalance(selectedVaultId)
             setVaultState(state)
             setVaultBalance(balance)
             
-            if (state && walletAddress) {
+            if (state) {
                 const isOwner = currentChain.type === 'solana' ? 
                     state.owner === walletAddress : 
                     state.owner.toLowerCase() === walletAddress.toLowerCase()
@@ -123,19 +124,15 @@ export const VaultPage: React.FC = () => {
         if (selectedVaultId) loadVaultState()
     }, [selectedVaultId, loadVaultState])
 
-    // Role checks
+    // Derive roles
     const isOwner = useMemo(() => {
-        if (!vaultState || !walletAddress) return false
-        const own = String(vaultState.owner)
-        const wallet = String(walletAddress)
-        return currentChain.type === 'solana' ? own === wallet : own.toLowerCase() === wallet.toLowerCase()
+        if (!vaultState || !walletAddress || walletAddress === 'undefined') return false
+        return currentChain.type === 'solana' ? vaultState.owner === walletAddress : vaultState.owner.toLowerCase() === walletAddress.toLowerCase()
     }, [walletAddress, vaultState, currentChain])
 
     const isBeneficiary = useMemo(() => {
-        if (!vaultState || !walletAddress) return false
-        const ben = String(vaultState.beneficiary)
-        const wallet = String(walletAddress)
-        return currentChain.type === 'solana' ? ben === wallet : ben.toLowerCase() === wallet.toLowerCase()
+        if (!vaultState || !walletAddress || walletAddress === 'undefined') return false
+        return currentChain.type === 'solana' ? vaultState.beneficiary === walletAddress : vaultState.beneficiary.toLowerCase() === walletAddress.toLowerCase()
     }, [walletAddress, vaultState, currentChain])
 
     const now = Math.floor(Date.now() / 1000)
@@ -149,58 +146,66 @@ export const VaultPage: React.FC = () => {
 
     const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
-    const handleCreateVaultSubmit = async () => {
-        await handleCreateVault(beneficiaryInput, lockDurationInput, depositInput, (vaultId) => {
-            setSelectedVaultId(vaultId)
-            setShowCreateForm(false)
-            discoverVaults()
-        })
+    // Navigation Actions
+    const handleLaunchApp = () => setStep('connect')
+    
+    const handleGoBackToLanding = () => {
+        setStep('landing')
+        disconnectWallet()
     }
 
-    const handleHeartbeatAction = async () => {
-        if (selectedVaultId) {
-            await handleHeartbeat(selectedVaultId, loadVaultState)
+    const handleProceedToDashboard = () => {
+        if (isConnected && walletAddress && walletAddress !== 'undefined') {
+            setStep('dashboard')
+        } else {
+            alert('Please connect your wallet correctly first.')
         }
     }
 
-    const handleWithdrawAction = async () => {
-        const amountStr = window.prompt(`Enter amount to withdraw (${currentChain.nativeCurrency.symbol}):`)
-        if (amountStr) {
-            const amount = parseFloat(amountStr)
-            if (!isNaN(amount) && amount > 0) {
-                await handleWithdraw(selectedVaultId!, amount, loadVaultState)
-            }
-        }
+    // RENDER LOGIC
+    if (step === 'landing') {
+        return <LandingPage onLaunch={handleLaunchApp} currentChain={currentChain} />
     }
 
-    // Navigation logic: If user clicks "Launch App" or is already connected
-    if (viewMode === 'landing' && !isConnected) {
-        return <LandingPage onLaunch={() => setViewMode('app')} />
-    }
-
-    if (!isConnected) {
+    if (step === 'connect') {
         return (
             <div className="wallet-shell">
+                {/* Fixed Back Button */}
                 <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
-                    <button onClick={() => setViewMode('landing')} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
+                    <button onClick={handleGoBackToLanding} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                         <ArrowLeft size={18} />
                         Back to Home
                     </button>
                 </div>
+
                 <div className="wallet-container">
-                    <ConnectScreen onConnect={handleConnect} connecting={uiStatus.loading} />
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <ConnectScreen onConnect={handleConnect} connecting={uiStatus.loading} />
+                        
+                        {/* Manual Proceed Button - ONLY show if connected and address is valid */}
+                        {isConnected && walletAddress && walletAddress !== 'undefined' && (
+                            <div style={{ position: 'absolute', bottom: '40px', left: '32px', right: '32px', zIndex: 50 }}>
+                                <button className="nb-btn-primary" onClick={handleProceedToDashboard} style={{ width: '100%', background: '#16C784', padding: '20px' }}>
+                                    <span>Proceed to Dashboard</span>
+                                    <ArrowRight size={20} />
+                                </button>
+                                <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: '#8E8E93' }}>
+                                    Connected: {formatAddr(walletAddress)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         )
     }
 
+    // DASHBOARD STEP
     return (
         <div className="wallet-shell">
             <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => {}} />
 
-            {/* Layout Wrapper: desktop-mode adds sidebar on large screens */}
             <div className="wallet-container desktop-mode">
-                
                 {/* Desktop Sidebar */}
                 <div className="desktop-sidebar">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
@@ -212,46 +217,29 @@ export const VaultPage: React.FC = () => {
 
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                         <button onClick={() => setCurrentTab('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'dashboard' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'dashboard' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                            <Home size={20} />
-                            Dashboard
+                            <Home size={20} /> Dashboard
                         </button>
                         <button onClick={() => setCurrentTab('security')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'security' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'security' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                            <Shield size={20} />
-                            Security
-                        </button>
-                        <button onClick={() => setCurrentTab('history')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'history' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'history' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                            <History size={20} />
-                            Activity
-                        </button>
-                        <button onClick={() => setCurrentTab('settings')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'settings' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'settings' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                            <Settings size={20} />
-                            Settings
+                            <Shield size={20} /> Security
                         </button>
                     </nav>
 
                     <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid #E5E5EA' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#F2F2F7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Wallet size={20} color="#3B82F6" />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '14px', fontWeight: 700 }}>{formatAddr(walletAddress!)}</div>
-                                <div style={{ fontSize: '11px', color: '#8E8E93' }}>Connected Wallet</div>
-                            </div>
-                        </div>
+                        <button onClick={() => setStep('connect')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: '#F2F2F7', border: 'none', color: '#1C1C1E', fontWeight: 700, cursor: 'pointer', marginBottom: '12px' }}>
+                            <ArrowLeft size={18} /> Exit Dashboard
+                        </button>
                         <button onClick={handleDisconnect} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: '#FFF0F0', border: 'none', color: '#FF3B30', fontWeight: 700, cursor: 'pointer' }}>
-                            <LogOut size={20} />
-                            Disconnect
+                            <LogOut size={20} /> Disconnect
                         </button>
                     </div>
                 </div>
 
-                {/* Main Content (Dashboard/Mobile View) */}
+                {/* Main Content Area */}
                 <div className="desktop-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
                     {isDiscovering ? (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>SYNCING ASSETS...</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>FETCHING VAULTS...</span>
                         </div>
                     ) : selectedVaultId && vaultState ? (
                         <VaultDashboard
@@ -265,8 +253,8 @@ export const VaultPage: React.FC = () => {
                             isExpired={isExpired}
                             formatAddr={formatAddr}
                             copyToClipboard={copyToClipboard}
-                            onHeartbeat={handleHeartbeatAction}
-                            onWithdraw={handleWithdrawAction}
+                            onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
+                            onWithdraw={() => handleWithdraw(selectedVaultId!, 0, loadVaultState)} // Simplified for now
                             onClaim={() => handleClaim(selectedVaultId!, loadVaultState)}
                             currentTab={currentTab}
                             setCurrentTab={setCurrentTab}
@@ -276,37 +264,36 @@ export const VaultPage: React.FC = () => {
                             <div style={{ width: '96px', height: '96px', margin: '0 auto 32px', background: '#fff', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
                                 <Shield size={48} color="#3B82F6" />
                             </div>
-                            <h2 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', color: '#1C1C1E' }}>No Vault Found</h2>
-                            <p style={{ color: '#8E8E93', fontSize: '18px', marginBottom: '48px', maxWidth: '400px' }}>Start your protection journey by creating a secure vault on {currentChain.name}.</p>
-                            <button className="nb-btn-primary" style={{ padding: '20px 60px' }} onClick={() => setShowCreateForm(true)}>
-                                <Plus size={22} />
-                                Create New Vault
+                            <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#1C1C1E', marginBottom: '16px' }}>No Vault Found</h2>
+                            <p style={{ color: '#8E8E93', fontSize: '16px', marginBottom: '40px' }}>Your address is <b>{formatAddr(walletAddress || '')}</b>. Start your legacy on {currentChain.name}.</p>
+                            <button className="nb-btn-primary" style={{ padding: '18px 48px' }} onClick={() => setShowCreateForm(true)}>
+                                <Plus size={20} /> Create New Vault
                             </button>
                         </div>
                     )}
 
-                    {/* Mobile Create Form Overlay */}
+                    {/* Create Form Overlay */}
                     {showCreateForm && (
                         <div style={{ position: 'absolute', inset: 0, zIndex: 1000, background: '#F2F2F7', display: 'flex', flexDirection: 'column', padding: '32px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
-                                <button onClick={() => setShowCreateForm(false)} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+                                <button onClick={() => setShowCreateForm(false)} style={{ background: '#fff', border: 'none', color: '#000', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
                                 <span style={{ fontWeight: 800, fontSize: '15px' }}>NEW PROTOCOL</span>
-                                <div style={{ width: 24 }} />
+                                <div style={{ width: 48 }} />
                             </div>
 
-                            <div style={{ maxWidth: '500px', margin: '0 auto', width: '100%', background: '#fff', padding: '32px', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-                                <div style={{ marginBottom: '24px' }}>
+                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#fff', padding: '32px', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                                <div style={{ marginBottom: '20px' }}>
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#8E8E93', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
-                                    <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder="0x... or Solana Address" style={{ width: '100%', background: '#F2F2F7', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }} />
+                                    <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder="0x... or Solana Address" style={{ width: '100%', background: '#F2F2F7', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none' }} />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '40px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#8E8E93', marginBottom: '12px', textTransform: 'uppercase' }}>Timer (Sec)</label>
-                                        <input type="number" value={lockDurationInput} onChange={(e) => setLockDurationInput(e.target.value)} style={{ width: '100%', background: '#F2F2F7', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+                                    <div style={{ background: '#F2F2F7', padding: '16px', borderRadius: '16px' }}>
+                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#8E8E93', marginBottom: '8px' }}>TIMER (SEC)</label>
+                                        <input type="number" value={lockDurationInput} onChange={(e) => setLockDurationInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#000', fontSize: '16px', outline: 'none' }} />
                                     </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#8E8E93', marginBottom: '12px', textTransform: 'uppercase' }}>Deposit ({currentChain.nativeCurrency.symbol})</label>
-                                        <input type="number" value={depositInput} onChange={(e) => setDepositInput(e.target.value)} style={{ width: '100%', background: '#F2F2F7', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '20px', color: '#000', fontSize: '16px', outline: 'none' }} />
+                                    <div style={{ background: '#F2F2F7', padding: '16px', borderRadius: '16px' }}>
+                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#8E8E93', marginBottom: '8px' }}>DEPOSIT ({currentChain.nativeCurrency.symbol})</label>
+                                        <input type="number" value={depositInput} onChange={(e) => setDepositInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#000', fontSize: '16px', outline: 'none' }} />
                                     </div>
                                 </div>
                                 <button className="nb-btn-primary" style={{ width: '100%', padding: '20px' }} onClick={handleCreateVaultSubmit}>Initiate Protection</button>
@@ -315,7 +302,7 @@ export const VaultPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Account Selector (Mobile Only in Bottom Nav, Desktop has Sidebar) */}
+                {/* Mobile Dropdown (Dashboard mode only) */}
                 {!showCreateForm && (
                     <div className="mobile-only-selector">
                         <VaultDropdown
@@ -345,7 +332,6 @@ export const VaultPage: React.FC = () => {
             <style>{`
                 @media (min-width: 1024px) {
                     .mobile-only-selector { display: none; }
-                    .desktop-content { padding-bottom: 0 !important; }
                 }
             `}</style>
         </div>
