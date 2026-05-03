@@ -38,7 +38,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                     Protect your assets with a dead man's switch. If something happens to you, your crypto goes to your loved ones.
                 </p>
 
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px' }}>
                     <div style={{ 
                         position: 'absolute', 
                         width: '320px', 
