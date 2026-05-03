@@ -9,7 +9,9 @@ interface ConnectScreenProps {
 }
 
 export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onContinue, connecting }) => {
-    const { currentChain, isConnected } = useChain()
+    const { currentChain, isConnected, walletAddress } = useChain()
+
+    const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
     return (
         <div style={{ 
@@ -30,7 +32,7 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
                 </div>
             </div>
 
-            {/* Premium Asset Visual - Keys */}
+            {/* Content */}
             <div style={{ 
                 flex: 1, 
                 display: 'flex', 
@@ -58,6 +60,9 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
                     <img 
                         src="/device_keys.png" 
                         alt="Vault Keys" 
+                        loading="eager"
+                        decoding="async"
+                        className="fade-in-image"
                         style={{ 
                             width: '240px', 
                             height: 'auto', 
@@ -67,9 +72,28 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
                         }} 
                     />
                 </div>
+
+                {/* Show connected wallet address */}
+                {isConnected && walletAddress && (
+                    <div style={{ 
+                        marginTop: '24px', 
+                        background: 'rgba(16, 185, 129, 0.1)', 
+                        border: '1px solid rgba(16, 185, 129, 0.2)', 
+                        borderRadius: '20px', 
+                        padding: '16px 28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        boxShadow: '0 0 20px rgba(16, 185, 129, 0.05)'
+                    }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }}></div>
+                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#fff', letterSpacing: '0.5px' }}>{formatAddr(walletAddress)}</span>
+                        <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: 600 }}>• {currentChain.name}</span>
+                    </div>
+                )}
             </div>
 
-            {/* Bottom Content Area */}
+            {/* Bottom */}
             <div style={{ padding: '32px' }}>
                 {isConnected ? (
                     <button 
@@ -125,6 +149,13 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
             </div>
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
+                .fade-in-image {
+                    animation: fadeIn 0.8s ease-out forwards;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
             `}</style>
         </div>
     )

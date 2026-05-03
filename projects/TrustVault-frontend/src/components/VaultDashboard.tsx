@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Wallet, Timer, FileText, Copy, Heart, Unlock, ArrowUpRight, Asterisk, MoreHorizontal, Search, Bell, MessageCircle, Plus, Home, History, Settings, QrCode, Share2, Activity, User, Clock, Zap } from 'lucide-react'
+import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
+import { Toast } from './Toast'
 
 export interface VaultDashboardProps {
     vaultState: any;
@@ -15,8 +16,9 @@ export interface VaultDashboardProps {
     formatAddr: (addr: string) => string;
     copyToClipboard: (text: string) => void;
     onHeartbeat: () => void;
-    onWithdraw: () => void;
+    onWithdraw: (amount: number) => void;
     onClaim: () => void;
+    onRefresh?: () => void;
     currentTab: 'dashboard' | 'security' | 'history' | 'settings';
     setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'settings') => void;
 }
@@ -35,15 +37,42 @@ export default function VaultDashboard({
     onHeartbeat,
     onWithdraw,
     onClaim,
+    onRefresh,
     currentTab,
     setCurrentTab
 }: VaultDashboardProps) {
     const { t } = useTranslation()
     const [showBalanceHidden, setShowBalanceHidden] = useState(false)
+    const [showWithdrawInput, setShowWithdrawInput] = useState(false)
+    const [withdrawAmount, setWithdrawAmount] = useState('')
+    const [copyToast, setCopyToast] = useState(false)
 
     const symbol = currentChain.nativeCurrency.symbol
     const statusText = vaultState.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
     const statusColor = vaultState.released ? '#10b981' : isExpired ? '#ef4444' : '#10b981'
+
+    // Correct address type label per chain
+    const getAddressLabel = () => {
+        switch(currentChain.type) {
+            case 'evm': return `${currentChain.nativeCurrency.symbol} Address`
+            case 'solana': return 'Solana Address'
+            case 'algorand': return 'Algorand Address'
+            default: return 'Wallet Address'
+        }
+    }
+
+    const handleCopyVault = () => {
+        copyToClipboard(vaultAddress)
+        setCopyToast(true)
+    }
+
+    const handleWithdrawSubmit = () => {
+        const amt = parseFloat(withdrawAmount)
+        if (isNaN(amt) || amt <= 0) return
+        onWithdraw(amt)
+        setShowWithdrawInput(false)
+        setWithdrawAmount('')
+    }
 
     const renderContent = () => {
         switch (currentTab) {
@@ -67,6 +96,15 @@ export default function VaultDashboard({
                                     </div>
                                     <div style={{ fontSize: '12px', fontWeight: 700, color: statusColor, background: `${statusColor}20`, padding: '4px 10px', borderRadius: '8px' }}>{statusText}</div>
                                 </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: '15px' }}>Your Role</div>
+                                        <div style={{ fontSize: '12px', color: '#94a3b8' }}>In this vault</div>
+                                    </div>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                                        {isOwner ? 'OWNER' : isBeneficiary ? 'BENEFICIARY' : 'VIEWER'}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -86,12 +124,17 @@ export default function VaultDashboard({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div style={{ background: '#111e2f', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px' }}>Protocol Settings</h3>
-                            <button className="nb-btn-secondary" onClick={() => copyToClipboard(vaultAddress)} style={{ width: '100%', justifyContent: 'flex-start', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '14px', borderRadius: '12px', cursor: 'pointer' }}>
+                            <button onClick={handleCopyVault} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'flex-start', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '14px', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
                                 <Copy size={18} /> Copy Vault Address
                             </button>
-                            <button className="nb-btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', background: 'rgba(255,255,255,0.1)', border: 'none', marginTop: '12px', color: '#fff', padding: '14px', borderRadius: '12px', cursor: 'pointer' }}>
-                                <QrCode size={18} /> Show QR Code
-                            </button>
+                            <div style={{ marginTop: '16px', background: '#080e17', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Vault Address</div>
+                                <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff', wordBreak: 'break-all' }}>{vaultAddress}</div>
+                            </div>
+                            <div style={{ marginTop: '12px', background: '#080e17', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Network</div>
+                                <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{currentChain.name}</div>
+                            </div>
                         </div>
                     </div>
                 )
@@ -115,7 +158,7 @@ export default function VaultDashboard({
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Action Buttons — Heartbeat, Withdraw, Refresh */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                             <button onClick={onHeartbeat} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -123,19 +166,41 @@ export default function VaultDashboard({
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Heartbeat</span>
                             </button>
-                            <button onClick={onWithdraw} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <button onClick={() => setShowWithdrawInput(true)} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <ArrowUpRight size={22} color="#000" />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Withdraw</span>
                             </button>
-                            <button onClick={() => copyToClipboard(vaultAddress)} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <button onClick={onRefresh} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Copy size={22} color="#fff" />
+                                    <RefreshCw size={22} color="#fff" />
                                 </div>
-                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Deposit</span>
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Refresh</span>
                             </button>
                         </div>
+
+                        {/* Withdraw Amount Input (shown on demand) */}
+                        {showWithdrawInput && (
+                            <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '20px' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Withdraw Amount ({symbol})</div>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <input 
+                                        type="number" 
+                                        value={withdrawAmount} 
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                        placeholder={`Max: ${vaultBalance.toFixed(4)}`}
+                                        style={{ flex: 1, background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '14px', color: '#fff', fontSize: '16px', outline: 'none' }}
+                                    />
+                                    <button onClick={handleWithdrawSubmit} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: '12px', padding: '14px 20px', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
+                                        Send
+                                    </button>
+                                </div>
+                                <button onClick={() => { setShowWithdrawInput(false); setWithdrawAmount('') }} style={{ marginTop: '8px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
 
                         {/* Countdown Timer */}
                         <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -181,29 +246,47 @@ export default function VaultDashboard({
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0B131E' }}>
+            {/* Copy toast */}
+            {copyToast && <Toast message="Address copied!" type="success" onClose={() => setCopyToast(false)} duration={2000} />}
+
             {/* Header */}
-            <div style={{ background: '#0B131E', padding: '24px 20px 32px', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ background: '#0B131E', padding: '24px 20px 20px', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Shield size={18} />
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '16px' }}>TRUSTVAULT</span>
+                        <span style={{ fontWeight: 800, fontSize: '16px', letterSpacing: '0.5px' }}>TRUSTVAULT</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', background: '#111e2f', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            {walletAddress ? formatAddr(walletAddress) : ''}
-                        </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {walletAddress && (
+                            <div style={{ 
+                                fontSize: '13px', 
+                                fontWeight: 800, 
+                                color: '#fff', 
+                                background: 'rgba(16, 185, 129, 0.1)', 
+                                padding: '8px 16px', 
+                                borderRadius: '12px', 
+                                border: '1px solid rgba(16, 185, 129, 0.2)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px',
+                                boxShadow: '0 0 15px rgba(16, 185, 129, 0.05)'
+                            }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></div>
+                                {formatAddr(walletAddress)}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Content Area */}
+            {/* Content */}
             <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                 {renderContent()}
             </div>
 
-            {/* Bottom Nav (Mobile Only) */}
+            {/* Bottom Nav (Mobile) */}
             <div className="mobile-nav" style={{ 
                 padding: '12px 24px 28px', 
                 background: '#0d1724', 
@@ -233,6 +316,13 @@ export default function VaultDashboard({
             <style>{`
                 @media (min-width: 1024px) {
                     .mobile-nav { display: none !important; }
+                }
+                .fade-in-image {
+                    animation: fadeIn 0.8s ease-out forwards;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
             `}</style>
         </div>
