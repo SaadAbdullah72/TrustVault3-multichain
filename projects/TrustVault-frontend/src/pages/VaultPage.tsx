@@ -50,8 +50,8 @@ export const VaultPage: React.FC = () => {
         handleWithdraw
     } = useVaultActions()
 
-    // Explicit Navigation Step: 'landing' | 'connect' | 'dashboard'
-    const [step, setStep] = useState<'landing' | 'connect' | 'dashboard'>('landing')
+    // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard'
+    const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard'>('landing')
     const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings'>('dashboard')
 
     // Vault Data
@@ -154,9 +154,9 @@ export const VaultPage: React.FC = () => {
         disconnectWallet()
     }
 
-    const handleProceedToDashboard = () => {
+    const handleProceedToActionSelect = () => {
         if (isConnected && walletAddress && walletAddress !== 'undefined') {
-            setStep('dashboard')
+            setStep('actionSelect')
         } else {
             alert('Please connect your wallet correctly first.')
         }
@@ -172,21 +172,21 @@ export const VaultPage: React.FC = () => {
             <div className="wallet-shell">
                 {/* Fixed Back Button */}
                 <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
-                    <button onClick={handleGoBackToLanding} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                    <button onClick={handleGoBackToLanding} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
                         <ArrowLeft size={18} />
-                        Back to Home
+                        Back
                     </button>
                 </div>
 
-                <div className="wallet-container">
+                <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
                         <ConnectScreen onConnect={handleConnect} connecting={uiStatus.loading} />
                         
                         {/* Manual Proceed Button - ONLY show if connected and address is valid */}
                         {isConnected && walletAddress && walletAddress !== 'undefined' && (
                             <div style={{ position: 'absolute', bottom: '40px', left: '32px', right: '32px', zIndex: 50 }}>
-                                <button className="nb-btn-primary" onClick={handleProceedToDashboard} style={{ width: '100%', background: '#16C784', padding: '20px' }}>
-                                    <span>Proceed to Dashboard</span>
+                                <button onClick={handleProceedToActionSelect} style={{ width: '100%', background: '#fff', color: '#000', padding: '20px', borderRadius: '24px', border: 'none', fontSize: '16px', fontWeight: 700, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <span>Continue</span>
                                     <ArrowRight size={20} />
                                 </button>
                                 <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: '#8E8E93' }}>
@@ -194,6 +194,48 @@ export const VaultPage: React.FC = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (step === 'actionSelect') {
+        return (
+            <div className="wallet-shell">
+                <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
+                    <button onClick={() => setStep('connect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
+                        <ArrowLeft size={18} />
+                        Back
+                    </button>
+                </div>
+
+                <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', color: '#fff' }}>
+                        <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '16px', letterSpacing: '-0.5px' }}>
+                            You're set to go!
+                        </h1>
+                        <p style={{ fontSize: '14px', color: '#8E8E93', textAlign: 'center', maxWidth: '280px', marginBottom: '40px', lineHeight: 1.5 }}>
+                            You've successfully connected your wallet. Manage existing vaults or create a new one.
+                        </p>
+
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '40px' }}>
+                            <div style={{ position: 'absolute', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)', filter: 'blur(50px)' }}></div>
+                            <img src="/device_chip.png" alt="Smart Account" style={{ width: '220px', height: 'auto', zIndex: 1, filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))' }} />
+                        </div>
+
+                        <div style={{ width: '100%', padding: '0 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <button 
+                                onClick={() => { setShowCreateForm(false); setStep('dashboard'); }}
+                                style={{ width: '100%', padding: '18px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
+                                Check Existing Vaults
+                            </button>
+                            <button 
+                                onClick={() => { setShowCreateForm(true); setStep('dashboard'); }}
+                                style={{ width: '100%', padding: '18px', background: '#fff', color: '#000', border: 'none', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
+                                Create New Vault
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
