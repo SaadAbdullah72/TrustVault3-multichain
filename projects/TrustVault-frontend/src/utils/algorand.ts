@@ -71,6 +71,7 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
             if (appId && appId > 0) foundIds.add(appId.toString())
         })
 
+        /* 
         // 3. notePrefix search (REDUNDANT but fallback) - Use shorter prefix to avoid 500 error
         const shortPrefix = VAULT_NOTE_PREFIX + address.slice(0, 4)
         const notePrefixTxs: any = await indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(shortPrefix)).do().catch(() => ({ transactions: [] }))
@@ -78,6 +79,7 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
             const appId = tx['application-transaction']?.['application-id']
             if (appId && appId > 0) foundIds.add(appId.toString())
         })
+        */
 
         // 4. Supabase results
         supabaseOwner.forEach((id: string) => foundIds.add(id))

@@ -19,6 +19,8 @@ export interface VaultDashboardProps {
     onWithdraw: (amount: number) => void;
     onClaim: () => void;
     onRefresh?: () => void;
+    onBack?: () => void;
+    uiStatus: any;
     currentTab: 'dashboard' | 'security' | 'history' | 'settings';
     setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'settings') => void;
 }
@@ -38,6 +40,8 @@ export default function VaultDashboard({
     onWithdraw,
     onClaim,
     onRefresh,
+    onBack,
+    uiStatus,
     currentTab,
     setCurrentTab
 }: VaultDashboardProps) {
@@ -160,21 +164,33 @@ export default function VaultDashboard({
 
                         {/* Action Buttons — Heartbeat, Withdraw, Refresh */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                            <button onClick={onHeartbeat} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <button 
+                                onClick={onHeartbeat} 
+                                disabled={uiStatus.loading || isExpired}
+                                style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: uiStatus.loading || isExpired ? 0.5 : 1 }}
+                            >
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Heart size={22} color="#fff" fill="#fff" />
+                                    <Heart size={22} color="#fff" fill="#fff" className={uiStatus.loading ? 'pulse' : ''} />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Heartbeat</span>
                             </button>
-                            <button onClick={() => setShowWithdrawInput(true)} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <button 
+                                onClick={() => setShowWithdrawInput(true)} 
+                                disabled={uiStatus.loading}
+                                style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}
+                            >
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <ArrowUpRight size={22} color="#000" />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Withdraw</span>
                             </button>
-                            <button onClick={onRefresh} style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <button 
+                                onClick={onRefresh} 
+                                disabled={uiStatus.loading}
+                                style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}
+                            >
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <RefreshCw size={22} color="#fff" />
+                                    <RefreshCw size={22} color="#fff" className={uiStatus.loading ? 'spinning' : ''} />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Refresh</span>
                             </button>
@@ -193,7 +209,7 @@ export default function VaultDashboard({
                                         style={{ flex: 1, background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '14px', color: '#fff', fontSize: '16px', outline: 'none' }}
                                     />
                                     <button onClick={handleWithdrawSubmit} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: '12px', padding: '14px 20px', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
-                                        Send
+                                        Withdraw
                                     </button>
                                 </div>
                                 <button onClick={() => { setShowWithdrawInput(false); setWithdrawAmount('') }} style={{ marginTop: '8px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
@@ -252,11 +268,18 @@ export default function VaultDashboard({
             {/* Header */}
             <div style={{ background: '#0B131E', padding: '24px 20px 20px', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Shield size={18} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {onBack && (
+                            <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ArrowLeft size={20} />
+                            </button>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Shield size={16} />
+                            </div>
+                            <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>TRUSTVAULT 3</span>
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '16px', letterSpacing: '0.5px' }}>TRUSTVAULT</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {walletAddress && (
@@ -324,6 +347,10 @@ export default function VaultDashboard({
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+                .spinning { animation: spin 1s linear infinite; }
+                .pulse { animation: pulse 1s ease-in-out infinite; }
             `}</style>
         </div>
     )

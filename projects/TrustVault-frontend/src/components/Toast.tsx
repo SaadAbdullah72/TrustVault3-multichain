@@ -36,15 +36,9 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
 
     return (
         <div style={{
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: `translateX(-50%) translateY(${isVisible ? '0' : '-20px'})`,
             opacity: isVisible ? 1 : 0,
-            transition: 'all 0.3s ease',
-            zIndex: 9999,
-            maxWidth: '420px',
-            width: '90%',
+            transform: `translateY(${isVisible ? '0' : '-20px'})`,
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             background: c.bg,
             backdropFilter: 'blur(20px)',
             border: `1px solid ${c.border}`,
@@ -53,10 +47,12 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            marginBottom: '12px',
+            pointerEvents: 'auto'
         }}>
             <Icon size={20} color={c.icon} style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: '14px', fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>
+            <span style={{ flex: 1, fontSize: '13px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
                 {message}
             </span>
             <button onClick={() => { setIsVisible(false); setTimeout(onClose, 300) }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', flexShrink: 0 }}>
@@ -88,17 +84,27 @@ export const useToast = () => {
     }
 
     const ToastContainer = () => (
-        <>
-            {toasts.map((toast, index) => (
-                <div key={toast.id} style={{ position: 'fixed', top: `${20 + index * 80}px`, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, width: '90%', maxWidth: '420px' }}>
-                    <Toast
-                        message={toast.message}
-                        type={toast.type}
-                        onClose={() => removeToast(toast.id)}
-                    />
-                </div>
+        <div style={{ 
+            position: 'fixed', 
+            top: '24px', 
+            left: '50%', 
+            transform: 'translateX(-50%)', 
+            zIndex: 9999, 
+            width: '90%', 
+            maxWidth: '420px',
+            display: 'flex',
+            flexDirection: 'column',
+            pointerEvents: 'none'
+        }}>
+            {toasts.map((toast) => (
+                <Toast
+                    key={toast.id}
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => removeToast(toast.id)}
+                />
             ))}
-        </>
+        </div>
     )
 
     return { showToast, ToastContainer }

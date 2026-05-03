@@ -5,10 +5,11 @@ import ChainSwitcher from './ChainSwitcher'
 interface ConnectScreenProps {
     onConnect: () => void;
     onContinue?: () => void;
+    onDisconnect?: () => void;
     connecting?: boolean;
 }
 
-export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onContinue, connecting }) => {
+export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onContinue, onDisconnect, connecting }) => {
     const { currentChain, isConnected, walletAddress } = useChain()
 
     const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
@@ -77,18 +78,43 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
                 {isConnected && walletAddress && (
                     <div style={{ 
                         marginTop: '24px', 
-                        background: 'rgba(16, 185, 129, 0.1)', 
-                        border: '1px solid rgba(16, 185, 129, 0.2)', 
-                        borderRadius: '20px', 
-                        padding: '16px 28px',
+                        background: 'rgba(16, 185, 129, 0.05)', 
+                        border: '1px solid rgba(16, 185, 129, 0.15)', 
+                        borderRadius: '24px', 
+                        padding: '12px 16px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        boxShadow: '0 0 20px rgba(16, 185, 129, 0.05)'
+                        justifyContent: 'space-between',
+                        width: '280px',
+                        boxShadow: '0 0 20px rgba(16, 185, 129, 0.03)'
                     }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }}></div>
-                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#fff', letterSpacing: '0.5px' }}>{formatAddr(walletAddress)}</span>
-                        <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: 600 }}>• {currentChain.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)' }}></div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff', letterSpacing: '0.3px' }}>{formatAddr(walletAddress)}</span>
+                                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>{currentChain.name}</span>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onDisconnect}
+                            style={{ 
+                                background: 'rgba(255,255,255,0.06)', 
+                                border: '1px solid rgba(255,255,255,0.1)', 
+                                borderRadius: '12px', 
+                                padding: '8px', 
+                                color: '#fff', 
+                                cursor: 'pointer', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                            }}
+                            title="Disconnect"
+                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        </button>
                     </div>
                 )}
             </div>

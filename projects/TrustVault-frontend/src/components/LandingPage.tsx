@@ -18,8 +18,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
         }}>
             {/* Top Bar */}
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600 }}>TRUSTVAULT</span>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 16px 16px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '2px', color: '#fff' }}>TRUSTVAULT 3</span>
             </div>
 
             {/* Content */}
@@ -29,13 +29,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 flexDirection: 'column', 
                 justifyContent: 'center', 
                 alignItems: 'center',
-                padding: '20px',
-                marginTop: '10px'
+                padding: '20px'
             }}>
-                <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '16px', letterSpacing: '-0.5px', textAlign: 'center' }}>
+                <h1 style={{ fontSize: '32px', fontWeight: 800, textAlign: 'center', marginBottom: '16px', lineHeight: 1.1 }}>
                     Don't Lose Your<br/>Crypto Forever
                 </h1>
-                <p style={{ fontSize: '14px', color: '#8E8E93', textAlign: 'center', maxWidth: '280px', marginBottom: '40px', lineHeight: 1.5 }}>
+                <p style={{ fontSize: '15px', color: '#8E8E93', textAlign: 'center', maxWidth: '300px', marginBottom: '40px', lineHeight: 1.5 }}>
                     Protect your assets with a dead man's switch. If something happens to you, your crypto goes to your loved ones.
                 </p>
 
@@ -44,7 +43,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                         position: 'absolute', 
                         width: '320px', 
                         height: '320px', 
-                        background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)',
+                        background: 'radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)',
                         filter: 'blur(50px)'
                     }}></div>
                     <img 
@@ -57,7 +56,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                             width: '240px', 
                             height: 'auto', 
                             zIndex: 1,
-                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
+                            filter: 'drop-shadow(0 10px 40px rgba(0,0,0,0.6))',
                             mixBlendMode: 'screen'
                         }} 
                     />

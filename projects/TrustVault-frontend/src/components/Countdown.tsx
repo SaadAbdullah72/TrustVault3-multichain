@@ -18,6 +18,10 @@ export default function Countdown({ lastHeartbeat, lockDuration, released, compa
         }
 
         const updateTimer = () => {
+            if (lastHeartbeat === 0) {
+                setTimeLeft(lockDuration)
+                return
+            }
             const now = Math.floor(Date.now() / 1000)
             const unlockTime = lastHeartbeat + lockDuration
             const remaining = unlockTime - now
@@ -98,8 +102,12 @@ export default function Countdown({ lastHeartbeat, lockDuration, released, compa
                     <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={accentColor} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
                 </svg>
                 <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{isExpired ? 'Expired' : 'Time Left'}</span>
-                    <span style={{ fontSize: '24px', fontWeight: 800, color: isExpired ? '#ef4444' : '#fff', letterSpacing: '-0.5px' }}>{formatTime(timeLeft)}</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {lastHeartbeat === 0 ? 'Protocol Ready' : isExpired ? 'Expired' : 'Time Left'}
+                    </span>
+                    <span style={{ fontSize: '24px', fontWeight: 800, color: isExpired && lastHeartbeat > 0 ? '#ef4444' : '#fff', letterSpacing: '-0.5px' }}>
+                        {lastHeartbeat === 0 ? formatTime(lockDuration) : formatTime(timeLeft)}
+                    </span>
                 </div>
             </div>
         </div>

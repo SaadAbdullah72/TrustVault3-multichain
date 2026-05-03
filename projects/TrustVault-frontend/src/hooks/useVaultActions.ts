@@ -22,6 +22,19 @@ export const useVaultActions = () => {
         setUIStatus({ loading: false, error: '', txId: '' })
     }, [])
 
+    const extractErrorMessage = (e: any): string => {
+        const errorStr = JSON.stringify(e).toLowerCase()
+        if (errorStr.includes('insufficient funds')) return 'Insufficient funds for this transaction. Please top up your wallet.'
+        if (errorStr.includes('user rejected')) return 'Transaction cancelled by user.'
+        if (errorStr.includes('rejected')) return 'Transaction rejected.'
+        if (e.reason) return e.reason
+        if (e.message) {
+            if (e.message.includes('insufficient funds')) return 'Insufficient funds for gas + value.'
+            return e.message
+        }
+        return 'Transaction failed. Please check your wallet.'
+    }
+
     const handleConnect = useCallback(async () => {
         try {
             updateStatus({ loading: true, error: '' })
@@ -75,7 +88,7 @@ export const useVaultActions = () => {
             updateStatus({ txId: 'Vault established! ✨' })
             onSuccess(vaultId)
         } catch (e: any) {
-            updateStatus({ error: e.message || 'Creation failed', txId: '' })
+            updateStatus({ error: extractErrorMessage(e), txId: '' })
         } finally {
             updateStatus({ loading: false })
         }
@@ -89,7 +102,7 @@ export const useVaultActions = () => {
             updateStatus({ txId: `Heartbeat confirmed! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
-            updateStatus({ error: e.message || 'Heartbeat failed', txId: '' })
+            updateStatus({ error: extractErrorMessage(e), txId: '' })
         } finally {
             updateStatus({ loading: false })
         }
@@ -103,7 +116,7 @@ export const useVaultActions = () => {
             updateStatus({ txId: `Inheritance claimed successfully! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
-            updateStatus({ error: e.message || 'Claim failed', txId: '' })
+            updateStatus({ error: extractErrorMessage(e), txId: '' })
         } finally {
             updateStatus({ loading: false })
         }
@@ -117,7 +130,7 @@ export const useVaultActions = () => {
             updateStatus({ txId: `Funds Withdrawn! TX: ${id}` })
             onComplete?.()
         } catch (e: any) {
-            updateStatus({ error: e.message || 'Withdrawal failed', txId: '' })
+            updateStatus({ error: extractErrorMessage(e), txId: '' })
         } finally {
             updateStatus({ loading: false })
         }

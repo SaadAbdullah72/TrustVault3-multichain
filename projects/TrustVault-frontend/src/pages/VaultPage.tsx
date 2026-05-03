@@ -217,6 +217,7 @@ export const VaultPage: React.FC = () => {
                         <ConnectScreen 
                             onConnect={handleConnect} 
                             onContinue={handleProceedToActionSelect}
+                            onDisconnect={handleGoBackToLanding}
                             connecting={uiStatus.loading} 
                         />
                     </div>
@@ -235,7 +236,7 @@ export const VaultPage: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', color: '#fff' }}>
                         <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '16px', letterSpacing: '-0.5px' }}>
                             You're set to go!
@@ -337,6 +338,8 @@ export const VaultPage: React.FC = () => {
                             onWithdraw={(amount: number) => handleWithdraw(selectedVaultId!, amount, loadVaultState)}
                             onClaim={() => handleClaim(selectedVaultId!, loadVaultState)}
                             onRefresh={loadVaultState}
+                            onBack={() => setStep('actionSelect')}
+                            uiStatus={uiStatus}
                             currentTab={currentTab}
                             setCurrentTab={setCurrentTab}
                         />
