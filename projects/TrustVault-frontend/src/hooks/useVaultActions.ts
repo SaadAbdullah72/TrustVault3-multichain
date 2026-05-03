@@ -25,6 +25,7 @@ export const useVaultActions = () => {
     const extractErrorMessage = (e: any): string => {
         const errorStr = JSON.stringify(e).toLowerCase()
         if (errorStr.includes('insufficient funds')) return 'Insufficient funds for this transaction. Please top up your wallet.'
+        if (errorStr.includes('overspend')) return 'Insufficient balance to pay for transaction fees. Please add some funds to your wallet.'
         if (errorStr.includes('user rejected')) return 'Transaction cancelled by user.'
         if (errorStr.includes('rejected')) return 'Transaction rejected.'
         if (e.reason) return e.reason

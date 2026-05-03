@@ -287,7 +287,7 @@ export const VaultPage: React.FC = () => {
                         <div style={{ width: '40px', height: '40px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Asterisk size={24} color="#000" />
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '20px', color: '#fff' }}>TRUSTVAULT</span>
+                        <span style={{ fontWeight: 800, fontSize: '20px', color: '#fff' }}>TRUSTVAULT 3</span>
                     </div>
 
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>

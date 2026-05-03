@@ -52,7 +52,15 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
             pointerEvents: 'auto'
         }}>
             <Icon size={20} color={c.icon} style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: '13px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
+            <span style={{ 
+                flex: 1, 
+                fontSize: '13px', 
+                fontWeight: 700, 
+                color: '#fff', 
+                lineHeight: 1.4,
+                overflowWrap: 'anywhere',
+                wordBreak: 'break-word'
+            }}>
                 {message}
             </span>
             <button onClick={() => { setIsVisible(false); setTimeout(onClose, 300) }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', flexShrink: 0 }}>
