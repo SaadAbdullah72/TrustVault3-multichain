@@ -54,7 +54,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                             width: '240px', 
                             height: 'auto', 
                             zIndex: 1,
-                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))'
+                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
+                            mixBlendMode: 'screen'
                         }} 
                     />
                 </div>

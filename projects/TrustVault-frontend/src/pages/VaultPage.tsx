@@ -149,6 +149,19 @@ export const VaultPage: React.FC = () => {
     // Navigation Actions
     const handleLaunchApp = () => setStep('connect')
     
+    const handleCreateVaultSubmit = () => {
+        handleCreateVault(
+            beneficiaryInput,
+            lockDurationInput,
+            depositInput,
+            (vaultId) => {
+                setShowCreateForm(false)
+                setSelectedVaultId(vaultId)
+                discoverVaults()
+            }
+        )
+    }
+    
     const handleGoBackToLanding = () => {
         setStep('landing')
         disconnectWallet()
@@ -180,20 +193,11 @@ export const VaultPage: React.FC = () => {
 
                 <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
-                        <ConnectScreen onConnect={handleConnect} connecting={uiStatus.loading} />
-                        
-                        {/* Manual Proceed Button - ONLY show if connected and address is valid */}
-                        {isConnected && walletAddress && walletAddress !== 'undefined' && (
-                            <div style={{ position: 'absolute', bottom: '40px', left: '32px', right: '32px', zIndex: 50 }}>
-                                <button onClick={handleProceedToActionSelect} style={{ width: '100%', background: '#fff', color: '#000', padding: '20px', borderRadius: '24px', border: 'none', fontSize: '16px', fontWeight: 700, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <span>Continue</span>
-                                    <ArrowRight size={20} />
-                                </button>
-                                <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: '#8E8E93' }}>
-                                    Connected: {formatAddr(walletAddress)}
-                                </div>
-                            </div>
-                        )}
+                        <ConnectScreen 
+                            onConnect={handleConnect} 
+                            onContinue={handleProceedToActionSelect}
+                            connecting={uiStatus.loading} 
+                        />
                     </div>
                 </div>
             </div>
@@ -221,7 +225,7 @@ export const VaultPage: React.FC = () => {
 
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '40px' }}>
                             <div style={{ position: 'absolute', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)', filter: 'blur(50px)' }}></div>
-                            <img src="/device_chip.png" alt="Smart Account" style={{ width: '220px', height: 'auto', zIndex: 1, filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))' }} />
+                            <img src="/device_chip.png" alt="Smart Account" style={{ width: '220px', height: 'auto', zIndex: 1, filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))', mixBlendMode: 'screen' }} />
                         </div>
 
                         <div style={{ width: '100%', padding: '0 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -303,12 +307,12 @@ export const VaultPage: React.FC = () => {
                         />
                     ) : (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '40px', textAlign: 'center' }}>
-                            <div style={{ width: '96px', height: '96px', margin: '0 auto 32px', background: '#fff', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-                                <Shield size={48} color="#3B82F6" />
+                            <div style={{ width: '96px', height: '96px', margin: '0 auto 32px', background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Shield size={48} color="#fff" />
                             </div>
-                            <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#1C1C1E', marginBottom: '16px' }}>No Vault Found</h2>
-                            <p style={{ color: '#8E8E93', fontSize: '16px', marginBottom: '40px' }}>Your address is <b>{formatAddr(walletAddress || '')}</b>. Start your legacy on {currentChain.name}.</p>
-                            <button className="nb-btn-primary" style={{ padding: '18px 48px' }} onClick={() => setShowCreateForm(true)}>
+                            <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#fff', marginBottom: '16px' }}>No Vault Found</h2>
+                            <p style={{ color: '#94a3b8', fontSize: '16px', marginBottom: '40px' }}>Your address is <b>{formatAddr(walletAddress || '')}</b>. Start your legacy on {currentChain.name}.</p>
+                            <button className="nb-btn-primary" style={{ padding: '18px 48px', background: '#fff', color: '#000', border: 'none' }} onClick={() => setShowCreateForm(true)}>
                                 <Plus size={20} /> Create New Vault
                             </button>
                         </div>
@@ -316,29 +320,29 @@ export const VaultPage: React.FC = () => {
 
                     {/* Create Form Overlay */}
                     {showCreateForm && (
-                        <div style={{ position: 'absolute', inset: 0, zIndex: 1000, background: '#F2F2F7', display: 'flex', flexDirection: 'column', padding: '32px' }}>
+                        <div style={{ position: 'absolute', inset: 0, zIndex: 1000, background: '#0B131E', display: 'flex', flexDirection: 'column', padding: '32px' }}>
                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
-                                <button onClick={() => setShowCreateForm(false)} style={{ background: '#fff', border: 'none', color: '#000', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
-                                <span style={{ fontWeight: 800, fontSize: '15px' }}>NEW PROTOCOL</span>
+                                <button onClick={() => setShowCreateForm(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
+                                <span style={{ fontWeight: 800, fontSize: '15px', color: '#fff' }}>NEW PROTOCOL</span>
                                 <div style={{ width: 48 }} />
                             </div>
 
-                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#fff', padding: '32px', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#8E8E93', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
-                                    <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder="0x... or Solana Address" style={{ width: '100%', background: '#F2F2F7', border: '1px solid #E5E5EA', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none' }} />
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
+                                    <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder="0x... or Solana Address" style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff' }} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
-                                    <div style={{ background: '#F2F2F7', padding: '16px', borderRadius: '16px' }}>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#8E8E93', marginBottom: '8px' }}>TIMER (SEC)</label>
-                                        <input type="number" value={lockDurationInput} onChange={(e) => setLockDurationInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#000', fontSize: '16px', outline: 'none' }} />
+                                    <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94a3b8', marginBottom: '8px' }}>TIMER (SEC)</label>
+                                        <input type="number" value={lockDurationInput} onChange={(e) => setLockDurationInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }} />
                                     </div>
-                                    <div style={{ background: '#F2F2F7', padding: '16px', borderRadius: '16px' }}>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#8E8E93', marginBottom: '8px' }}>DEPOSIT ({currentChain.nativeCurrency.symbol})</label>
-                                        <input type="number" value={depositInput} onChange={(e) => setDepositInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#000', fontSize: '16px', outline: 'none' }} />
+                                    <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94a3b8', marginBottom: '8px' }}>DEPOSIT ({currentChain.nativeCurrency.symbol})</label>
+                                        <input type="number" value={depositInput} onChange={(e) => setDepositInput(e.target.value)} style={{ width: '100%', background: 'none', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }} />
                                     </div>
                                 </div>
-                                <button className="nb-btn-primary" style={{ width: '100%', padding: '20px' }} onClick={handleCreateVaultSubmit}>Initiate Protection</button>
+                                <button className="nb-btn-primary" style={{ width: '100%', padding: '20px', background: '#fff', color: '#000', border: 'none' }} onClick={handleCreateVaultSubmit}>Initiate Protection</button>
                             </div>
                         </div>
                     )}

@@ -54,14 +54,14 @@ export default function VaultDropdown({
                     right: '20px', 
                     borderRadius: '24px', 
                     padding: '24px',
-                    background: '#fff',
-                    boxShadow: '0 -20px 60px rgba(0,0,0,0.1)',
+                    background: '#111e2f',
+                    boxShadow: '0 -20px 60px rgba(0,0,0,0.5)',
                     marginBottom: '20px',
-                    border: '1px solid #e2e8f0'
+                    border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <span style={{ fontWeight: 800, fontSize: '13px', color: '#94a3b8', letterSpacing: '1px' }}>MY VAULTS</span>
-                        <button onClick={() => setShowVaultSelector(false)} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer' }}><X size={20} /></button>
+                        <button onClick={() => setShowVaultSelector(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={20} /></button>
                     </div>
 
                     <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -75,22 +75,22 @@ export default function VaultDropdown({
                                         alignItems: 'center', 
                                         gap: '12px', 
                                         padding: '14px', 
-                                        background: selectedVaultId === id ? '#f1f5f9' : 'transparent',
-                                        border: `1px solid ${selectedVaultId === id ? '#cbd5e1' : '#f1f5f9'}`,
+                                        background: selectedVaultId === id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                        border: `1px solid ${selectedVaultId === id ? 'rgba(255,255,255,0.2)' : 'transparent'}`,
                                         borderRadius: '16px',
                                         cursor: 'pointer',
                                         textAlign: 'left',
-                                        color: '#000'
+                                        color: '#fff'
                                     }}
                                 >
-                                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                                        <Shield size={18} color={selectedVaultId === id ? '#38bdf8' : '#94a3b8'} />
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }}>
+                                        <Shield size={18} color={selectedVaultId === id ? '#fff' : '#94a3b8'} />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontSize: '14px', fontWeight: 700 }}>Vault #{id.slice(0, 8)}</div>
                                         <div style={{ fontSize: '11px', color: '#94a3b8' }}>{formatAddr(adapter.getVaultAddress(id))}</div>
                                     </div>
-                                    {selectedVaultId === id && <CheckCircle size={16} color="#38bdf8" />}
+                                    {selectedVaultId === id && <CheckCircle size={16} color="#fff" />}
                                 </button>
                                 <button onClick={() => handleDeleteVaultId(id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
                             </div>
@@ -99,7 +99,7 @@ export default function VaultDropdown({
 
                     <button 
                         onClick={() => { setShowCreateForm(true); setShowVaultSelector(false) }}
-                        style={{ width: '100%', marginTop: '20px', padding: '16px', borderRadius: '16px', border: '1px dashed #cbd5e1', background: 'transparent', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px' }}
+                        style={{ width: '100%', marginTop: '20px', padding: '16px', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.2)', background: 'transparent', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px' }}
                     >
                         <Plus size={18} />
                         New Vault
@@ -107,17 +107,17 @@ export default function VaultDropdown({
                 </div>
             )}
 
-            <div style={{ padding: '12px 24px 24px', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ padding: '12px 24px 24px', background: '#0B131E', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <div 
                     onClick={() => setShowVaultSelector(!showVaultSelector)}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#111e2f', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>{walletAddress ? formatAddr(walletAddress) : ''}</span>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>{walletAddress ? formatAddr(walletAddress) : ''}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#000' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>
                             {selectedVaultId ? `Vault #${selectedVaultId.slice(0, 6)}` : 'No Vault'}
                         </span>
                         <ChevronDown size={14} color="#94a3b8" />

@@ -4,10 +4,11 @@ import ChainSwitcher from './ChainSwitcher'
 
 interface ConnectScreenProps {
     onConnect: () => void;
+    onContinue?: () => void;
     connecting?: boolean;
 }
 
-export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connecting }) => {
+export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onContinue, connecting }) => {
     const { currentChain, isConnected } = useChain()
 
     return (
@@ -61,7 +62,8 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
                             width: '240px', 
                             height: 'auto', 
                             zIndex: 1,
-                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))'
+                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
+                            mixBlendMode: 'screen'
                         }} 
                     />
                 </div>
@@ -69,34 +71,57 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, connect
 
             {/* Bottom Content Area */}
             <div style={{ padding: '32px' }}>
-                <button 
-                    onClick={onConnect}
-                    disabled={connecting}
-                    style={{ 
-                        width: '100%', 
-                        padding: '18px', 
-                        background: isConnected ? '#16C784' : '#FFFFFF', 
-                        color: isConnected ? '#FFFFFF' : '#000000',
-                        fontSize: '16px', 
-                        fontWeight: 700, 
-                        borderRadius: '24px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }}
-                >
-                    {connecting ? (
-                        <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#000' }}></div>
-                    ) : isConnected ? (
-                        <span>Connected</span>
-                    ) : (
-                        <span>Connect Wallet</span>
-                    )}
-                </button>
+                {isConnected ? (
+                    <button 
+                        onClick={onContinue}
+                        style={{ 
+                            width: '100%', 
+                            padding: '18px', 
+                            background: '#FFFFFF', 
+                            color: '#000000',
+                            fontSize: '16px', 
+                            fontWeight: 700, 
+                            borderRadius: '24px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <span>Continue</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                ) : (
+                    <button 
+                        onClick={onConnect}
+                        disabled={connecting}
+                        style={{ 
+                            width: '100%', 
+                            padding: '18px', 
+                            background: '#FFFFFF', 
+                            color: '#000000',
+                            fontSize: '16px', 
+                            fontWeight: 700, 
+                            borderRadius: '24px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        {connecting ? (
+                            <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#000' }}></div>
+                        ) : (
+                            <span>Connect Wallet</span>
+                        )}
+                    </button>
+                )}
             </div>
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
