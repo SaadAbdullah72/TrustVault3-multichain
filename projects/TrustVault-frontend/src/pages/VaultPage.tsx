@@ -255,26 +255,32 @@ export const VaultPage: React.FC = () => {
                 {/* Desktop Sidebar */}
                 <div className="desktop-sidebar">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
-                        <div style={{ width: '40px', height: '40px', background: '#3B82F6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Asterisk size={24} color="#fff" />
+                        <div style={{ width: '40px', height: '40px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Asterisk size={24} color="#000" />
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '20px' }}>TRUSTVAULT</span>
+                        <span style={{ fontWeight: 800, fontSize: '20px', color: '#fff' }}>TRUSTVAULT</span>
                     </div>
 
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                        <button onClick={() => setCurrentTab('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'dashboard' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'dashboard' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => setCurrentTab('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'dashboard' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Home size={20} /> Dashboard
                         </button>
-                        <button onClick={() => setCurrentTab('security')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'security' ? '#F2F2F7' : 'transparent', border: 'none', color: currentTab === 'security' ? '#3B82F6' : '#8E8E93', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => setCurrentTab('security')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'security' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'security' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Shield size={20} /> Security
+                        </button>
+                        <button onClick={() => setCurrentTab('history')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'history' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'history' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                            <History size={20} /> Activity
+                        </button>
+                        <button onClick={() => setCurrentTab('settings')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'settings' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'settings' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                            <Settings size={20} /> Settings
                         </button>
                     </nav>
 
-                    <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid #E5E5EA' }}>
-                        <button onClick={() => setStep('connect')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: '#F2F2F7', border: 'none', color: '#1C1C1E', fontWeight: 700, cursor: 'pointer', marginBottom: '12px' }}>
-                            <ArrowLeft size={18} /> Exit Dashboard
+                    <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button onClick={() => setStep('actionSelect')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700, cursor: 'pointer', marginBottom: '12px' }}>
+                            <ArrowLeft size={18} /> Back
                         </button>
-                        <button onClick={handleDisconnect} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: '#FFF0F0', border: 'none', color: '#FF3B30', fontWeight: 700, cursor: 'pointer' }}>
+                        <button onClick={handleDisconnect} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', fontWeight: 700, cursor: 'pointer' }}>
                             <LogOut size={20} /> Disconnect
                         </button>
                     </div>
@@ -300,7 +306,7 @@ export const VaultPage: React.FC = () => {
                             formatAddr={formatAddr}
                             copyToClipboard={copyToClipboard}
                             onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
-                            onWithdraw={() => handleWithdraw(selectedVaultId!, 0, loadVaultState)} // Simplified for now
+                            onWithdraw={() => handleWithdraw(selectedVaultId!, vaultBalance, loadVaultState)}
                             onClaim={() => handleClaim(selectedVaultId!, loadVaultState)}
                             currentTab={currentTab}
                             setCurrentTab={setCurrentTab}
