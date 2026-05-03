@@ -29,6 +29,7 @@ import ChainSwitcher from '../components/ChainSwitcher'
 import VaultDropdown from '../components/VaultDropdown'
 import TransactionOverlay from '../components/TransactionOverlay'
 import LandingPage from '../components/LandingPage'
+import { Toast } from '../components/Toast'
 
 export const VaultPage: React.FC = () => {
     const { 
@@ -42,6 +43,7 @@ export const VaultPage: React.FC = () => {
 
     const {
         uiStatus,
+        resetStatus,
         handleConnect,
         handleDisconnect,
         handleCreateVault,
@@ -49,6 +51,25 @@ export const VaultPage: React.FC = () => {
         handleClaim,
         handleWithdraw
     } = useVaultActions()
+
+    // Toast state
+    const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null)
+
+    // Watch for errors and show toast
+    useEffect(() => {
+        if (uiStatus.error) {
+            setToast({ message: uiStatus.error, type: 'error' })
+            // Clear the error from uiStatus after showing
+            setTimeout(() => resetStatus(), 100)
+        }
+    }, [uiStatus.error, resetStatus])
+
+    // Watch for success messages
+    useEffect(() => {
+        if (uiStatus.txId && !uiStatus.loading && (uiStatus.txId.includes('confirmed') || uiStatus.txId.includes('established') || uiStatus.txId.includes('claimed') || uiStatus.txId.includes('Withdrawn'))) {
+            setToast({ message: uiStatus.txId, type: 'success' })
+        }
+    }, [uiStatus.txId, uiStatus.loading])
 
     // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard'
     const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard'>('landing')
@@ -249,7 +270,14 @@ export const VaultPage: React.FC = () => {
     // DASHBOARD STEP
     return (
         <div className="wallet-shell">
-            <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => {}} />
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => resetStatus()} />
 
             <div className="wallet-container desktop-mode">
                 {/* Desktop Sidebar */}
