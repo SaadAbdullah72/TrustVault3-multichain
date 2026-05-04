@@ -47,6 +47,10 @@ const idl = {
       ],
       "args": [
         {
+          "name": "vaultId",
+          "type": "u64"
+        },
+        {
           "name": "beneficiary",
           "type": "pubkey"
         },
@@ -210,8 +214,8 @@ const idl = {
             "type": "i64"
           },
           {
-            "name": "lastHeartbeat",
-            "type": "i64"
+            "name": "vaultId",
+            "type": "u64"
           },
           {
             "name": "released",
@@ -324,54 +328,35 @@ export class SolanaAdapter implements ChainAdapter {
 
         try {
             const depositBN = new anchor.BN(depositAmount * LAMPORTS_PER_SOL);
+            const vaultId = new anchor.BN(Math.floor(Date.now() / 1000));
             
-            // Check if PDA already exists (user already initialized it but didn't deposit)
-            const existingInfo = await this.connection.getAccountInfo(vaultPDA);
-            let tx;
-            
-            if (existingInfo !== null) {
-                console.log('[SolanaAdapter] Vault already exists! Executing Heartbeat + Deposit...');
-                const heartbeatIx = await program.methods
-                    .heartbeat()
-                    .accounts({
-                        vault: vaultPDA,
-                        owner: this.wallet.publicKey,
-                    })
-                    .instruction();
+            const [newVaultPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from('vault'), this.wallet.publicKey.toBuffer(), vaultId.toArrayLike(Buffer, 'le', 8)],
+                program.programId
+            )
 
-                tx = await program.methods
-                    .deposit(depositBN)
-                    .accounts({
-                        vault: vaultPDA,
-                        owner: this.wallet.publicKey,
-                        systemProgram: SystemProgram.programId,
-                    })
-                    .postInstructions([heartbeatIx])
-                    .rpc();
-            } else {
-                console.log('[SolanaAdapter] Vault is new. Executing Initialize + Deposit directly...');
-                const depositIx = await program.methods
-                    .deposit(depositBN)
-                    .accounts({
-                        vault: vaultPDA,
-                        owner: this.wallet.publicKey,
-                        systemProgram: SystemProgram.programId,
-                    })
-                    .instruction();
+            console.log('[SolanaAdapter] Creating brand new vault with ID:', vaultId.toString());
+            const depositIx = await program.methods
+                .deposit(depositBN)
+                .accounts({
+                    vault: newVaultPDA,
+                    owner: this.wallet.publicKey,
+                    systemProgram: SystemProgram.programId,
+                })
+                .instruction();
 
-                tx = await program.methods
-                    .initialize(beneficiaryPubKey, lockBN)
-                    .accounts({
-                        vault: vaultPDA,
-                        owner: this.wallet.publicKey,
-                        systemProgram: SystemProgram.programId,
-                    })
-                    .postInstructions([depositIx])
-                    .rpc();
-            }
+            tx = await program.methods
+                .initialize(vaultId, beneficiaryPubKey, lockBN)
+                .accounts({
+                    vault: newVaultPDA,
+                    owner: this.wallet.publicKey,
+                    systemProgram: SystemProgram.programId,
+                })
+                .postInstructions([depositIx])
+                .rpc();
 
             await this.connection.confirmTransaction(tx)
-            return vaultPDA.toString()
+            return newVaultPDA.toString()
         } catch (e: any) {
             console.error('[SolanaAdapter] createVault failed:', e);
             throw e;
@@ -459,6 +444,7 @@ export class SolanaAdapter implements ChainAdapter {
                 beneficiary: account.beneficiary.toString(),
                 lockDuration: account.lockDuration.toNumber(),
                 lastHeartbeat: account.lastHeartbeat.toNumber(),
+                vaultId: account.vaultId?.toString() || '0',
                 released: account.released
             }
         } catch (e: any) { 
@@ -496,14 +482,24 @@ export class SolanaAdapter implements ChainAdapter {
             if (!factoryAddr) return [];
             
             const programId = new PublicKey(factoryAddr);
-            const ownerKey = new PublicKey(address);
             
-            const [vaultPDA] = PublicKey.findProgramAddressSync(
-                [Buffer.from('vault'), ownerKey.toBuffer()], 
-                programId
-            )
-            const info = await this.connection.getAccountInfo(vaultPDA)
-            return info ? [vaultPDA.toString()] : []
+            // Search for all vaults where owner (offset 8) matches address
+            const accounts = await this.connection.getProgramAccounts(programId, {
+                filters: [
+                    { dataSize: 97 }, // 89 + 8 = 97
+                    { memcmp: { offset: 8, bytes: address } }
+                ]
+            });
+
+            // Sort by vaultId (offset 88 for u64) to have latest on top
+            // Layout: 8(disc)+32(owner)+32(ben)+8(dur)+8(hb) = 88 offset for vault_id
+            const sorted = accounts.sort((a, b) => {
+                const idA = a.account.data.readBigUInt64LE(88);
+                const idB = b.account.data.readBigUInt64LE(88);
+                return idA > idB ? -1 : 1;
+            });
+
+            return sorted.map(a => a.pubkey.toString());
         } catch (e) {
             console.error('[SolanaAdapter] discoverVaults failed for address:', address, e);
             return [];
@@ -521,7 +517,7 @@ export class SolanaAdapter implements ChainAdapter {
             // Layout: 8 (disc) + 32 (owner) + 32 (beneficiary) = 40 offset
             const accounts = await this.connection.getProgramAccounts(programId, {
                 filters: [
-                    { dataSize: 89 },
+                    { dataSize: 97 },
                     { memcmp: { offset: 40, bytes: address } }
                 ]
             });

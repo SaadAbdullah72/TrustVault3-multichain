@@ -13,6 +13,7 @@ export interface VaultDashboardProps {
     isOwner: boolean;
     isBeneficiary: boolean;
     isExpired: boolean;
+    isLatest?: boolean;
     formatAddr: (addr: string) => string;
     copyToClipboard: (text: string) => void;
     onHeartbeat: () => void;
@@ -34,6 +35,7 @@ export default function VaultDashboard({
     isOwner,
     isBeneficiary,
     isExpired,
+    isLatest,
     formatAddr,
     copyToClipboard,
     onHeartbeat,
@@ -198,6 +200,9 @@ export default function VaultDashboard({
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vault Balance</div>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: statusColor, background: `${statusColor}20`, padding: '2px 8px', borderRadius: '6px' }}>{statusLabel}</div>
+                                {isLatest && (
+                                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', padding: '2px 8px', borderRadius: '6px' }}>LATEST</div>
+                                )}
                             </div>
                             <div style={{ fontSize: '36px', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', marginBottom: '4px' }}>
                                 {showBalanceHidden ? '••••••' : `${vaultBalance.toFixed(4)}`}

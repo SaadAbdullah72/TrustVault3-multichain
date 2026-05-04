@@ -9,6 +9,7 @@ pub mod trust_vault {
 
     pub fn initialize(
         ctx: Context<Initialize>, 
+        vault_id: u64,
         beneficiary: Pubkey, 
         lock_duration: i64
     ) -> Result<()> {
@@ -17,6 +18,7 @@ pub mod trust_vault {
         vault.beneficiary = beneficiary;
         vault.lock_duration = lock_duration;
         vault.last_heartbeat = Clock::get()?.unix_timestamp;
+        vault.vault_id = vault_id;
         vault.released = false;
         Ok(())
     }
@@ -85,12 +87,13 @@ pub mod trust_vault {
 }
 
 #[derive(Accounts)]
+#[instruction(vault_id: u64)]
 pub struct Initialize<'info> {
     #[account(
         init, 
         payer = owner, 
-        space = 8 + 32 + 32 + 8 + 8 + 1,
-        seeds = [b"vault", owner.key().as_ref()],
+        space = 8 + 32 + 32 + 8 + 8 + 8 + 1,
+        seeds = [b"vault", owner.key().as_ref(), &vault_id.to_le_bytes()],
         bump
     )]
     pub vault: Account<'info, VaultAccount>,
@@ -137,6 +140,7 @@ pub struct VaultAccount {
     pub beneficiary: Pubkey,
     pub lock_duration: i64,
     pub last_heartbeat: i64,
+    pub vault_id: u64,
     pub released: bool,
 }
 

@@ -344,6 +344,7 @@ export const VaultPage: React.FC = () => {
                             isOwner={isOwner}
                             isBeneficiary={isBeneficiary}
                             isExpired={isExpired}
+                            isLatest={selectedVaultId === userVaults[0]}
                             formatAddr={formatAddr}
                             copyToClipboard={copyToClipboard}
                             onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
