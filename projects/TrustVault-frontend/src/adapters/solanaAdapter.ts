@@ -330,7 +330,15 @@ export class SolanaAdapter implements ChainAdapter {
             let tx;
             
             if (existingInfo !== null) {
-                console.log('[SolanaAdapter] Vault already exists! Skipping initialize, executing Deposit only...');
+                console.log('[SolanaAdapter] Vault already exists! Executing Heartbeat + Deposit...');
+                const heartbeatIx = await program.methods
+                    .heartbeat()
+                    .accounts({
+                        vault: vaultPDA,
+                        owner: this.wallet.publicKey,
+                    })
+                    .instruction();
+
                 tx = await program.methods
                     .deposit(depositBN)
                     .accounts({
@@ -338,6 +346,7 @@ export class SolanaAdapter implements ChainAdapter {
                         owner: this.wallet.publicKey,
                         systemProgram: SystemProgram.programId,
                     })
+                    .postInstructions([heartbeatIx])
                     .rpc();
             } else {
                 console.log('[SolanaAdapter] Vault is new. Executing Initialize + Deposit directly...');

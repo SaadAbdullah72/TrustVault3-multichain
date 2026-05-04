@@ -54,6 +54,7 @@ export default function VaultDashboard({
     const symbol = currentChain.nativeCurrency.symbol
     const statusText = vaultState.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
     const statusColor = vaultState.released ? '#10b981' : isExpired ? '#ef4444' : '#10b981'
+    const statusLabel = isExpired && !vaultState.released ? 'ACTION REQUIRED' : statusText;
 
     // Correct address type label per chain
     const getAddressLabel = () => {
@@ -196,7 +197,7 @@ export default function VaultDashboard({
                         <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '24px', textAlign: 'center' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vault Balance</div>
-                                <div style={{ fontSize: '10px', fontWeight: 700, color: statusColor, background: `${statusColor}20`, padding: '2px 8px', borderRadius: '6px' }}>{statusText}</div>
+                                <div style={{ fontSize: '10px', fontWeight: 700, color: statusColor, background: `${statusColor}20`, padding: '2px 8px', borderRadius: '6px' }}>{statusLabel}</div>
                             </div>
                             <div style={{ fontSize: '36px', fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', marginBottom: '4px' }}>
                                 {showBalanceHidden ? '••••••' : `${vaultBalance.toFixed(4)}`}
@@ -213,8 +214,8 @@ export default function VaultDashboard({
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                             <button 
                                 onClick={onHeartbeat} 
-                                disabled={uiStatus.loading || isExpired}
-                                style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: uiStatus.loading || isExpired ? 0.5 : 1 }}
+                                disabled={uiStatus.loading}
+                                style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 8px', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}
                             >
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Heart size={22} color="#fff" fill="#fff" className={uiStatus.loading ? 'pulse' : ''} />

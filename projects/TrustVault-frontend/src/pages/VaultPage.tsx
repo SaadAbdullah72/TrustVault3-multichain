@@ -97,11 +97,19 @@ export const VaultPage: React.FC = () => {
         if (!walletAddress || walletAddress === 'undefined') return
         setIsDiscovering(true)
         try {
-            const vaults = await adapter.discoverVaults(walletAddress)
-            setUserVaults(vaults)
+            // 1. Discover vaults owned by the user
+            const ownedVaults = await adapter.discoverVaults(walletAddress)
             
-            if (vaults.length > 0 && !selectedVaultId) {
-                setSelectedVaultId(vaults[vaults.length - 1])
+            // 2. Discover vaults where the user is a beneficiary
+            const claimable = await adapter.discoverClaimableVaults(walletAddress)
+            const beneficiaryVaultIds = claimable.map(v => v.vaultId)
+            
+            // Combine unique vault IDs
+            const allVaults = Array.from(new Set([...ownedVaults, ...beneficiaryVaultIds]))
+            setUserVaults(allVaults)
+            
+            if (allVaults.length > 0 && !selectedVaultId) {
+                setSelectedVaultId(allVaults[allVaults.length - 1])
             }
         } catch (e) {
             console.error('Discovery failed:', e)
