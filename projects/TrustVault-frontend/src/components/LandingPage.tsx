@@ -32,7 +32,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 padding: '20px'
             }}>
                 <h1 style={{ fontSize: '32px', fontWeight: 800, textAlign: 'center', marginBottom: '16px', lineHeight: 1.1 }}>
-                    Don't Lose Your<br/>Crypto Forever
+                    Secure Your Crypto<br/>Legacy Forever
                 </h1>
                 <p style={{ fontSize: '15px', color: '#8E8E93', textAlign: 'center', maxWidth: '300px', marginBottom: '40px', lineHeight: 1.5 }}>
                     Protect your assets with a dead man's switch. If something happens to you, your crypto goes to your loved ones.
