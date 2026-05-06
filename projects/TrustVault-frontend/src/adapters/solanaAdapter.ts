@@ -330,18 +330,20 @@ export class SolanaAdapter implements ChainAdapter {
             const depositBN = new anchor.BN(depositAmount * LAMPORTS_PER_SOL);
             const vaultId = new anchor.BN(Math.floor(Date.now() / 1000));
             
-            // PDA Derivation must match Program: [b"vault", owner_pubkey, vault_id_u64_le_bytes]
+            // Pukka Anchor style seeds: [b"vault", owner_pubkey, vault_id_u64_le_bytes]
             const [newVaultPDA] = PublicKey.findProgramAddressSync(
                 [
-                    Buffer.from("vault"), 
-                    this.wallet.publicKey.toBuffer(), 
-                    vaultId.toBuffer('le', 8)
+                    anchor.utils.bytes.utf8.encode("vault"),
+                    this.wallet.publicKey.toBuffer(),
+                    vaultId.toArrayLike(Buffer, "le", 8)
                 ],
                 program.programId
-            )
+            );
 
             console.log('[SolanaAdapter] Derived PDA:', newVaultPDA.toString());
-            console.log('[SolanaAdapter] Creating brand new vault with ID:', vaultId.toString());
+            console.log('[SolanaAdapter] Program ID:', program.programId.toString());
+            console.log('[SolanaAdapter] Owner:', this.wallet.publicKey.toString());
+            console.log('[SolanaAdapter] Vault ID (u64):', vaultId.toString());
             
             const depositIx = await program.methods
                 .deposit(depositBN)
