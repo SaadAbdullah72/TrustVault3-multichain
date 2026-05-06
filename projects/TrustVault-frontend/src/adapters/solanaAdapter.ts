@@ -345,7 +345,7 @@ export class SolanaAdapter implements ChainAdapter {
                 })
                 .instruction();
 
-            tx = await program.methods
+            let tx = await program.methods
                 .initialize(beneficiaryPubKey, lockBN)
                 .accounts({
                     vault: newVaultPDA,
