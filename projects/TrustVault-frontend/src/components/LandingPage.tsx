@@ -19,7 +19,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
         }}>
             {/* Top Bar */}
             <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 16px 16px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '2px', color: '#fff' }}>TRUSTVAULT 3</span>
+                <span style={{ fontSize: '14px', fontWeight: 900, letterSpacing: '3px', color: '#fff' }}>TRUSTVAULT³</span>
             </div>
 
             {/* Content */}
