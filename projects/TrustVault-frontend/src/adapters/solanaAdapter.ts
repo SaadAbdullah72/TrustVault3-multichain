@@ -47,10 +47,6 @@ const idl = {
       ],
       "args": [
         {
-          "name": "vaultId",
-          "type": "u64"
-        },
-        {
           "name": "beneficiary",
           "type": "pubkey"
         },
@@ -328,22 +324,17 @@ export class SolanaAdapter implements ChainAdapter {
 
         try {
             const depositBN = new anchor.BN(depositAmount * LAMPORTS_PER_SOL);
-            const vaultId = new anchor.BN(Math.floor(Date.now() / 1000));
             
-            // Pukka Anchor style seeds: [b"vault", owner_pubkey, vault_id_u64_le_bytes]
+            // Standard Single-Vault Seeds: [b"vault", owner_pubkey]
             const [newVaultPDA] = PublicKey.findProgramAddressSync(
                 [
                     anchor.utils.bytes.utf8.encode("vault"),
-                    this.wallet.publicKey.toBuffer(),
-                    vaultId.toArrayLike(Buffer, "le", 8)
+                    this.wallet.publicKey.toBuffer()
                 ],
                 program.programId
             );
 
-            console.log('[SolanaAdapter] Derived PDA:', newVaultPDA.toString());
-            console.log('[SolanaAdapter] Program ID:', program.programId.toString());
-            console.log('[SolanaAdapter] Owner:', this.wallet.publicKey.toString());
-            console.log('[SolanaAdapter] Vault ID (u64):', vaultId.toString());
+            console.log('[SolanaAdapter] Reverting to Single-Vault PDA:', newVaultPDA.toString());
             
             const depositIx = await program.methods
                 .deposit(depositBN)
@@ -355,7 +346,7 @@ export class SolanaAdapter implements ChainAdapter {
                 .instruction();
 
             tx = await program.methods
-                .initialize(vaultId, beneficiaryPubKey, lockBN)
+                .initialize(beneficiaryPubKey, lockBN)
                 .accounts({
                     vault: newVaultPDA,
                     owner: this.wallet.publicKey,
