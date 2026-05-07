@@ -323,6 +323,8 @@ export class SolanaAdapter implements ChainAdapter {
             lockDuration: lockBN.toString() 
         });
 
+        try {
+            const depositBN = new anchor.BN(depositAmount * LAMPORTS_PER_SOL);
             const vaultId = Date.now();
             const vaultIdBN = new anchor.BN(vaultId);
             
