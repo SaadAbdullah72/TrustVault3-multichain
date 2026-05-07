@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Clock;
 
-declare_id!("TrustVau1t111111111111111111111111111111111");
+declare_id!("7VgDt7rwmPWqHyjViTVQLfYku5WSxbccqfg4xER59hKE");
 
 #[program]
 pub mod trust_vault {

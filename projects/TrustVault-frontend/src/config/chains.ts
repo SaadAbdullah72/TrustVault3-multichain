@@ -299,7 +299,7 @@ const solana: ChainConfig = {
     testnet: {
         rpcUrl: 'https://api.testnet.solana.com',
         explorerUrl: 'https://explorer.solana.com/address/{address}?cluster=testnet',
-        factoryAddress: '9CHePjTYinAK5hZ8xHyN3RcT1TavQg1oVsYto4C3PKQg'
+        factoryAddress: '7VgDt7rwmPWqHyjViTVQLfYku5WSxbccqfg4xER59hKE'
     },
     nativeCurrency: { name: 'SOL', symbol: 'SOL', decimals: 9 },
 }

@@ -9,7 +9,7 @@ import {
 } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
 const idl = {
-  "address": "9CHePjTYinAK5hZ8xHyN3RcT1TavQg1oVsYto4C3PKQg",
+  "address": "7VgDt7rwmPWqHyjViTVQLfYku5WSxbccqfg4xER59hKE",
   "metadata": {
     "name": "trust_vault",
     "version": "0.1.0",
