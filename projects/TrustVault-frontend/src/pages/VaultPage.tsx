@@ -108,27 +108,28 @@ export const VaultPage: React.FC = () => {
         if (!walletAddress || walletAddress === 'undefined') return
         setIsDiscovering(true)
         try {
-            // 1. Discover vaults owned by the user from Supabase (Cloud Registry)
-            const ownedVaults = await getVaultsByOwner(walletAddress)
+            // 1. Discover vaults from Supabase (Cloud Registry)
+            const cloudVaults = await getVaultsByOwner(walletAddress)
             
-            // 2. Fallback to on-chain discovery if cloud registry is empty (for legacy support)
-            if (ownedVaults.length === 0) {
-                const onChainIds = await adapter.discoverVaults(walletAddress)
-                const legacyVaults: RegistryVault[] = onChainIds.map(id => ({
-                    vault_id: id,
-                    vault_name: 'Legacy Vault',
-                    owner_address: walletAddress,
-                    beneficiary_address: ''
-                }))
-                setUserVaults(legacyVaults)
-                if (legacyVaults.length > 0 && !selectedVaultId) {
-                    setSelectedVaultId(legacyVaults[0].vault_id)
+            // 2. Discover vaults from Blockchain (On-Chain)
+            const onChainIds = await adapter.discoverVaults(walletAddress)
+            
+            // 3. Merge: If an on-chain vault is missing from cloud, add it
+            const mergedVaults = [...cloudVaults]
+            for (const id of onChainIds) {
+                if (!mergedVaults.find(v => v.vault_id === id)) {
+                    mergedVaults.push({
+                        vault_id: id,
+                        vault_name: 'Solana Vault',
+                        owner_address: walletAddress,
+                        beneficiary_address: '?'
+                    })
                 }
-            } else {
-                setUserVaults(ownedVaults)
-                if (ownedVaults.length > 0 && !selectedVaultId) {
-                    setSelectedVaultId(ownedVaults[0].vault_id)
-                }
+            }
+            
+            setUserVaults(mergedVaults)
+            if (mergedVaults.length > 0 && !selectedVaultId) {
+                setSelectedVaultId(mergedVaults[0].vault_id)
             }
         } catch (e) {
             console.error('Discovery failed:', e)
