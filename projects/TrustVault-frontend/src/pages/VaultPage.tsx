@@ -30,6 +30,9 @@ import ChainSwitcher from '../components/ChainSwitcher'
 import VaultDropdown from '../components/VaultDropdown'
 import TransactionOverlay from '../components/TransactionOverlay'
 import LandingPage from '../components/LandingPage'
+import VaultList, { VaultMetadata } from '../components/VaultList'
+import PrivacyPolicy from '../components/PrivacyPolicy'
+import { getVaultsByOwner, RegistryVault } from '../utils/supabase'
 import { Toast } from '../components/Toast'
 
 export const VaultPage: React.FC = () => {
@@ -72,12 +75,19 @@ export const VaultPage: React.FC = () => {
         }
     }, [uiStatus.txId, uiStatus.loading])
 
-    // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard'
-    const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard'>('landing')
+    // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard' | 'vaultList' | 'privacy'
+    const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard' | 'vaultList' | 'privacy'>('landing')
+    
+    // Expose step to window for landing page access
+    React.useEffect(() => {
+        (window as any).setPageStep = setStep;
+        return () => { delete (window as any).setPageStep; };
+    }, []);
+
     const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings' | 'api'>('dashboard')
 
     // Vault Data
-    const [userVaults, setUserVaults] = useState<string[]>([])
+    const [userVaults, setUserVaults] = useState<RegistryVault[]>([])
     const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
     const [vaultBalance, setVaultBalance] = useState(0)
@@ -88,6 +98,7 @@ export const VaultPage: React.FC = () => {
     const [vaultRoles, setVaultRoles] = useState<Record<string, string>>({})
 
     // Form inputs
+    const [vaultNameInput, setVaultNameInput] = useState('')
     const [beneficiaryInput, setBeneficiaryInput] = useState('')
     const [lockDurationInput, setLockDurationInput] = useState('60')
     const [depositInput, setDepositInput] = useState('0.1')
@@ -97,19 +108,27 @@ export const VaultPage: React.FC = () => {
         if (!walletAddress || walletAddress === 'undefined') return
         setIsDiscovering(true)
         try {
-            // 1. Discover vaults owned by the user
-            const ownedVaults = await adapter.discoverVaults(walletAddress)
+            // 1. Discover vaults owned by the user from Supabase (Cloud Registry)
+            const ownedVaults = await getVaultsByOwner(walletAddress)
             
-            // 2. Discover vaults where the user is a beneficiary
-            const claimable = await adapter.discoverClaimableVaults(walletAddress)
-            const beneficiaryVaultIds = claimable.map(v => v.vaultId)
-            
-            // Combine unique vault IDs
-            const allVaults = Array.from(new Set([...ownedVaults, ...beneficiaryVaultIds]))
-            setUserVaults(allVaults)
-            
-            if (allVaults.length > 0 && !selectedVaultId) {
-                setSelectedVaultId(allVaults[allVaults.length - 1])
+            // 2. Fallback to on-chain discovery if cloud registry is empty (for legacy support)
+            if (ownedVaults.length === 0) {
+                const onChainIds = await adapter.discoverVaults(walletAddress)
+                const legacyVaults: RegistryVault[] = onChainIds.map(id => ({
+                    vault_id: id,
+                    vault_name: 'Legacy Vault',
+                    owner_address: walletAddress,
+                    beneficiary_address: ''
+                }))
+                setUserVaults(legacyVaults)
+                if (legacyVaults.length > 0 && !selectedVaultId) {
+                    setSelectedVaultId(legacyVaults[0].vault_id)
+                }
+            } else {
+                setUserVaults(ownedVaults)
+                if (ownedVaults.length > 0 && !selectedVaultId) {
+                    setSelectedVaultId(ownedVaults[0].vault_id)
+                }
             }
         } catch (e) {
             console.error('Discovery failed:', e)
@@ -187,8 +206,10 @@ export const VaultPage: React.FC = () => {
             (vaultId) => {
                 setShowCreateForm(false)
                 setSelectedVaultId(vaultId)
+                setStep('dashboard')
                 discoverVaults()
-            }
+            },
+            vaultNameInput || `${currentChain.name} Protection`
         )
     }
     
@@ -203,6 +224,11 @@ export const VaultPage: React.FC = () => {
         } else {
             alert('Please connect your wallet correctly first.')
         }
+    }
+
+    const handleVaultSelect = (id: string) => {
+        setSelectedVaultId(id)
+        setStep('dashboard')
     }
 
     // RENDER LOGIC
@@ -261,7 +287,7 @@ export const VaultPage: React.FC = () => {
 
                         <div style={{ width: '100%', padding: '0 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <button 
-                                onClick={() => { setShowCreateForm(false); setStep('dashboard'); }}
+                                onClick={() => { setShowCreateForm(false); setStep('vaultList'); }}
                                 style={{ width: '100%', padding: '18px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
                                 Check Existing Vaults
                             </button>
@@ -270,8 +296,39 @@ export const VaultPage: React.FC = () => {
                                 style={{ width: '100%', padding: '18px', background: '#fff', color: '#000', border: 'none', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
                                 Create New Vault
                             </button>
+                            <button 
+                                onClick={() => setStep('privacy')}
+                                style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '12px', fontWeight: 600, cursor: 'pointer', marginTop: '10px' }}>
+                                Privacy Policy
+                            </button>
                         </div>
                     </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (step === 'privacy') {
+        return <PrivacyPolicy onBack={() => setStep('actionSelect')} />
+    }
+
+    if (step === 'vaultList') {
+        return (
+            <div className="wallet-shell" style={{ background: '#0B131E' }}>
+                <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
+                    <button onClick={() => setStep('actionSelect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
+                        <ArrowLeft size={18} /> Back
+                    </button>
+                </div>
+                <div style={{ paddingTop: '100px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+                    <VaultList 
+                        vaults={userVaults as any} 
+                        onSelect={handleVaultSelect} 
+                        onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
+                        formatAddr={formatAddr}
+                        currentChain={currentChain}
+                        isDiscovering={isDiscovering}
+                    />
                 </div>
             </div>
         )
@@ -350,6 +407,7 @@ export const VaultPage: React.FC = () => {
                             onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
                             onWithdraw={(amount: number) => handleWithdraw(selectedVaultId!, amount, loadVaultState)}
                             onClaim={() => handleClaim(selectedVaultId!, loadVaultState)}
+                            vaultName={userVaults.find(v => v.vault_id === selectedVaultId)?.vault_name}
                             onRefresh={loadVaultState}
                             onBack={() => setStep('actionSelect')}
                             uiStatus={uiStatus}
@@ -378,8 +436,11 @@ export const VaultPage: React.FC = () => {
                                 <div style={{ width: 48 }} />
                             </div>
 
-                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                             <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 <div style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Vault Nickname</label>
+                                    <input value={vaultNameInput} onChange={(e) => setVaultNameInput(e.target.value)} placeholder="e.g. My Savings Vault" style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff', marginBottom: '20px' }} />
+                                    
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
                                     <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder={currentChain.type === 'evm' ? '0x... ETH Address' : currentChain.type === 'solana' ? 'Solana Address' : 'Algorand Address'} style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff' }} />
                                 </div>

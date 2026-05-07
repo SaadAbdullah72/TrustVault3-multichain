@@ -19,6 +19,7 @@ export interface VaultDashboardProps {
     onHeartbeat: () => void;
     onWithdraw: (amount: number) => void;
     onClaim: () => void;
+    vaultName?: string;
     onRefresh?: () => void;
     onBack?: () => void;
     uiStatus: any;
@@ -41,6 +42,7 @@ export default function VaultDashboard({
     onHeartbeat,
     onWithdraw,
     onClaim,
+    vaultName,
     onRefresh,
     onBack,
     uiStatus,
@@ -198,7 +200,7 @@ export default function VaultDashboard({
                         {/* Balance Card */}
                         <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '24px', textAlign: 'center' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vault Balance</div>
+                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', textTransform: 'uppercase' }}>{vaultName || 'Protected Vault'}</div>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: statusColor, background: `${statusColor}20`, padding: '2px 8px', borderRadius: '6px' }}>{statusLabel}</div>
                                 {isLatest && (
                                     <div style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', padding: '2px 8px', borderRadius: '6px' }}>LATEST</div>

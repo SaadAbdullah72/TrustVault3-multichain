@@ -9,6 +9,8 @@ export interface VaultState {
     lockDuration: number
     lastHeartbeat: number
     released: boolean
+    vaultId?: string
+    vaultName?: string
 }
 
 export interface ClaimableVault {
@@ -45,7 +47,8 @@ export interface ChainAdapter {
         beneficiary: string,
         lockDuration: number,
         depositAmount: number,
-        onStatus?: (msg: string) => void
+        onStatus?: (msg: string) => void,
+        vaultName?: string
     ): Promise<string>
 
     /** Send heartbeat to reset inactivity timer */

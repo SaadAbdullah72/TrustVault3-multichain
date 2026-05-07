@@ -56,7 +56,8 @@ export const useVaultActions = () => {
         beneficiaryInput: string,
         lockDurationInput: string,
         depositInput: string,
-        onSuccess: (vaultId: string) => void
+        onSuccess: (vaultId: string) => void,
+        vaultName: string = 'Unnamed Vault'
     ) => {
         if (!walletAddress) return
         if (!beneficiaryInput || !lockDurationInput || !depositInput) {
@@ -83,7 +84,8 @@ export const useVaultActions = () => {
                 beneficiaryInput.trim(),
                 duration,
                 deposit,
-                (msg: string) => updateStatus({ txId: msg })
+                (msg: string) => updateStatus({ txId: msg }),
+                vaultName
             )
 
             updateStatus({ txId: 'Vault established! ✨' })

@@ -138,7 +138,8 @@ export class EVMAdapter implements ChainAdapter {
         beneficiary: string,
         lockDuration: number,
         depositAmount: number,
-        onStatus?: (msg: string) => void
+        onStatus?: (msg: string) => void,
+        vaultName: string = 'EVM Vault'
     ): Promise<string> {
         const signer = await this.ensureSigner()
         const ethers = await this.getEthers()
@@ -153,28 +154,35 @@ export class EVMAdapter implements ChainAdapter {
         const factory = new ethers.Contract(factoryAddress, FACTORY_ABI, signer)
         const depositWei = ethers.parseEther(depositAmount.toString())
 
+        // Use createVault2 from the factory
         const tx = await factory.createVault2(beneficiary, lockDuration, { value: depositWei })
         onStatus?.('Transaction sent! Waiting for confirmation...')
 
         const receipt = await tx.wait()
 
         // Extract vault address from VaultCreated event
-        const event = receipt.logs.find((log: any) => {
-            try {
-                const parsed = factory.interface.parseLog(log)
-                return parsed?.name === 'VaultCreated'
-            } catch { return false }
-        })
-
-        if (!event) {
-            throw new Error('Vault creation event not found in transaction receipt')
+        let vaultAddress = ''
+        try {
+            const event = receipt.logs.find((log: any) => {
+                try {
+                    const parsed = factory.interface.parseLog(log)
+                    return parsed?.name === 'VaultCreated'
+                } catch { return false }
+            })
+            if (event) {
+                const parsed = factory.interface.parseLog(event)
+                vaultAddress = parsed!.args[0]
+            }
+        } catch (e) {
+            // Fallback: get the last vault from the factory
+            const vaults = await factory.getVaultsByOwner(this._address)
+            vaultAddress = vaults[vaults.length - 1]
         }
 
-        const parsed = factory.interface.parseLog(event)
-        const vaultAddress = parsed!.args[0]
+        if (!vaultAddress) throw new Error('Could not determine vault address')
 
-        // Save to localStorage
-        this.saveVaultLocally(vaultAddress)
+        // Save to Supabase
+        await saveVaultToRegistry(vaultAddress, beneficiary, this._address!, vaultName)
 
         return vaultAddress
     }

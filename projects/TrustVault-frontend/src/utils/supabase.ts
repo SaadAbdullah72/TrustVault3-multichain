@@ -19,7 +19,8 @@ export const isSupabaseConfigured = () => !!supabase
 export const saveVaultToRegistry = async (
     vaultId: string | bigint,
     beneficiaryAddress: string,
-    ownerAddress: string
+    ownerAddress: string,
+    vaultName: string = 'Unnamed Vault'
 ): Promise<boolean> => {
     if (!supabase) {
         console.warn('Supabase not configured, skipping cloud save')
@@ -31,7 +32,8 @@ export const saveVaultToRegistry = async (
             {
                 vault_id: vaultId.toString(),
                 beneficiary_address: beneficiaryAddress.toUpperCase(),
-                owner_address: ownerAddress.toUpperCase()
+                owner_address: ownerAddress.toUpperCase(),
+                vault_name: vaultName
             },
             { onConflict: 'vault_id' }
         )
@@ -41,12 +43,19 @@ export const saveVaultToRegistry = async (
             return false
         }
 
-        console.log(`Cloud registry: Saved vault #${vaultId} → ${beneficiaryAddress.slice(0, 8)}...`)
+        console.log(`Cloud registry: Saved vault ${vaultName} (#${vaultId}) → ${beneficiaryAddress.slice(0, 8)}...`)
         return true
     } catch (e) {
         console.error('Supabase save failed:', e)
         return false
     }
+}
+
+export interface RegistryVault {
+    vault_id: string;
+    vault_name: string;
+    beneficiary_address: string;
+    owner_address: string;
 }
 
 // Get all vault IDs where an address is the beneficiary
@@ -73,19 +82,19 @@ export const getVaultsByBeneficiary = async (beneficiaryAddress: string): Promis
     }
 }
 
-// Get all vault IDs where an address is the owner
-export const getVaultsByOwner = async (ownerAddress: string): Promise<string[]> => {
+// Get all vaults where an address is the owner
+export const getVaultsByOwner = async (ownerAddress: string): Promise<RegistryVault[]> => {
     if (!supabase) return []
 
     try {
         const { data, error } = await supabase
             .from('vault_registry')
-            .select('vault_id')
+            .select('*')
             .eq('owner_address', ownerAddress.toUpperCase())
 
         if (error) return []
 
-        return (data || []).map((row: any) => row.vault_id)
+        return data as RegistryVault[]
     } catch (e) {
         return []
     }

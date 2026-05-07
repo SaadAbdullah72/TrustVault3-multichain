@@ -278,7 +278,8 @@ export class SolanaAdapter implements ChainAdapter {
         beneficiary: string,
         lockDuration: number,
         depositAmount: number,
-        onStatus?: (msg: string) => void
+        onStatus?: (msg: string) => void,
+        vaultName: string = 'Solana Vault'
     ): Promise<string> {
         console.log('[SolanaAdapter] createVault start:', { beneficiary, lockDuration, depositAmount })
         
@@ -322,19 +323,20 @@ export class SolanaAdapter implements ChainAdapter {
             lockDuration: lockBN.toString() 
         });
 
-        try {
-            const depositBN = new anchor.BN(depositAmount * LAMPORTS_PER_SOL);
+            const vaultId = Date.now();
+            const vaultIdBN = new anchor.BN(vaultId);
             
-            // Standard Single-Vault Seeds: [b"vault", owner_pubkey]
+            // Multi-Vault Seeds: [b"vault", owner_pubkey, vault_id]
             const [newVaultPDA] = PublicKey.findProgramAddressSync(
                 [
                     anchor.utils.bytes.utf8.encode("vault"),
-                    this.wallet.publicKey.toBuffer()
+                    this.wallet.publicKey.toBuffer(),
+                    vaultIdBN.toArrayLike(Buffer, 'le', 8)
                 ],
                 program.programId
             );
 
-            console.log('[SolanaAdapter] Reverting to Single-Vault PDA:', newVaultPDA.toString());
+            console.log('[SolanaAdapter] Creating Multi-Vault PDA:', newVaultPDA.toString(), 'ID:', vaultId);
             
             const depositIx = await program.methods
                 .deposit(depositBN)
@@ -346,7 +348,7 @@ export class SolanaAdapter implements ChainAdapter {
                 .instruction();
 
             let tx = await program.methods
-                .initialize(beneficiaryPubKey, lockBN)
+                .initialize(vaultIdBN, beneficiaryPubKey, lockBN)
                 .accounts({
                     vault: newVaultPDA,
                     owner: this.wallet.publicKey,
@@ -356,6 +358,10 @@ export class SolanaAdapter implements ChainAdapter {
                 .rpc();
 
             await this.connection.confirmTransaction(tx)
+            
+            // Save to Supabase
+            await saveVaultToRegistry(newVaultPDA.toString(), beneficiary, this.wallet.publicKey.toString(), vaultName);
+
             return newVaultPDA.toString()
         } catch (e: any) {
             console.error('[SolanaAdapter] createVault failed:', e);

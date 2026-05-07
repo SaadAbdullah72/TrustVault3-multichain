@@ -1,9 +1,9 @@
 import { Shield, ChevronDown, CheckCircle, X, Plus, RefreshCw, Copy, Asterisk, MoreHorizontal } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { RegistryVault } from '../utils/supabase'
 
 export interface VaultDropdownProps {
     currentChain: any;
-    userVaults: string[];
+    userVaults: RegistryVault[];
     vaultRoles: Record<string, string>;
     selectedVaultId: string | null;
     setSelectedVaultId: (id: string | null) => void;
@@ -65,18 +65,18 @@ export default function VaultDropdown({
                     </div>
 
                     <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {userVaults.map(id => (
-                            <div key={id} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {userVaults.map(v => (
+                            <div key={v.vault_id} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <button 
-                                    onClick={() => { setSelectedVaultId(id); setShowVaultSelector(false) }}
+                                    onClick={() => { setSelectedVaultId(v.vault_id); setShowVaultSelector(false) }}
                                     style={{ 
                                         flex: 1, 
                                         display: 'flex', 
                                         alignItems: 'center', 
                                         gap: '12px', 
                                         padding: '14px', 
-                                        background: selectedVaultId === id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                        border: `1px solid ${selectedVaultId === id ? 'rgba(255,255,255,0.2)' : 'transparent'}`,
+                                        background: selectedVaultId === v.vault_id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                        border: `1px solid ${selectedVaultId === v.vault_id ? 'rgba(255,255,255,0.2)' : 'transparent'}`,
                                         borderRadius: '16px',
                                         cursor: 'pointer',
                                         textAlign: 'left',
@@ -84,15 +84,15 @@ export default function VaultDropdown({
                                     }}
                                 >
                                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }}>
-                                        <Shield size={18} color={selectedVaultId === id ? '#fff' : '#94a3b8'} />
+                                        <Shield size={18} color={selectedVaultId === v.vault_id ? '#fff' : '#94a3b8'} />
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '14px', fontWeight: 700 }}>Vault #{id.slice(0, 8)}</div>
-                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>{formatAddr(adapter.getVaultAddress(id))}</div>
+                                        <div style={{ fontSize: '14px', fontWeight: 700 }}>{v.vault_name || 'Unnamed Vault'}</div>
+                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>{formatAddr(v.vault_id)}</div>
                                     </div>
-                                    {selectedVaultId === id && <CheckCircle size={16} color="#fff" />}
+                                    {selectedVaultId === v.vault_id && <CheckCircle size={16} color="#fff" />}
                                 </button>
-                                <button onClick={() => handleDeleteVaultId(id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
+                                <button onClick={() => handleDeleteVaultId(v.vault_id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
                             </div>
                         ))}
                     </div>
@@ -118,7 +118,9 @@ export default function VaultDropdown({
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>
-                            {selectedVaultId ? `Vault #${selectedVaultId.slice(0, 6)}` : 'No Vault'}
+                            {selectedVaultId 
+                                ? (userVaults.find(v => v.vault_id === selectedVaultId)?.vault_name || `Vault #${selectedVaultId.slice(0, 6)}`)
+                                : 'No Vault'}
                         </span>
                         <ChevronDown size={14} color="#94a3b8" />
                     </div>

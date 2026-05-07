@@ -76,7 +76,7 @@ export class AlgorandAdapter implements ChainAdapter {
         return !!this.activeAddress
     }
 
-    async createVault(beneficiary: string, lockDuration: number, depositAmount: number, onStatus?: (msg: string) => void): Promise<string> {
+    async createVault(beneficiary: string, lockDuration: number, depositAmount: number, onStatus?: (msg: string) => void, vaultName: string = 'Algorand Vault'): Promise<string> {
         console.log('[AlgorandAdapter] createVault start:', { beneficiary, lockDuration, depositAmount })
         if (!this.activeAddress || !this.transactionSigner) {
             console.error('[AlgorandAdapter] Missing address or signer:', { activeAddress: this.activeAddress, hasSigner: !!this.transactionSigner })
@@ -147,7 +147,7 @@ export class AlgorandAdapter implements ChainAdapter {
         // Save to registries
         onStatus?.('Vault established! Finalizing secure registry...')
         saveBeneficiaryMapping(beneficiary.trim(), appId)
-        await saveVaultToRegistry(appId.toString(), beneficiary, this.activeAddress)
+        await saveVaultToRegistry(appId.toString(), beneficiary, this.activeAddress, vaultName)
 
         return appId.toString()
     }
