@@ -215,6 +215,10 @@ const idl = {
             "type": "i64"
           },
           {
+            "name": "lastHeartbeat",
+            "type": "i64"
+          },
+          {
             "name": "vaultId",
             "type": "u64"
           },
