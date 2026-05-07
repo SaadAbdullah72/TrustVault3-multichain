@@ -42,7 +42,6 @@ export default function VaultDropdown({
     copyToClipboard,
     formatAddr
 }: VaultDropdownProps) {
-    const { t } = useTranslation()
 
     return (
         <div style={{ position: 'relative', zIndex: 150 }}>
