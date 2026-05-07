@@ -8,6 +8,7 @@ import {
     LAMPORTS_PER_SOL
 } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
+import { saveVaultToRegistry } from '../utils/supabase'
 const idl = {
   "address": "7VgDt7rwmPWqHyjViTVQLfYku5WSxbccqfg4xER59hKE",
   "metadata": {
