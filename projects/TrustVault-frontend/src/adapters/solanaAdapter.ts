@@ -47,6 +47,10 @@ const idl = {
       ],
       "args": [
         {
+          "name": "vaultId",
+          "type": "u64"
+        },
+        {
           "name": "beneficiary",
           "type": "pubkey"
         },
