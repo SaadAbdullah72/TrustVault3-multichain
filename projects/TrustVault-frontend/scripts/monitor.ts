@@ -28,9 +28,9 @@ async function runMonitor() {
                 // Initialize SDK for this specific chain
                 let sdk: TrustVaultSDK;
                 if (chain.type === 'evm') {
-                    sdk = TrustVaultSDK.forEVM(chain.testnet.rpcUrl);
+                    sdk = TrustVaultSDK.forEVM(chain);
                 } else if (chain.type === 'solana') {
-                    sdk = TrustVaultSDK.forSolana(chain.testnet.rpcUrl);
+                    sdk = TrustVaultSDK.forSolana(chain);
                 } else {
                     // Algorand fallback
                     sdk = TrustVaultSDK.forAlgorand(chain.testnet.rpcUrl, '', '');

@@ -1,5 +1,5 @@
 import { ChainAdapter, VaultState, ClaimableVault } from '../adapters/types';
-import { EthereumAdapter } from '../adapters/evmAdapter';
+import { EVMAdapter } from '../adapters/evmAdapter';
 import { SolanaAdapter } from '../adapters/solanaAdapter';
 import { AlgorandAdapter } from '../adapters/algorandAdapter';
 
@@ -17,12 +17,12 @@ export class TrustVaultSDK {
     /**
      * Initialize the SDK for a specific chain.
      */
-    static forEVM(rpcUrl: string, provider?: any): TrustVaultSDK {
-        return new TrustVaultSDK(new EthereumAdapter(rpcUrl, provider));
+    static forEVM(chainConfig: any): TrustVaultSDK {
+        return new TrustVaultSDK(new EVMAdapter(chainConfig));
     }
 
-    static forSolana(rpcUrl: string): TrustVaultSDK {
-        return new TrustVaultSDK(new SolanaAdapter(rpcUrl));
+    static forSolana(chainConfig: any): TrustVaultSDK {
+        return new TrustVaultSDK(new SolanaAdapter(chainConfig));
     }
 
     static forAlgorand(server: string, port: string, token: string): TrustVaultSDK {
