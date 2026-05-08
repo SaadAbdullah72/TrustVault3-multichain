@@ -290,20 +290,31 @@ export default function VaultDashboard({
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Action Buttons - Dynamic based on role */}
                         <div className="action-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                            <button onClick={onHeartbeat} disabled={uiStatus.loading} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}>
-                                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)' }}>
-                                    <Heart size={22} color="#fff" fill="#fff" className={uiStatus.loading ? 'pulse' : ''} />
-                                </div>
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>Heartbeat</span>
-                            </button>
-                            <button onClick={() => setShowWithdrawInput(true)} disabled={uiStatus.loading} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}>
+                            {isOwner ? (
+                                <button onClick={onHeartbeat} disabled={uiStatus.loading} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)' }}>
+                                        <Heart size={22} color="#fff" fill="#fff" className={uiStatus.loading ? 'pulse' : ''} />
+                                    </div>
+                                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>Heartbeat</span>
+                                </button>
+                            ) : (
+                                <button onClick={onClaim} disabled={uiStatus.loading || !isExpired || vaultData.released} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: (uiStatus.loading || !isExpired || vaultData.released) ? 0.5 : 1 }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(59, 130, 246, 0.3)' }}>
+                                        <Unlock size={22} color="#fff" />
+                                    </div>
+                                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>{vaultData.released ? 'Claimed' : 'Claim Vault'}</span>
+                                </button>
+                            )}
+
+                            <button onClick={() => setShowWithdrawInput(true)} disabled={uiStatus.loading || (isBeneficiary && !vaultData.released)} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: (uiStatus.loading || (isBeneficiary && !vaultData.released)) ? 0.5 : 1 }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(255, 255, 255, 0.1)' }}>
                                     <ArrowUpRight size={22} color="#000" />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>Withdraw</span>
                             </button>
+
                             <button onClick={onRefresh} disabled={uiStatus.loading} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <RefreshCw size={22} color="#fff" className={uiStatus.loading ? 'spinning' : ''} />

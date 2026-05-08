@@ -108,7 +108,7 @@ export const discoverBeneficiaryVaults = async (address: string): Promise<Claima
             if (state) {
                 const benMatch = state.beneficiary.toUpperCase() === address.toUpperCase()
                 console.log(`[Vault #${allIds[idx]}] Ben: ${state.beneficiary.slice(0, 8)}... Match: ${benMatch}, Released: ${state.released}`)
-                if (benMatch && !state.released) {
+                if (benMatch) {
                     results.push({ appId: allIds[idx], state })
                 }
             } else {
