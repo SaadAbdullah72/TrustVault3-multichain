@@ -573,7 +573,7 @@ export const VaultPage: React.FC = () => {
                     </div>
                 )}
 
-                <style>{`
+                <style dangerouslySetInnerHTML={{ __html: `
                     .wallet-container {
                         display: flex;
                         height: 100vh;
@@ -620,9 +620,8 @@ export const VaultPage: React.FC = () => {
                     @media (min-width: 1024px) {
                         .mobile-only-selector { display: none; }
                     }
-                `}</style>
+                ` }} />
             </div>
-        </div>
     )
 }
 
