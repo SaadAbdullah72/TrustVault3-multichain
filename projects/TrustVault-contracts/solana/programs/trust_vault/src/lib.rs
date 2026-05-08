@@ -25,7 +25,15 @@ pub mod trust_vault {
 
     pub fn heartbeat(ctx: Context<Heartbeat>) -> Result<()> {
         let vault = &mut ctx.accounts.vault;
-        vault.last_heartbeat = Clock::get()?.unix_timestamp;
+        let now = Clock::get()?.unix_timestamp;
+        
+        // Security: Disable heartbeat if timer already expired
+        require!(
+            now < vault.last_heartbeat + vault.lock_duration, 
+            TrustError::AlreadyExpired
+        );
+
+        vault.last_heartbeat = now;
         Ok(())
     }
 
@@ -48,7 +56,15 @@ pub mod trust_vault {
 
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         let vault = &mut ctx.accounts.vault;
+        let now = Clock::get()?.unix_timestamp;
+
         require!(!vault.released, TrustError::AlreadyReleased);
+        
+        // Security: Disable withdraw if timer already expired
+        require!(
+            now < vault.last_heartbeat + vault.lock_duration, 
+            TrustError::AlreadyExpired
+        );
         
         let vault_info = vault.to_account_info();
         let owner_info = ctx.accounts.owner.to_account_info();
@@ -152,4 +168,6 @@ pub enum TrustError {
     AlreadyReleased,
     #[msg("Insufficient funds in vault.")]
     InsufficientFunds,
+    #[msg("Security: Timer has already expired. Access revoked.")]
+    AlreadyExpired,
 }
