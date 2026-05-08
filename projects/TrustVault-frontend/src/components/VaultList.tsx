@@ -131,7 +131,7 @@ export default function VaultList({
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div>
                                     <div style={{ fontSize: '10px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>Beneficiary</div>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{formatAddr(vault.beneficiary_address)}</div>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{vault.beneficiary_address ? formatAddr(vault.beneficiary_address) : '?...?'}</div>
                                 </div>
                                 <div>
                                     <div style={{ fontSize: '10px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>Network</div>
