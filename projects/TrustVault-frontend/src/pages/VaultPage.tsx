@@ -32,7 +32,7 @@ import TransactionOverlay from '../components/TransactionOverlay'
 import LandingPage from '../components/LandingPage'
 import VaultList, { VaultMetadata } from '../components/VaultList'
 import PrivacyPolicy from '../components/PrivacyPolicy'
-import { getVaultsByOwner, RegistryVault } from '../utils/supabase'
+import { getVaultsByOwner, getVaultsByBeneficiary, RegistryVault } from '../utils/supabase'
 import { Toast } from '../components/Toast'
 
 export const VaultPage: React.FC = () => {
