@@ -414,6 +414,11 @@ export const VaultPage: React.FC = () => {
                                 Create New Vault
                             </button>
                             <button
+                                onClick={() => { setCurrentTab('api'); setShowCreateForm(true); setStep('dashboard'); }}
+                                style={{ width: '100%', padding: '18px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <Code size={20} /> Developer Mode
+                            </button>
+                            <button
                                 onClick={() => setStep('privacy')}
                                 style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '12px', fontWeight: 600, cursor: 'pointer', marginTop: '10px' }}>
                                 Privacy Policy
