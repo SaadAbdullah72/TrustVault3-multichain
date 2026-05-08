@@ -54,11 +54,10 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         const foundIds = new Set<string>()
 
         // Run primary discovery methods in parallel (optimized for speed + on-chain cross-device support)
-        const [createdApps, notePrefixTxs, supabaseOwner, supabaseBen] = await Promise.all([
+        // Run primary discovery methods in parallel (optimized for speed + on-chain cross-device support)
+        const [createdApps, notePrefixTxs] = await Promise.all([
             indexerClient.searchForApplications().creator(address).do().catch(() => ({ applications: [] })),
-            indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address.slice(0, 10))).do().catch(() => ({ transactions: [] })),
-            import('./supabase').then(m => m.getVaultsByOwner(address)).catch(() => []),
-            import('./supabase').then(m => m.getVaultsByBeneficiary(address)).catch(() => [])
+            indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address.slice(0, 10))).do().catch(() => ({ transactions: [] }))
         ])
 
         // 1. Creator search (Very fast)
@@ -70,9 +69,7 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
             if (appId && appId > 0) foundIds.add(appId.toString())
         })
 
-        // 3. Supabase results (Fast & Reliable cross-device)
-        supabaseOwner.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
-        supabaseBen.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
+        // (Supabase cloud registry disabled per user request for performance)
 
         // 3. Local storage fallbacks
         if (typeof window !== 'undefined') {
