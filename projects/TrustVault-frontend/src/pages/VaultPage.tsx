@@ -451,10 +451,24 @@ export const VaultPage: React.FC = () => {
                 {/* Mobile Menu Toggle */}
                 <button 
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 2000, background: 'rgba(17, 30, 47, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px', borderRadius: '10px', display: 'none', backdropFilter: 'blur(10px)' }}
+                    style={{ 
+                        position: 'fixed', 
+                        top: '14px', 
+                        right: '12px', 
+                        zIndex: 3000, 
+                        background: 'rgba(25, 35, 55, 0.9)', 
+                        border: '1px solid rgba(255,255,255,0.15)', 
+                        color: '#fff', 
+                        padding: '12px', 
+                        borderRadius: '14px', 
+                        display: 'none', 
+                        backdropFilter: 'blur(15px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                        transition: 'all 0.2s ease'
+                    }}
                     className="mobile-menu-toggle"
                 >
-                    {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
 
                 {/* Sidebar (Responsive) */}
