@@ -10,6 +10,9 @@ export interface VaultMetadata {
 
 interface VaultListProps {
     vaults: VaultMetadata[];
+    inheritedVaults: VaultMetadata[];
+    activeListTab: 'owned' | 'inherited';
+    setActiveListTab: (tab: 'owned' | 'inherited') => void;
     onSelect: (vaultId: string) => void;
     onCreateNew: () => void;
     formatAddr: (addr: string) => string;
@@ -17,7 +20,17 @@ interface VaultListProps {
     isDiscovering: boolean;
 }
 
-export default function VaultList({ vaults, onSelect, onCreateNew, formatAddr, currentChain, isDiscovering }: VaultListProps) {
+export default function VaultList({ 
+    vaults, 
+    inheritedVaults,
+    activeListTab,
+    setActiveListTab,
+    onSelect, 
+    onCreateNew, 
+    formatAddr, 
+    currentChain, 
+    isDiscovering 
+}: VaultListProps) {
     if (isDiscovering) {
         return (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
@@ -30,7 +43,41 @@ export default function VaultList({ vaults, onSelect, onCreateNew, formatAddr, c
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff' }}>Existing Vaults</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff' }}>Existing Vaults</h2>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                        <button 
+                            onClick={() => setActiveListTab('owned')}
+                            style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: activeListTab === 'owned' ? '#fff' : '#475569', 
+                                fontWeight: 800, 
+                                fontSize: '14px', 
+                                cursor: 'pointer',
+                                borderBottom: activeListTab === 'owned' ? '2px solid #fff' : 'none',
+                                padding: '8px 0'
+                            }}
+                        >
+                            OWNED
+                        </button>
+                        <button 
+                            onClick={() => setActiveListTab('inherited')}
+                            style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: activeListTab === 'inherited' ? '#fff' : '#475569', 
+                                fontWeight: 800, 
+                                fontSize: '14px', 
+                                cursor: 'pointer',
+                                borderBottom: activeListTab === 'inherited' ? '2px solid #fff' : 'none',
+                                padding: '8px 0'
+                            }}
+                        >
+                            INHERITED
+                        </button>
+                    </div>
+                </div>
                 <button 
                     onClick={onCreateNew}
                     style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
@@ -39,7 +86,7 @@ export default function VaultList({ vaults, onSelect, onCreateNew, formatAddr, c
                 </button>
             </div>
 
-            {vaults.length === 0 ? (
+            {(activeListTab === 'owned' ? vaults : inheritedVaults).length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
                     <div style={{ width: '64px', height: '64px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                         <Shield size={32} color="#475569" />
@@ -55,7 +102,7 @@ export default function VaultList({ vaults, onSelect, onCreateNew, formatAddr, c
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                    {vaults.map((vault) => (
+                    {(activeListTab === 'owned' ? vaults : inheritedVaults).map((vault) => (
                         <div 
                             key={vault.vault_id}
                             onClick={() => onSelect(vault.vault_id)}

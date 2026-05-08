@@ -336,6 +336,9 @@ export const VaultPage: React.FC = () => {
                 <div style={{ paddingTop: '100px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
                     <VaultList 
                         vaults={userVaults as any} 
+                        inheritedVaults={inheritedVaults as any}
+                        activeListTab={activeListTab}
+                        setActiveListTab={setActiveListTab}
                         onSelect={handleVaultSelect} 
                         onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                         formatAddr={formatAddr}
