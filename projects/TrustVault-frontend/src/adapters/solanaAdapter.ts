@@ -390,6 +390,9 @@ export class SolanaAdapter implements ChainAdapter {
         try {
             return await program.methods.heartbeat().accounts({ vault: new PublicKey(vaultId), owner: this.wallet.publicKey }).rpc()
         } catch (e: any) {
+            if (e.name === 'WalletDisconnectedError' || e.message?.includes('WalletDisconnectedError')) {
+                throw new Error('Wallet disconnected. Please reconnect your Solana wallet.');
+            }
             console.error('[SolanaAdapter] heartbeat failed:', e);
             throw e;
         }
@@ -405,6 +408,9 @@ export class SolanaAdapter implements ChainAdapter {
         try {
             return await program.methods.withdraw(new anchor.BN(amount * LAMPORTS_PER_SOL)).accounts({ vault: new PublicKey(vaultId), owner: this.wallet.publicKey }).rpc()
         } catch (e: any) {
+            if (e.name === 'WalletDisconnectedError' || e.message?.includes('WalletDisconnectedError')) {
+                throw new Error('Wallet disconnected. Please reconnect your Solana wallet.');
+            }
             console.error('[SolanaAdapter] withdraw failed:', e);
             throw e;
         }
@@ -420,6 +426,9 @@ export class SolanaAdapter implements ChainAdapter {
         try {
             return await program.methods.autoRelease().accounts({ vault: new PublicKey(vaultId), beneficiary: this.wallet.publicKey }).rpc()
         } catch (e: any) {
+            if (e.name === 'WalletDisconnectedError' || e.message?.includes('WalletDisconnectedError')) {
+                throw new Error('Wallet disconnected. Please reconnect your Solana wallet.');
+            }
             console.error('[SolanaAdapter] autoRelease failed:', e);
             throw e;
         }
@@ -435,6 +444,9 @@ export class SolanaAdapter implements ChainAdapter {
         try {
             return await program.methods.deposit(new anchor.BN(amount * LAMPORTS_PER_SOL)).accounts({ vault: new PublicKey(vaultId), owner: this.wallet.publicKey, systemProgram: SystemProgram.programId }).rpc()
         } catch (e: any) {
+            if (e.name === 'WalletDisconnectedError' || e.message?.includes('WalletDisconnectedError')) {
+                throw new Error('Wallet disconnected. Please reconnect your Solana wallet.');
+            }
             console.error('[SolanaAdapter] deposit failed:', e);
             throw e;
         }

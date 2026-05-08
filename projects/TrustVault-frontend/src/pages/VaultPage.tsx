@@ -272,8 +272,15 @@ export const VaultPage: React.FC = () => {
                     ...prev,
                     [selectedVaultId]: isOwner ? 'owner' : (isBen ? 'beneficiary' : '')
                 }))
+            } else {
+                // If state is null (e.g. Solana account closed after claim), 
+                // we should stop trying to load it to avoid stuck spinner.
+                console.log('[VaultPage] Vault state is null, resetting selection.')
+                setSelectedVaultId(null)
             }
-        } catch (e) { }
+        } catch (e) {
+            setSelectedVaultId(null)
+        }
     }, [adapter, selectedVaultId, walletAddress, currentChain.type])
 
     useEffect(() => {
