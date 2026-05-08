@@ -145,7 +145,7 @@ export const VaultPage: React.FC = () => {
 
                     ownedMap.set(idStr, {
                         vault_id: id.toString(),
-                        vault_name: `Algorand Vault`, // Proper name
+                        vault_name: `${currentChain.name} Vault`,
                         owner_address: walletAddress,
                         beneficiary_address: beneficiary
                     })
@@ -392,8 +392,8 @@ export const VaultPage: React.FC = () => {
 
     if (step === 'vaultList') {
         return (
-            <div className="wallet-shell" style={{ background: '#0B131E' }}>
-                <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
+            <div style={{ minHeight: '100vh', background: '#0B131E', width: '100%' }}>
+                <div style={{ position: 'fixed', top: '24px', left: '24px', zIndex: 100 }}>
                     <button onClick={() => setStep('actionSelect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
                         <ArrowLeft size={18} /> Back
                     </button>
