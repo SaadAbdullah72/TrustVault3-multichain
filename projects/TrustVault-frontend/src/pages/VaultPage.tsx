@@ -33,7 +33,7 @@ import TransactionOverlay from '../components/TransactionOverlay'
 import LandingPage from '../components/LandingPage'
 import VaultList, { VaultMetadata } from '../components/VaultList'
 import PrivacyPolicy from '../components/PrivacyPolicy'
-import { getVaultsByOwner, getVaultsByBeneficiary, RegistryVault } from '../utils/supabase'
+import { getVaultsByOwner, getVaultsByBeneficiary, deleteVaultFromRegistry, RegistryVault } from '../utils/supabase'
 import { Toast } from '../components/Toast'
 
 export const VaultPage: React.FC = () => {
@@ -206,19 +206,39 @@ export const VaultPage: React.FC = () => {
         }
     }, [isConnected, currentChain.id, walletAddress, discoverVaults])
 
-    const handleDeleteVaultId = (id: string) => {
+    const handleDeleteVaultId = async (id: string) => {
+        // 1. Remove from Cloud (Supabase)
+        try {
+            await deleteVaultFromRegistry(id)
+        } catch (e) {
+            console.error('Failed to delete from cloud registry:', e)
+        }
+
+        // 2. Add to local blacklist as backup/instant UI update
         const updated = [...hiddenVaultIds, id]
         setHiddenVaultIds(updated)
         localStorage.setItem('hidden_vaults', JSON.stringify(updated))
+        
         if (selectedVaultId === id) setSelectedVaultId(null)
     }
 
-    const handleDeleteAll = () => {
+    const handleDeleteAll = async () => {
         const currentList = activeListTab === 'owned' ? visibleOwned : visibleInherited
-        const newHidden = [...hiddenVaultIds, ...currentList.map(v => v.vault_id)]
+        const idsToDelete = currentList.map(v => v.vault_id)
+
+        // 1. Remove all from Cloud
+        try {
+            await Promise.all(idsToDelete.map(id => deleteVaultFromRegistry(id)))
+        } catch (e) {
+            console.error('Failed to delete some vaults from cloud:', e)
+        }
+
+        // 2. Update local blacklist
+        const newHidden = [...hiddenVaultIds, ...idsToDelete]
         const unique = Array.from(new Set(newHidden))
         setHiddenVaultIds(unique)
         localStorage.setItem('hidden_vaults', JSON.stringify(unique))
+        
         setSelectedVaultId(null)
     }
 

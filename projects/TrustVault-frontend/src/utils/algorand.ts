@@ -53,23 +53,19 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         console.log(`[Discovery] Starting unified scan for ${address.slice(0, 8)}...`)
         const foundIds = new Set<string>()
 
-        // Run primary discovery methods in parallel (optimized for speed + on-chain cross-device support)
-        // Run primary discovery methods in parallel (optimized for speed + on-chain cross-device support)
-        const [createdApps, notePrefixTxs] = await Promise.all([
+        // Run primary discovery methods in parallel (Supabase-first as requested)
+        const [createdApps, supabaseOwner, supabaseBen] = await Promise.all([
             indexerClient.searchForApplications().creator(address).do().catch(() => ({ applications: [] })),
-            indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(VAULT_NOTE_PREFIX + address.slice(0, 10))).do().catch(() => ({ transactions: [] }))
+            import('./supabase').then(m => m.getVaultsByOwner(address)).catch(() => []),
+            import('./supabase').then(m => m.getVaultsByBeneficiary(address)).catch(() => [])
         ])
 
-        // 1. Creator search (Very fast)
+        // 1. Creator search (Always instant)
         createdApps.applications?.forEach((app: any) => app.id > 0 && foundIds.add(app.id.toString()))
 
-        // 2. On-Chain Beneficiary Note Search (Fast cross-device discovery)
-        notePrefixTxs.transactions?.forEach((tx: any) => {
-            const appId = tx['application-transaction']?.['application-id']
-            if (appId && appId > 0) foundIds.add(appId.toString())
-        })
-
-        // (Supabase cloud registry disabled per user request for performance)
+        // 2. Supabase Cloud Results (Primary cross-device source)
+        supabaseOwner.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
+        supabaseBen.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
 
         // 3. Local storage fallbacks
         if (typeof window !== 'undefined') {

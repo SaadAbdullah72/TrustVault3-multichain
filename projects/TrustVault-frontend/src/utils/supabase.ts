@@ -112,4 +112,25 @@ export const getAllVaults = async (): Promise<RegistryVault[]> => {
     }
 }
 
+// Delete vault from registry
+export const deleteVaultFromRegistry = async (vaultId: string): Promise<boolean> => {
+    if (!supabase) return false
+    try {
+        const { error } = await supabase
+            .from('vault_registry')
+            .delete()
+            .eq('vault_id', vaultId.toString())
+
+        if (error) {
+            console.error('Supabase delete error:', error)
+            return false
+        }
+        console.log(`Cloud registry: Deleted vault #${vaultId}`)
+        return true
+    } catch (e) {
+        console.error('Supabase delete failed:', e)
+        return false
+    }
+}
+
 export default supabase
