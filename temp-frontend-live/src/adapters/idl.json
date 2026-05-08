@@ -1,0 +1,86 @@
+{
+  "version": "0.1.0",
+  "name": "trust_vault",
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [175, 175, 204, 31, 13, 152, 110, 169],
+      "accounts": [
+        { "name": "vault", "writable": true, "pda": { "seeds": [{ "kind": "const", "value": [118, 97, 117, 108, 116] }, { "kind": "account", "path": "owner" }] } },
+        { "name": "owner", "writable": true, "signer": true },
+        { "name": "systemProgram", "address": "11111111111111111111111111111111" }
+      ],
+      "args": [
+        { "name": "beneficiary", "type": "pubkey" },
+        { "name": "lockDuration", "type": "i64" }
+      ]
+    },
+    {
+      "name": "heartbeat",
+      "discriminator": [201, 237, 2, 75, 14, 253, 58, 204],
+      "accounts": [
+        { "name": "vault", "writable": true },
+        { "name": "owner", "signer": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "deposit",
+      "discriminator": [242, 35, 198, 137, 82, 225, 242, 182],
+      "accounts": [
+        { "name": "vault", "writable": true },
+        { "name": "owner", "writable": true, "signer": true },
+        { "name": "systemProgram", "address": "11111111111111111111111111111111" }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [183, 18, 70, 156, 148, 109, 161, 34],
+      "accounts": [
+        { "name": "vault", "writable": true },
+        { "name": "owner", "writable": true, "signer": true }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "autoRelease",
+      "discriminator": [121, 196, 219, 163, 163, 206, 171, 7],
+      "accounts": [
+        { "name": "vault", "writable": true },
+        { "name": "beneficiary", "writable": true }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "VaultAccount",
+      "discriminator": [123, 219, 13, 100, 153, 224, 73, 22]
+    }
+  ],
+  "types": [
+    {
+      "name": "VaultAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "pubkey" },
+          { "name": "beneficiary", "type": "pubkey" },
+          { "name": "lockDuration", "type": "i64" },
+          { "name": "lastHeartbeat", "type": "i64" },
+          { "name": "released", "type": "bool" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "NotExpired", "msg": "Lock period has not expired yet." },
+    { "code": 6001, "name": "AlreadyReleased", "msg": "Vault funds have already been released." },
+    { "code": 6002, "name": "InsufficientFunds", "msg": "Insufficient funds in vault." }
+  ]
+}

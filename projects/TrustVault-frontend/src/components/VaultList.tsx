@@ -48,11 +48,11 @@ export default function VaultList({
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff' }}>Existing Vaults</h2>
-                    <div style={{ display: 'flex', gap: '16px' }}>
+        <div className="vault-list-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '20px' }}>
+            <div className="vault-list-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>Existing Vaults</h2>
+                    <div style={{ display: 'flex', gap: '20px' }}>
                         <button 
                             onClick={() => setActiveListTab('owned')}
                             style={{ 
@@ -60,10 +60,11 @@ export default function VaultList({
                                 border: 'none', 
                                 color: activeListTab === 'owned' ? '#fff' : '#475569', 
                                 fontWeight: 800, 
-                                fontSize: '14px', 
+                                fontSize: '13px', 
                                 cursor: 'pointer',
-                                borderBottom: activeListTab === 'owned' ? '2px solid #fff' : 'none',
-                                padding: '8px 0'
+                                borderBottom: activeListTab === 'owned' ? '2px solid #3b82f6' : '2px solid transparent',
+                                padding: '8px 0',
+                                transition: 'all 0.2s'
                             }}
                         >
                             OWNED
@@ -75,94 +76,96 @@ export default function VaultList({
                                 border: 'none', 
                                 color: activeListTab === 'inherited' ? '#fff' : '#475569', 
                                 fontWeight: 800, 
-                                fontSize: '14px', 
+                                fontSize: '13px', 
                                 cursor: 'pointer',
-                                borderBottom: activeListTab === 'inherited' ? '2px solid #fff' : 'none',
-                                padding: '8px 0'
+                                borderBottom: activeListTab === 'inherited' ? '2px solid #3b82f6' : '2px solid transparent',
+                                padding: '8px 0',
+                                transition: 'all 0.2s'
                             }}
                         >
                             INHERITED
                         </button>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '10px', width: 'auto', flexWrap: 'wrap' }}>
                     {currentList.length > 0 && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); if (window.confirm('Remove ALL vaults in this list?')) onDeleteAll(); }}
-                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '8px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '10px 16px', borderRadius: '14px', fontSize: '12px', fontWeight: 800, cursor: 'pointer' }}
                         >
                             Remove All
                         </button>
                     )}
                     <button 
                         onClick={onCreateNew}
-                        style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                        style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 20px', borderRadius: '14px', fontWeight: 900, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(255,255,255,0.1)' }}
                     >
-                        <Plus size={16} /> New Vault
+                        <Plus size={18} strokeWidth={3} /> New Vault
                     </button>
                 </div>
             </div>
 
             {currentList.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                    <div style={{ width: '64px', height: '64px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                        <Shield size={32} color="#475569" />
+                <div style={{ textAlign: 'center', padding: '80px 24px', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                    <div style={{ width: '80px', height: '80px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                        <Shield size={40} color="#334155" />
                     </div>
-                    <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>No Vaults Found</h3>
-                    <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>We couldn't find any inheritance vaults linked to your address on this chain.</p>
+                    <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 800, marginBottom: '12px' }}>No Vaults Detected</h3>
+                    <p style={{ color: '#64748b', fontSize: '15px', marginBottom: '32px', maxWidth: '300px', marginInline: 'auto', lineHeight: 1.6 }}>We couldn't find any active inheritance vaults linked to this wallet address.</p>
                     <button 
                         onClick={onCreateNew}
-                        style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}
+                        style={{ background: '#fff', color: '#000', border: 'none', padding: '14px 32px', borderRadius: '16px', fontWeight: 900, fontSize: '15px', cursor: 'pointer' }}
                     >
-                        Create Your First Vault
+                        Create First Vault
                     </button>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                <div className="vault-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                     {(activeListTab === 'owned' ? vaults : inheritedVaults).map((vault) => (
                         <div 
                             key={vault.vault_id}
                             onClick={() => onSelect(vault.vault_id)}
                             style={{ 
-                                background: '#111e2f', 
-                                border: '1px solid rgba(255,255,255,0.1)', 
-                                borderRadius: '20px', 
-                                padding: '24px', 
+                                background: 'linear-gradient(135deg, #111e2f 0%, #0d1724 100%)', 
+                                border: '1px solid rgba(255,255,255,0.08)', 
+                                borderRadius: '28px', 
+                                padding: '28px', 
                                 cursor: 'pointer',
-                                transition: 'all 0.2s ease',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 position: 'relative',
                                 overflow: 'hidden'
                             }}
                             className="vault-card-hover"
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                                <div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Shield size={22} color="#fff" />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                                <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.04)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <Shield size={24} color="#fff" />
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     {vault.isClaimed && (
-                                        <div style={{ padding: '4px 10px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#22c55e', borderRadius: '8px', fontSize: '10px', fontWeight: 800, letterSpacing: '1px' }}>CLAIMED</div>
+                                        <div style={{ padding: '6px 12px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#22c55e', borderRadius: '10px', fontSize: '10px', fontWeight: 900, letterSpacing: '1px' }}>CLAIMED</div>
                                     )}
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); if (window.confirm('Really want to remove this vault from list?')) onDelete(vault.vault_id); }}
-                                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '8px', borderRadius: '10px', cursor: 'pointer' }}
+                                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.1)', color: '#ef4444', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
+                                        className="delete-btn"
                                     >
-                                        <X size={16} />
+                                        <X size={18} />
                                     </button>
                                 </div>
                             </div>
 
-                            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{vault.vault_name || 'Unnamed Vault'}</h3>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '20px', wordBreak: 'break-all' }}>{formatAddr(vault.vault_id)}</div>
+                            <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#fff', marginBottom: '6px', letterSpacing: '-0.5px' }}>{vault.vault_name || 'Unnamed Vault'}</h3>
+                            <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '28px', fontUnderline: 'none', wordBreak: 'break-all' }}>{formatAddr(vault.vault_id)}</div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div className="vault-card-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div>
-                                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>Beneficiary</div>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{vault.beneficiary_address ? formatAddr(vault.beneficiary_address) : '?...?'}</div>
+                                    <div style={{ fontSize: '10px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Beneficiary</div>
+                                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{vault.beneficiary_address ? formatAddr(vault.beneficiary_address) : '?...?'}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>Network</div>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{currentChain.name}</div>
+                                    <div style={{ fontSize: '10px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Network</div>
+                                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{currentChain.name}</div>
                                 </div>
                             </div>
                         </div>
@@ -172,11 +175,35 @@ export default function VaultList({
 
             <style>{`
                 .vault-card-hover:hover {
-                    border-color: rgba(255,255,255,0.3) !important;
-                    transform: translateY(-4px);
-                    background: #15253a !important;
+                    border-color: rgba(59, 130, 246, 0.4) !important;
+                    transform: translateY(-6px);
+                    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+                }
+                .delete-btn:hover {
+                    background: #ef4444 !important;
+                    color: #fff !important;
                 }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                
+                @media (max-width: 600px) {
+                    .vault-list-header {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .vault-list-header > div {
+                        width: 100% !important;
+                    }
+                    .vault-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .vault-list-container {
+                        padding: 16px !important;
+                    }
+                    .vault-card-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                    }
+                }
             `}</style>
         </div>
     )

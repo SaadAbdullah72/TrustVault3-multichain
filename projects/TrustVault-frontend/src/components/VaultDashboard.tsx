@@ -54,7 +54,6 @@ export default function VaultDashboard({
     const [showWithdrawInput, setShowWithdrawInput] = useState(false)
     const [withdrawAmount, setWithdrawAmount] = useState('')
     const [copyToast, setCopyToast] = useState(false)
-    const [apiTab, setApiTab] = useState('SDK')
     const [showDocs, setShowDocs] = useState(false)
 
     const symbol = currentChain.nativeCurrency.symbol
@@ -150,90 +149,86 @@ export default function VaultDashboard({
                     </div>
                 )
             case 'api':
-                const apiKey = walletAddress ? `tv_pub_${walletAddress.slice(2, 10)}_${walletAddress.slice(-6)}` : 'Please connect wallet';
+                const apiKey = walletAddress ? `${walletAddress.toUpperCase()}_TV_MAIN` : 'Connect wallet first';
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="fade-in">
                         {/* Integration Credentials Card */}
-                        <div style={{ background: 'linear-gradient(135deg, #111e2f 0%, #0d1724 100%)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: '32px', height: '32px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Key size={16} color="#10b981" />
+                        <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{ width: '40px', height: '40px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Key size={20} color="#3b82f6" />
                                     </div>
-                                    <h3 style={{ fontSize: '16px', fontWeight: 800 }}>Developer Access</h3>
+                                    <div>
+                                        <h3 style={{ fontSize: '18px', fontWeight: 800 }}>API Credentials</h3>
+                                        <p style={{ fontSize: '12px', color: '#64748b' }}>Enterprise-as-a-Service Access</p>
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '10px', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '20px' }}>ACTIVE</div>
+                                <div style={{ fontSize: '10px', fontWeight: 900, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>STATUS: ACTIVE</div>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase' }}>Public API Key</div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace' }}>{apiKey}</code>
-                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard(apiKey); setCopyToast(true); }} />
-                                    </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 800, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Primary API Key</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <code style={{ fontSize: '13px', color: '#fff', fontFamily: 'monospace', wordBreak: 'break-all' }}>{apiKey}</code>
+                                    <button 
+                                        onClick={() => { copyToClipboard(apiKey); setCopyToast(true); }}
+                                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '10px', padding: '8px', cursor: 'pointer' }}
+                                    >
+                                        <Copy size={16} color="#94a3b8" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        {/* SDK & Widget Selector */}
-                        <div style={{ background: '#111e2f', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-                                <div 
-                                    onClick={() => setApiTab('SDK')}
-                                    style={{ flex: 1, padding: '16px', borderRadius: '16px', background: apiTab === 'SDK' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)', border: apiTab === 'SDK' ? '1px solid #10b981' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
-                                >
-                                    <div style={{ color: apiTab === 'SDK' ? '#10b981' : '#64748b', marginBottom: '8px' }}><Package size={20} /></div>
-                                    <div style={{ fontSize: '14px', fontWeight: 700 }}>NPM Package</div>
-                                    <div style={{ fontSize: '11px', color: '#64748b' }}>Full SDK Integration</div>
+                        {/* SDK Integration Box */}
+                        <div style={{ background: '#111e2f', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                                <Package size={24} className="text-blue-400" />
+                                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>TrustVault Core SDK</h3>
+                            </div>
+                            
+                            <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '28px' }}>
+                                Integrate decentralized inheritance directly into your platform. Our SDK handles all cross-chain complexities, 
+                                ensuring your users' assets are protected by our audited smart contracts.
+                            </p>
+
+                            <div style={{ background: '#080e17', borderRadius: '20px', padding: '24px', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '1px' }}>NPM INSTALL</span>
+                                    <button onClick={() => { copyToClipboard('npm install @trustvault/sdk-core'); setCopyToast(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                        <Copy size={14} color="#64748b" />
+                                    </button>
                                 </div>
-                                <div 
-                                    onClick={() => setApiTab('WIDGET')}
-                                    style={{ flex: 1, padding: '16px', borderRadius: '16px', background: apiTab === 'WIDGET' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)', border: apiTab === 'WIDGET' ? '1px solid #3b82f6' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
-                                >
-                                    <div style={{ color: apiTab === 'WIDGET' ? '#3b82f6' : '#64748b', marginBottom: '8px' }}><Layout size={20} /></div>
-                                    <div style={{ fontSize: '14px', fontWeight: 700 }}>Direct Widget</div>
-                                    <div style={{ fontSize: '11px', color: '#64748b' }}>Drop-in Component</div>
-                                </div>
+                                <code style={{ fontSize: '14px', color: '#3b82f6', fontFamily: 'monospace', display: 'block', fontWeight: 700 }}>
+                                    npm install @trustvault/sdk-core
+                                </code>
                             </div>
 
-                            {apiTab === 'WIDGET' ? (
-                                <div className="fade-in">
-                                    <div style={{ background: '#080e17', borderRadius: '16px', padding: '24px', marginBottom: '16px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                                        <div style={{ padding: '12px 24px', background: '#fff', color: '#000', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 15px rgba(255,255,255,0.1)' }}>
-                                            <Shield size={14} /> Setup Inheritance
-                                        </div>
-                                        <p style={{ fontSize: '11px', color: '#64748b', marginTop: '16px' }}>Live Preview: How the widget appears on your site</p>
-                                    </div>
-                                    <div style={{ background: '#080e17', borderRadius: '12px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <code style={{ fontSize: '11px', color: '#10b981', fontFamily: 'monospace' }}>{`<script src="https://cdn.trustvault.io/v3/widget.js" />`}</code>
-                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard(`<script src="https://cdn.trustvault.io/v3/widget.js" data-api-key="${apiKey}" />`); setCopyToast(true); }} />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="fade-in">
-                                    <div style={{ background: '#080e17', borderRadius: '16px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>TERMINAL</span>
-                                            <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard('npm install @trustvault/sdk-core'); setCopyToast(true); }} />
-                                        </div>
-                                        <code style={{ fontSize: '13px', color: '#e2e8f0', fontFamily: 'monospace', display: 'block', borderLeft: '3px solid #10b981', paddingLeft: '12px' }}>
-                                            npm install @trustvault/sdk-core
-                                        </code>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <button 
-                                            onClick={() => setShowDocs(true)}
-                                            style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#fff', color: '#000', border: 'none', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}
-                                        >
-                                            Read SDK Documentation
-                                        </button>
-                                        <button style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
-                                            Join Discord Community
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                            <button 
+                                onClick={() => setShowDocs(true)}
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '20px', 
+                                    borderRadius: '18px', 
+                                    background: '#fff', 
+                                    color: '#000', 
+                                    border: 'none', 
+                                    fontWeight: 900, 
+                                    fontSize: '15px', 
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <Code size={20} />
+                                Technical Documentation
+                            </button>
                         </div>
                     </div>
                 )
@@ -299,21 +294,21 @@ export default function VaultDashboard({
 
                         {/* Withdraw Amount Input (shown on demand) */}
                         {showWithdrawInput && (
-                            <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '20px' }}>
-                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Withdraw Amount ({symbol})</div>
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '24px' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Withdraw Amount ({symbol})</div>
+                                <div className="responsive-input-row" style={{ display: 'flex', gap: '12px' }}>
                                     <input 
                                         type="number" 
                                         value={withdrawAmount} 
                                         onChange={(e) => setWithdrawAmount(e.target.value)}
                                         placeholder={`Max: ${vaultBalance.toFixed(4)}`}
-                                        style={{ flex: 1, background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '14px', color: '#fff', fontSize: '16px', outline: 'none' }}
+                                        style={{ flex: 1, background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', color: '#fff', fontSize: '16px', outline: 'none' }}
                                     />
-                                    <button onClick={handleWithdrawSubmit} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: '12px', padding: '14px 20px', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
+                                    <button onClick={handleWithdrawSubmit} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: '16px', padding: '16px 24px', fontWeight: 900, cursor: 'pointer', fontSize: '15px', whiteSpace: 'nowrap' }}>
                                         Withdraw
                                     </button>
                                 </div>
-                                <button onClick={() => { setShowWithdrawInput(false); setWithdrawAmount('') }} style={{ marginTop: '8px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                                <button onClick={() => { setShowWithdrawInput(false); setWithdrawAmount('') }} style={{ marginTop: '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 800 }}>
                                     Cancel
                                 </button>
                             </div>
@@ -326,7 +321,7 @@ export default function VaultDashboard({
                         </div>
 
                         {/* Vault Info Cards */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owner</div>
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>{formatAddr(vaultState.owner || '')}</div>
@@ -339,7 +334,7 @@ export default function VaultDashboard({
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Lock Duration</div>
                                 <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>{vaultState.lockDuration}s</div>
@@ -359,22 +354,6 @@ export default function VaultDashboard({
                     </div>
                 )
         }
-    }
-
-    return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0B131E' }}>
-            {/* Copy toast */}
-            {copyToast && <Toast message="Address copied!" type="success" onClose={() => setCopyToast(false)} duration={2000} />}
-
-            {/* Header */}
-            <div style={{ background: '#0B131E', padding: '24px 20px 20px', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {onBack && (
-                            <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <ArrowLeft size={20} />
-                            </button>
-                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Shield size={16} />
@@ -421,55 +400,83 @@ export default function VaultDashboard({
 
             {/* SDK Documentation Modal */}
             {showDocs && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                    <div style={{ background: '#0d1724', width: '100%', maxWidth: '600px', maxHeight: '80vh', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} className="fade-in">
-                        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ background: '#0f172a', width: '100%', maxWidth: '650px', maxHeight: '85vh', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} className="fade-in">
+                        <div style={{ padding: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff' }}>SDK Documentation</h3>
-                                <p style={{ fontSize: '12px', color: '#64748b' }}>Technical Implementation Guide v1.0</p>
+                                <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#fff' }}>Developer Documentation</h3>
+                                <p style={{ fontSize: '13px', color: '#64748b' }}>TrustVault Core SDK Integration Guide</p>
                             </div>
-                            <button onClick={() => setShowDocs(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer' }}>×</button>
+                            <button onClick={() => setShowDocs(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '20px' }}>×</button>
                         </div>
-                        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
-                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>1. CORE CONCEPT</h4>
-                            <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '20px' }}>
-                                TrustVault SDK provides a unified wrapper around our multi-chain smart contracts. 
-                                By initializing the SDK with your API Key (Wallet Address), you can manage inheritance vaults directly from your code.
-                            </p>
-                            
-                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>2. SAMPLE IMPLEMENTATION</h4>
-                            <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '20px' }}>
-                                <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
-{`import { TrustVaultSDK } from '@trustvault/sdk';
+                        
+                        <div style={{ padding: '32px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <section>
+                                <h4 style={{ color: '#3b82f6', fontSize: '12px', fontWeight: 900, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>1. Package Installation</h4>
+                                <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <code style={{ fontSize: '13px', color: '#e2e8f0', fontFamily: 'monospace' }}>npm install @trustvault/sdk-core</code>
+                                </div>
+                            </section>
 
-// Initialize
+                            <section>
+                                <h4 style={{ color: '#3b82f6', fontSize: '12px', fontWeight: 900, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>2. SDK Initialization</h4>
+                                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '12px' }}>
+                                    Initialize the SDK using your unique API Key. This identifies your application for analytics and cross-chain settlement.
+                                </p>
+                                <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <pre style={{ fontSize: '12px', color: '#10b981', fontFamily: 'monospace', margin: 0, whiteSpace: 'pre-wrap' }}>
+{`import { TrustVaultSDK } from '@trustvault/sdk-core';
+
 const sdk = TrustVaultSDK.forEVM({
   apiKey: "YOUR_API_KEY",
   network: "testnet"
-});
-
-// Protect Assets
-await sdk.createVault({
-  beneficiary: "0x...",
-  lockDuration: 3600 * 24 * 30 // 30 Days
 });`}
-                                </code>
-                            </div>
+                                    </pre>
+                                </div>
+                            </section>
 
-                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>3. SMART CONTRACT ADDRESSES</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '10px', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#64748b' }}>EVM (Sepolia)</span>
-                                    <code style={{ color: '#fff' }}>0x72...94k2</code>
+                            <section>
+                                <h4 style={{ color: '#3b82f6', fontSize: '12px', fontWeight: 900, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>3. Deploying Vaults</h4>
+                                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '12px' }}>
+                                    Protect your users' assets by deploying a vault. You can track progress via the optional <code style={{color: '#fff'}}>onStatus</code> callback.
+                                </p>
+                                <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <pre style={{ fontSize: '12px', color: '#10b981', fontFamily: 'monospace', margin: 0, whiteSpace: 'pre-wrap' }}>
+{`const vaultId = await sdk.createVault({
+  beneficiary: "0x...",
+  lockDuration: 86400 * 365, // 1 Year
+  depositAmount: 1.0,
+  onStatus: (msg) => updateUI(msg)
+});`}
+                                    </pre>
                                 </div>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '10px', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#64748b' }}>Solana (Devnet)</span>
-                                    <code style={{ color: '#fff' }}>Trv1...x82z</code>
-                                </div>
+                            </section>
+
+                            <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '20px' }}>
+                                <h5 style={{ color: '#3b82f6', fontSize: '14px', fontWeight: 800, marginBottom: '8px' }}>Security Note</h5>
+                                <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
+                                    All transactions are executed on-chain via non-custodial smart contracts. TrustVault never has access to your users' private keys.
+                                </p>
                             </div>
                         </div>
-                        <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                            <button onClick={() => setShowDocs(false)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#10b981', color: '#000', border: 'none', fontWeight: 800, cursor: 'pointer' }}>Got it, thanks!</button>
+
+                        <div style={{ padding: '24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                            <button 
+                                onClick={() => setShowDocs(false)} 
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '18px', 
+                                    borderRadius: '16px', 
+                                    background: '#fff', 
+                                    color: '#000', 
+                                    border: 'none', 
+                                    fontWeight: 900, 
+                                    cursor: 'pointer',
+                                    fontSize: '15px'
+                                }}
+                            >
+                                Acknowledged
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -513,10 +520,36 @@ await sdk.createVault({
                 .fade-in {
                     animation: fadeIn 0.4s ease-out forwards;
                 }
-                @media (max-width: 480px) {
-                    .action-grid { gap: 8px !important; }
-                    .action-btn { padding: 12px 4px !important; }
-                    .action-btn span { fontSize: 10px !important; }
+                @media (max-width: 640px) {
+                    .info-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 10px !important;
+                    }
+                    .action-grid {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                        gap: 8px !important;
+                    }
+                    .action-btn {
+                        padding: 12px 8px !important;
+                    }
+                    .action-btn span { font-size: 10px !important; }
+                    .responsive-input-row {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .responsive-input-row button {
+                        width: 100% !important;
+                    }
+                }
+                @media (max-width: 400px) {
+                    .action-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .action-btn {
+                        flex-direction: row !important;
+                        justify-content: center !important;
+                        gap: 12px !important;
+                    }
                 }
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }

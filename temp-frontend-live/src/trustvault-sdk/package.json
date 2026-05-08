@@ -1,0 +1,8 @@
+{
+  "name": "@trustvault/sdk-core",
+  "version": "1.0.0",
+  "description": "Unified Cross-Chain Inheritance SDK",
+  "main": "TrustVaultSDK.ts",
+  "author": "TrustVault Team",
+  "license": "MIT"
+}
