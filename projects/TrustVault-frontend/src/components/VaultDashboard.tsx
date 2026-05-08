@@ -354,7 +354,17 @@ export default function VaultDashboard({
                     </div>
                 )
         }
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    }
+
+    return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#080e17' }}>
+            {/* Top Bar */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <ArrowLeft size={18} />
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Shield size={16} />
                             </div>
