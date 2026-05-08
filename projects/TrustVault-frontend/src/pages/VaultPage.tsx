@@ -269,7 +269,7 @@ export const VaultPage: React.FC = () => {
                 setStep('dashboard')
                 discoverVaults()
             },
-            vaultNameInput || `${currentChain.name} Protection`
+            `${currentChain.name} Vault`
         )
     }
 

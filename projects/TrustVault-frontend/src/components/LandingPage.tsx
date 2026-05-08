@@ -73,23 +73,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 }
             `}</style>
 
-            {/* Bottom */}
-            <div style={{ padding: '32px' }}>
+            <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <button 
                     onClick={onLaunch}
                     style={{ 
                         width: '100%', 
-                        padding: '18px', 
+                        maxWidth: '240px',
+                        padding: '16px', 
                         background: '#FFFFFF', 
                         color: '#000000',
-                        fontSize: '16px', 
-                        fontWeight: 700, 
-                        borderRadius: '24px',
+                        fontSize: '15px', 
+                        fontWeight: 800, 
+                        borderRadius: '16px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
-                        marginBottom: '12px'
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                        marginBottom: '20px',
+                        transition: 'transform 0.2s ease'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
                     Proceed
                 </button>
