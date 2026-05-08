@@ -371,7 +371,7 @@ export class SolanaAdapter implements ChainAdapter {
             await this.connection.confirmTransaction(tx)
             
             // Save to Supabase
-            await saveVaultToRegistry(newVaultPDA.toString(), beneficiary, this.wallet.publicKey.toString(), vaultName);
+            await saveVaultToRegistry(newVaultPDA.toString(), beneficiary, this.wallet.publicKey.toString(), 'solana', vaultName);
 
             return newVaultPDA.toString()
         } catch (e: any) {

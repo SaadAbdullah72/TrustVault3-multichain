@@ -20,6 +20,7 @@ export const saveVaultToRegistry = async (
     vaultId: string | bigint,
     beneficiaryAddress: string,
     ownerAddress: string,
+    chainType: string,
     vaultName: string = 'Unnamed Vault'
 ): Promise<boolean> => {
     if (!supabase) {
@@ -33,7 +34,8 @@ export const saveVaultToRegistry = async (
                 vault_id: vaultId.toString(),
                 beneficiary_address: beneficiaryAddress.toUpperCase(),
                 owner_address: ownerAddress.toUpperCase(),
-                vault_name: vaultName
+                vault_name: vaultName,
+                chain_type: chainType
             },
             { onConflict: 'vault_id' }
         )
@@ -56,6 +58,7 @@ export interface RegistryVault {
     vault_name: string;
     beneficiary_address: string;
     owner_address: string;
+    chain_type: string;
 }
 
 // Get all vaults where an address is the beneficiary
@@ -92,6 +95,17 @@ export const getVaultsByOwner = async (ownerAddress: string): Promise<RegistryVa
 
         if (error) return []
 
+        return data as RegistryVault[]
+    } catch (e) {
+        return []
+    }
+}
+// Get all registered vaults for the global monitor
+export const getAllVaults = async (): Promise<RegistryVault[]> => {
+    if (!supabase) return []
+    try {
+        const { data, error } = await supabase.from('vault_registry').select('*')
+        if (error) return []
         return data as RegistryVault[]
     } catch (e) {
         return []

@@ -1,12 +1,12 @@
-/**
- * useVaultActions — Chain-agnostic vault operations.
- * Uses the ChainAdapter from ChainContext instead of direct algosdk calls.
- */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useChain } from '../contexts/ChainContext'
+import { TrustVaultSDK } from '../sdk/TrustVaultSDK'
 
 export const useVaultActions = () => {
     const { adapter, walletAddress, connectWallet, disconnectWallet } = useChain()
+    
+    // Wrap the adapter in the new SDK
+    const sdk = useMemo(() => new TrustVaultSDK(adapter), [adapter])
 
     const [uiStatus, setUIStatus] = useState({
         loading: false,
@@ -85,13 +85,13 @@ export const useVaultActions = () => {
 
         updateStatus({ loading: true, error: '', txId: 'Creating vault...' })
         try {
-            const vaultId = await adapter.createVault(
-                beneficiaryInput.trim(),
-                duration,
-                deposit,
-                (msg: string) => updateStatus({ txId: msg }),
+            const vaultId = await sdk.createVault({
+                beneficiary: beneficiaryInput.trim(),
+                lockDuration: duration,
+                depositAmount: deposit,
+                onStatus: (msg: string) => updateStatus({ txId: msg }),
                 vaultName
-            )
+            })
 
             updateStatus({ txId: 'Vault created successfully.' })
             onSuccess(vaultId)
@@ -100,13 +100,13 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [walletAddress, adapter, updateStatus])
+    }, [walletAddress, sdk, updateStatus])
 
     const handleHeartbeat = useCallback(async (vaultId: string, onComplete?: () => void) => {
         if (!walletAddress || !vaultId) return
         updateStatus({ loading: true, error: '', txId: 'Processing Heartbeat...' })
         try {
-            const id = await adapter.heartbeat(vaultId)
+            await sdk.heartbeat(vaultId)
             updateStatus({ txId: `Heartbeat signal confirmed.` })
             onComplete?.()
         } catch (e: any) {
@@ -114,13 +114,13 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [walletAddress, adapter, updateStatus])
+    }, [walletAddress, sdk, updateStatus])
 
     const handleClaim = useCallback(async (vaultId: string, onComplete?: () => void) => {
         if (!walletAddress || !vaultId) return
         updateStatus({ loading: true, error: '', txId: 'Claiming Inheritance funds...' })
         try {
-            const id = await adapter.autoRelease(vaultId)
+            await sdk.autoRelease(vaultId)
             updateStatus({ txId: `Inheritance funds claimed successfully.` })
             onComplete?.()
         } catch (e: any) {
@@ -128,13 +128,13 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [walletAddress, adapter, updateStatus])
+    }, [walletAddress, sdk, updateStatus])
 
     const handleWithdraw = useCallback(async (vaultId: string, amount: number, onComplete?: () => void) => {
         if (!walletAddress || !vaultId) return
         updateStatus({ loading: true, error: '', txId: 'Processing Withdrawal...' })
         try {
-            const id = await adapter.withdraw(vaultId, amount)
+            await sdk.withdraw(vaultId, amount)
             updateStatus({ txId: `Withdrawal completed successfully.` })
             onComplete?.()
         } catch (e: any) {
@@ -142,7 +142,7 @@ export const useVaultActions = () => {
         } finally {
             updateStatus({ loading: false })
         }
-    }, [walletAddress, adapter, updateStatus])
+    }, [walletAddress, sdk, updateStatus])
 
     return {
         uiStatus,

@@ -108,9 +108,15 @@ export const VaultPage: React.FC = () => {
     const [lockDurationInput, setLockDurationInput] = useState('60')
     const [depositInput, setDepositInput] = useState('0.1')
 
-    // Discover vaults
-    const discoverVaults = useCallback(async () => {
+    const lastFetchRef = React.useRef<number>(0)
+
+    const discoverVaults = useCallback(async (force = false) => {
         if (!walletAddress || walletAddress === 'undefined') return
+        
+        const now = Date.now()
+        if (!force && now - lastFetchRef.current < 5000) return
+        lastFetchRef.current = now
+
         setIsDiscovering(true)
         try {
             // 1. Discover vaults from Supabase (Cloud Registry)
@@ -168,7 +174,7 @@ export const VaultPage: React.FC = () => {
         } finally {
             setIsDiscovering(false)
         }
-    }, [adapter, walletAddress, selectedVaultId])
+    }, [adapter, walletAddress, selectedVaultId, currentChain.name])
 
     useEffect(() => {
         if (isConnected && walletAddress && walletAddress !== 'undefined') {

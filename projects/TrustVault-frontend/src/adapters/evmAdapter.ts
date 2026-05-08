@@ -183,7 +183,7 @@ export class EVMAdapter implements ChainAdapter {
         if (!vaultAddress) throw new Error('Could not determine vault address')
 
         // Save to Supabase
-        await saveVaultToRegistry(vaultAddress, beneficiary, this._address!, vaultName)
+        await saveVaultToRegistry(vaultAddress, beneficiary, this._address!, 'evm', vaultName)
 
         return vaultAddress
     }

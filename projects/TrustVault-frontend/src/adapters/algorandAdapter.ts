@@ -147,7 +147,7 @@ export class AlgorandAdapter implements ChainAdapter {
         // Save to registries
         onStatus?.('Vault established! Finalizing secure registry...')
         saveBeneficiaryMapping(beneficiary.trim(), appId)
-        await saveVaultToRegistry(appId.toString(), beneficiary, this.activeAddress, vaultName)
+        await saveVaultToRegistry(appId.toString(), beneficiary, this.activeAddress, 'algorand', vaultName)
 
         return appId.toString()
     }
