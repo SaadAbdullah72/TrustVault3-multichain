@@ -82,8 +82,8 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         */
 
         // 4. Supabase results
-        supabaseOwner.forEach((id: string) => foundIds.add(id))
-        supabaseBen.forEach((id: string) => foundIds.add(id))
+        supabaseOwner.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
+        supabaseBen.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
 
         // 5. Local storage fallbacks
         if (typeof window !== 'undefined') {
