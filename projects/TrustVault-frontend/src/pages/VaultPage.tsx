@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { 
-    Asterisk, 
-    LogOut, 
-    Shield, 
-    Plus, 
-    ChevronLeft, 
-    Clock, 
-    Wallet, 
+import {
+    Asterisk,
+    LogOut,
+    Shield,
+    Plus,
+    ChevronLeft,
+    Clock,
+    Wallet,
     CheckCircle,
     Timer,
     AlertCircle,
@@ -36,11 +36,11 @@ import { getVaultsByOwner, getVaultsByBeneficiary, RegistryVault } from '../util
 import { Toast } from '../components/Toast'
 
 export const VaultPage: React.FC = () => {
-    const { 
-        currentChain, 
-        adapter, 
-        walletAddress, 
-        isConnected, 
+    const {
+        currentChain,
+        adapter,
+        walletAddress,
+        isConnected,
         disconnectWallet,
         connectWallet
     } = useChain()
@@ -77,7 +77,7 @@ export const VaultPage: React.FC = () => {
 
     // Explicit Navigation Step: 'landing' | 'connect' | 'actionSelect' | 'dashboard' | 'vaultList' | 'privacy'
     const [step, setStep] = useState<'landing' | 'connect' | 'actionSelect' | 'dashboard' | 'vaultList' | 'privacy'>('landing')
-    
+
     // Expose step to window for landing page access
     React.useEffect(() => {
         (window as any).setPageStep = setStep;
@@ -116,10 +116,10 @@ export const VaultPage: React.FC = () => {
         try {
             // 1. Discover vaults from Supabase (Cloud Registry)
             const cloudVaults = await getVaultsByOwner(walletAddress)
-            
+
             // 2. Discover vaults from Blockchain (On-Chain)
             const onChainIds = await adapter.discoverVaults(walletAddress)
-            
+
             // 3. Merge: If an on-chain vault is missing from cloud, add it
             const mergedVaults = [...cloudVaults]
             for (const id of onChainIds) {
@@ -132,16 +132,16 @@ export const VaultPage: React.FC = () => {
                     })
                 }
             }
-            
+
             console.log(`[VaultPage] Final merged owned vaults: ${mergedVaults.length}`, mergedVaults);
             setUserVaults(mergedVaults)
 
             // 4. Discover Inherited Vaults from Cloud
             const cloudInherited = await getVaultsByBeneficiary(walletAddress)
-            
+
             // 5. Discover Inherited Vaults from Blockchain (Fallback/Merge)
             const onChainClaimable = await adapter.discoverClaimableVaults(walletAddress)
-            
+
             const mergedInherited = [...cloudInherited]
             for (const c of onChainClaimable) {
                 if (!mergedInherited.find(v => v.vault_id.toLowerCase() === c.vaultId.toLowerCase())) {
@@ -199,14 +199,14 @@ export const VaultPage: React.FC = () => {
             const balance = await adapter.getVaultBalance(selectedVaultId)
             setVaultState(state)
             setVaultBalance(balance)
-            
+
             if (state) {
-                const isOwner = currentChain.type === 'solana' ? 
-                    state.owner === walletAddress : 
+                const isOwner = currentChain.type === 'solana' ?
+                    state.owner === walletAddress :
                     state.owner.toLowerCase() === walletAddress.toLowerCase()
-                
-                const isBen = currentChain.type === 'solana' ? 
-                    state.beneficiary === walletAddress : 
+
+                const isBen = currentChain.type === 'solana' ?
+                    state.beneficiary === walletAddress :
                     state.beneficiary.toLowerCase() === walletAddress.toLowerCase()
 
                 setVaultRoles(prev => ({
@@ -214,7 +214,7 @@ export const VaultPage: React.FC = () => {
                     [selectedVaultId]: isOwner ? 'owner' : (isBen ? 'beneficiary' : '')
                 }))
             }
-        } catch (e) {}
+        } catch (e) { }
     }, [adapter, selectedVaultId, walletAddress, currentChain.type])
 
     useEffect(() => {
@@ -248,7 +248,7 @@ export const VaultPage: React.FC = () => {
 
     // Navigation Actions
     const handleLaunchApp = () => setStep('connect')
-    
+
     const handleCreateVaultSubmit = () => {
         handleCreateVault(
             beneficiaryInput,
@@ -263,7 +263,7 @@ export const VaultPage: React.FC = () => {
             vaultNameInput || `${currentChain.name} Protection`
         )
     }
-    
+
     const handleGoBackToLanding = () => {
         setStep('landing')
         disconnectWallet()
@@ -300,11 +300,11 @@ export const VaultPage: React.FC = () => {
 
                 <div className="wallet-container" style={{ background: '#0B131E', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
-                        <ConnectScreen 
-                            onConnect={handleConnect} 
+                        <ConnectScreen
+                            onConnect={handleConnect}
                             onContinue={handleProceedToActionSelect}
                             onDisconnect={handleGoBackToLanding}
-                            connecting={uiStatus.loading} 
+                            connecting={uiStatus.loading}
                         />
                     </div>
                 </div>
@@ -337,17 +337,17 @@ export const VaultPage: React.FC = () => {
                         </div>
 
                         <div style={{ width: '100%', padding: '0 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <button 
+                            <button
                                 onClick={() => { setShowCreateForm(false); setStep('vaultList'); }}
                                 style={{ width: '100%', padding: '18px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
                                 Check Existing Vaults
                             </button>
-                            <button 
+                            <button
                                 onClick={() => { setShowCreateForm(true); setStep('dashboard'); }}
                                 style={{ width: '100%', padding: '18px', background: '#fff', color: '#000', border: 'none', fontSize: '16px', fontWeight: 700, borderRadius: '24px', cursor: 'pointer' }}>
                                 Create New Vault
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setStep('privacy')}
                                 style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '12px', fontWeight: 600, cursor: 'pointer', marginTop: '10px' }}>
                                 Privacy Policy
@@ -372,12 +372,12 @@ export const VaultPage: React.FC = () => {
                     </button>
                 </div>
                 <div style={{ paddingTop: '100px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-                    <VaultList 
-                        vaults={visibleOwned as any} 
+                    <VaultList
+                        vaults={visibleOwned as any}
                         inheritedVaults={visibleInherited as any}
                         activeListTab={activeListTab}
                         setActiveListTab={setActiveListTab}
-                        onSelect={handleVaultSelect} 
+                        onSelect={handleVaultSelect}
                         onDelete={handleDeleteVaultId}
                         onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                         formatAddr={formatAddr}
@@ -485,17 +485,17 @@ export const VaultPage: React.FC = () => {
                     {/* Create Form Overlay */}
                     {showCreateForm && (
                         <div style={{ position: 'absolute', inset: 0, zIndex: 1000, background: '#0B131E', display: 'flex', flexDirection: 'column', padding: '32px' }}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
                                 <button onClick={() => setShowCreateForm(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
                                 <span style={{ fontWeight: 800, fontSize: '15px', color: '#fff' }}>NEW PROTOCOL</span>
                                 <div style={{ width: 48 }} />
                             </div>
 
-                             <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 <div style={{ marginBottom: '20px' }}>
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Vault Nickname</label>
                                     <input value={vaultNameInput} onChange={(e) => setVaultNameInput(e.target.value)} placeholder="e.g. My Savings Vault" style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff', marginBottom: '20px' }} />
-                                    
+
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
                                     <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder={currentChain.type === 'evm' ? '0x... ETH Address' : currentChain.type === 'solana' ? 'Solana Address' : 'Algorand Address'} style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff' }} />
                                 </div>
