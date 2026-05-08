@@ -41,9 +41,9 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                             </div>
                             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div style={{ fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <FileText size={16} color="#8b5cf6" /> Vault Metadata
+                                    <FileText size={16} color="#8b5cf6" /> Vault Registry (Supabase)
                                 </div>
-                                <p style={{ fontSize: '13px', color: '#64748b' }}>Vault names and beneficiary mappings are stored in our secure cloud registry (Supabase) to enable cross-device discovery.</p>
+                                <p style={{ fontSize: '13px', color: '#64748b' }}>For Algorand and other specific networks, we store vault identifiers and beneficiary mapping in a secure cloud registry (Supabase) to ensure your vaults are instantly discoverable across all your devices without relying on slow on-chain indexing.</p>
                             </div>
                         </div>
                     </section>

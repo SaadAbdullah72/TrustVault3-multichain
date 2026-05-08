@@ -50,6 +50,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                         src="/device_face.png" 
                         alt="TrustVault" 
                         loading="eager"
+                        fetchpriority="high"
                         decoding="async"
                         className="fade-in-image"
                         style={{ 
