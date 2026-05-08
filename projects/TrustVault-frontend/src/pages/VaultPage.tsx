@@ -219,7 +219,10 @@ export const VaultPage: React.FC = () => {
         setTimeout(() => setCopied(false), 2000)
     }
 
-    const formatAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
+    const formatAddr = (addr: string) => {
+        if (!addr || typeof addr !== 'string') return '?...?'
+        return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+    }
 
     // Navigation Actions
     const handleLaunchApp = () => setStep('connect')
