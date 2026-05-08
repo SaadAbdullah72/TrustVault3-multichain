@@ -414,6 +414,7 @@ export default function VaultDashboard({
             {copyToast && (
                 <Toast 
                     message="Copied to clipboard!" 
+                    type="success"
                     onClose={() => setCopyToast(false)} 
                 />
             )}

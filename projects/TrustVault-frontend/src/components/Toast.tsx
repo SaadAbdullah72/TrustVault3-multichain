@@ -5,12 +5,12 @@ export type ToastType = 'error' | 'success' | 'info'
 
 interface ToastProps {
     message: string
-    type: ToastType
+    type?: ToastType
     onClose: () => void
     duration?: number
 }
 
-export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 5000 }) => {
+export const Toast: React.FC<ToastProps> = ({ message, type = 'info', onClose, duration = 5000 }) => {
     const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {
