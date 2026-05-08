@@ -143,22 +143,19 @@ export const VaultPage: React.FC = () => {
             for (const id of onChainIds) {
                 const idStr = id.toString().toLowerCase()
                 if (!ownedMap.has(idStr)) {
-                    let beneficiary = '?'
-                    let owner = walletAddress
                     try {
                         const state = await adapter.fetchVaultState(id)
                         if (state) {
-                            beneficiary = state.beneficiary
-                            owner = state.owner
+                            ownedMap.set(idStr, {
+                                vault_id: id.toString(),
+                                vault_name: `${currentChain.name} Vault`,
+                                owner_address: state.owner,
+                                beneficiary_address: state.beneficiary
+                            })
                         }
-                    } catch {}
-
-                    ownedMap.set(idStr, {
-                        vault_id: id.toString(),
-                        vault_name: `${currentChain.name} Vault`,
-                        owner_address: owner,
-                        beneficiary_address: beneficiary
-                    })
+                    } catch (e) {
+                        console.warn(`[Discovery] Failed to fetch state for vault ${id}`, e)
+                    }
                 }
             }
             setUserVaults(Array.from(ownedMap.values()))
@@ -596,8 +593,8 @@ export const VaultPage: React.FC = () => {
                             activeListTab={activeListTab}
                             setActiveListTab={setActiveListTab}
                             onSelect={setSelectedVaultId}
-                            onDelete={() => {}} 
-                            onDeleteAll={() => {}}
+                            onDelete={handleDeleteVaultId} 
+                            onDeleteAll={handleDeleteAll}
                             onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                             formatAddr={formatAddr}
                             showVaultSelector={showVaultSelector}

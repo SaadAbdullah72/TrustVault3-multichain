@@ -53,39 +53,21 @@ export const discoverAllRelatedVaults = async (address: string): Promise<bigint[
         console.log(`[Discovery] Starting unified scan for ${address.slice(0, 8)}...`)
         const foundIds = new Set<string>()
 
-        // Run primary discovery methods in parallel
-        const [createdApps, involvedTxs, supabaseOwner, supabaseBen] = await Promise.all([
+        // Run primary discovery methods in parallel (removed tx history scan for speed)
+        const [createdApps, supabaseOwner, supabaseBen] = await Promise.all([
             indexerClient.searchForApplications().creator(address).do().catch(() => ({ applications: [] })),
-            indexerClient.searchForTransactions().address(address).txType('appl').do().catch(() => ({ transactions: [] })),
             import('./supabase').then(m => m.getVaultsByOwner(address)).catch(() => []),
             import('./supabase').then(m => m.getVaultsByBeneficiary(address)).catch(() => [])
         ])
 
-        // 1. Creator search
+        // 1. Creator search (Very fast)
         createdApps.applications?.forEach((app: any) => app.id > 0 && foundIds.add(app.id.toString()))
 
-        // 2. Tx history search
-        const allTxs = [...(involvedTxs.transactions || [])]
-        allTxs.forEach((tx: any) => {
-            const appId = tx['application-transaction']?.['application-id']
-            if (appId && appId > 0) foundIds.add(appId.toString())
-        })
-
-        /* 
-        // 3. notePrefix search (REDUNDANT but fallback) - Use shorter prefix to avoid 500 error
-        const shortPrefix = VAULT_NOTE_PREFIX + address.slice(0, 4)
-        const notePrefixTxs: any = await indexerClient.searchForTransactions().notePrefix(new TextEncoder().encode(shortPrefix)).do().catch(() => ({ transactions: [] }))
-        notePrefixTxs.transactions?.forEach((tx: any) => {
-            const appId = tx['application-transaction']?.['application-id']
-            if (appId && appId > 0) foundIds.add(appId.toString())
-        })
-        */
-
-        // 4. Supabase results
+        // 2. Supabase results (Fast & Reliable cross-device)
         supabaseOwner.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
         supabaseBen.forEach((v: any) => v.vault_id && foundIds.add(v.vault_id.toString()))
 
-        // 5. Local storage fallbacks
+        // 3. Local storage fallbacks
         if (typeof window !== 'undefined') {
             const cachedIds = localStorage.getItem(`trustvault_ids_${address}`)
             if (cachedIds) {
@@ -292,6 +274,13 @@ export async function fetchVaultState(appId: number | bigint): Promise<VaultStat
                 state[key] = Number(value.uint)
             }
         })
+
+        // Strict Validation: Must have core state keys to be a TrustVault
+        // If it doesn't have Owner and LockDuration, it's either un-bootstrapped or a totally different App
+        if (!(STATE_KEYS.OWNER in state) && !(STATE_KEYS.LOCK_DURATION in state)) {
+            console.warn(`[Vault ${appId}] Filtered out non-TrustVault application.`)
+            return null
+        }
 
         const result: VaultState = {
             owner: String(state[STATE_KEYS.OWNER] || senderAddr || 'Unknown Owner'),
