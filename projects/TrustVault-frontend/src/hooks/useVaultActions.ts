@@ -23,17 +23,22 @@ export const useVaultActions = () => {
     }, [])
 
     const extractErrorMessage = (e: any): string => {
-        const errorStr = JSON.stringify(e).toLowerCase()
-        if (errorStr.includes('insufficient funds')) return 'Insufficient funds for this transaction. Please top up your wallet.'
-        if (errorStr.includes('overspend')) return 'Insufficient balance to pay for transaction fees. Please add some funds to your wallet.'
-        if (errorStr.includes('user rejected')) return 'Transaction cancelled by user.'
-        if (errorStr.includes('rejected')) return 'Transaction rejected.'
-        if (e.reason) return e.reason
+        const errorStr = (typeof e === 'string' ? e : JSON.stringify(e)).toLowerCase()
+        
+        // Technical cleanup
+        if (errorStr.includes('user rejected')) return 'Transaction cancelled.'
+        if (errorStr.includes('insufficient funds')) return 'Insufficient funds. Please top up your wallet.'
+        if (errorStr.includes('overspend')) return 'Insufficient balance for network fees.'
+        if (errorStr.includes('rejected')) return 'Transaction rejected by wallet.'
+        if (errorStr.includes('cannot convert')) return 'Invalid data provided.'
+        
+        // Fallbacks
+        if (e.reason) return e.reason.charAt(0).toUpperCase() + e.reason.slice(1)
         if (e.message) {
-            if (e.message.includes('insufficient funds')) return 'Insufficient funds for gas + value.'
+            if (e.message.length > 60) return 'Action failed. Please verify your inputs and try again.'
             return e.message
         }
-        return 'Transaction failed. Please check your wallet.'
+        return 'An unexpected error occurred. Please try again.'
     }
 
     const handleConnect = useCallback(async () => {
