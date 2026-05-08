@@ -88,6 +88,10 @@ export const VaultPage: React.FC = () => {
 
     // Vault Data
     const [userVaults, setUserVaults] = useState<RegistryVault[]>([])
+    const [hiddenVaultIds, setHiddenVaultIds] = useState<string[]>(() => {
+        const saved = localStorage.getItem('hidden_vaults')
+        return saved ? JSON.parse(saved) : []
+    })
     const [inheritedVaults, setInheritedVaults] = useState<RegistryVault[]>([])
     const [activeListTab, setActiveListTab] = useState<'owned' | 'inherited'>('owned')
     const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
@@ -142,7 +146,8 @@ export const VaultPage: React.FC = () => {
                         vault_id: c.vaultId,
                         vault_name: 'Inherited Vault',
                         owner_address: c.state.owner,
-                        beneficiary_address: walletAddress
+                        beneficiary_address: walletAddress,
+                        isClaimed: c.state.released
                     })
                 }
             }
@@ -168,6 +173,15 @@ export const VaultPage: React.FC = () => {
             discoverVaults()
         }
     }, [isConnected, currentChain.id, walletAddress, discoverVaults])
+
+    const handleDeleteVaultId = (id: string) => {
+        const next = [...hiddenVaultIds, id]
+        setHiddenVaultIds(next)
+        localStorage.setItem('hidden_vaults', JSON.stringify(next))
+    }
+
+    const visibleOwned = useMemo(() => userVaults.filter(v => !hiddenVaultIds.includes(v.vault_id)), [userVaults, hiddenVaultIds])
+    const visibleInherited = useMemo(() => inheritedVaults.filter(v => !hiddenVaultIds.includes(v.vault_id)), [inheritedVaults, hiddenVaultIds])
 
     // Load vault data
     const loadVaultState = useCallback(async () => {
@@ -351,11 +365,12 @@ export const VaultPage: React.FC = () => {
                 </div>
                 <div style={{ paddingTop: '100px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
                     <VaultList 
-                        vaults={userVaults as any} 
-                        inheritedVaults={inheritedVaults as any}
+                        vaults={visibleOwned as any} 
+                        inheritedVaults={visibleInherited as any}
                         activeListTab={activeListTab}
                         setActiveListTab={setActiveListTab}
                         onSelect={handleVaultSelect} 
+                        onDelete={handleDeleteVaultId}
                         onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                         formatAddr={formatAddr}
                         currentChain={currentChain}

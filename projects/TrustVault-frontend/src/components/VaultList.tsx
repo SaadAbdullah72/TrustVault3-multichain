@@ -6,6 +6,7 @@ export interface VaultMetadata {
     vault_name: string;
     owner_address: string;
     beneficiary_address: string;
+    isClaimed?: boolean;
 }
 
 interface VaultListProps {
@@ -14,6 +15,7 @@ interface VaultListProps {
     activeListTab: 'owned' | 'inherited';
     setActiveListTab: (tab: 'owned' | 'inherited') => void;
     onSelect: (vaultId: string) => void;
+    onDelete: (vaultId: string) => void;
     onCreateNew: () => void;
     formatAddr: (addr: string) => string;
     currentChain: any;
@@ -26,6 +28,7 @@ export default function VaultList({
     activeListTab,
     setActiveListTab,
     onSelect, 
+    onDelete,
     onCreateNew, 
     formatAddr, 
     currentChain, 
@@ -122,7 +125,17 @@ export default function VaultList({
                                 <div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Shield size={22} color="#fff" />
                                 </div>
-                                <ArrowRight size={20} color="#64748b" />
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    {vault.isClaimed && (
+                                        <div style={{ padding: '4px 10px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#22c55e', borderRadius: '8px', fontSize: '10px', fontWeight: 800, letterSpacing: '1px' }}>CLAIMED</div>
+                                    )}
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); if (window.confirm('Really want to remove this vault from list?')) onDelete(vault.vault_id); }}
+                                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '8px', borderRadius: '10px', cursor: 'pointer' }}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
                             </div>
 
                             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{vault.vault_name || 'Unnamed Vault'}</h3>

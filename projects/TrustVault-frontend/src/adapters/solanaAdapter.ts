@@ -503,20 +503,24 @@ export class SolanaAdapter implements ChainAdapter {
             // Search for all vaults where owner (offset 8) matches address
             const accounts = await this.connection.getProgramAccounts(programId, {
                 filters: [
-                    { dataSize: 97 }, // 89 + 8 = 97
+                    { dataSize: 97 },
                     { memcmp: { offset: 8, bytes: address } }
                 ]
             });
 
-            // Sort by vaultId (offset 88 for u64) to have latest on top
-            // Layout: 8(disc)+32(owner)+32(ben)+8(dur)+8(hb) = 88 offset for vault_id
+            console.log(`[SolanaAdapter] Found ${accounts.length} owned accounts for ${address}`);
+
             const sorted = accounts.sort((a, b) => {
-                const idA = a.account.data.readBigUInt64LE(88);
-                const idB = b.account.data.readBigUInt64LE(88);
-                return idA > idB ? -1 : 1;
+                try {
+                    const idA = a.account.data.readBigUInt64LE(88);
+                    const idB = b.account.data.readBigUInt64LE(88);
+                    return idA > idB ? -1 : 1;
+                } catch(e) { return 0; }
             });
 
-            return sorted.map(a => a.pubkey.toString());
+            const ids = sorted.map(a => a.pubkey.toString());
+            console.log('[SolanaAdapter] Discovery complete:', ids);
+            return ids;
         } catch (e) {
             console.error('[SolanaAdapter] discoverVaults failed for address:', address, e);
             return [];
