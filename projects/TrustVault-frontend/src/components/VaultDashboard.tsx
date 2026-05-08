@@ -390,7 +390,6 @@ export default function VaultDashboard({
                                 {formatAddr(walletAddress)}
                             </div>
                         )}
-                    </div>
                 </div>
             </div>
 
