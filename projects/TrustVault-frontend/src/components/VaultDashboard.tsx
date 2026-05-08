@@ -55,6 +55,7 @@ export default function VaultDashboard({
     const [withdrawAmount, setWithdrawAmount] = useState('')
     const [copyToast, setCopyToast] = useState(false)
     const [apiTab, setApiTab] = useState('SDK')
+    const [showDocs, setShowDocs] = useState(false)
 
     const symbol = currentChain.nativeCurrency.symbol
     const statusText = vaultState.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
@@ -149,6 +150,7 @@ export default function VaultDashboard({
                     </div>
                 )
             case 'api':
+                const apiKey = walletAddress ? `tv_pub_${walletAddress.slice(2, 10)}_${walletAddress.slice(-6)}` : 'Please connect wallet';
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="fade-in">
                         {/* Integration Credentials Card */}
@@ -167,8 +169,8 @@ export default function VaultDashboard({
                                 <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase' }}>Public API Key</div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace' }}>tv_pub_live_94k2...x82z</code>
-                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('tv_pub_live_94k2...x82z')} />
+                                        <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace' }}>{apiKey}</code>
+                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard(apiKey); setCopyToast(true); }} />
                                     </div>
                                 </div>
                             </div>
@@ -205,7 +207,7 @@ export default function VaultDashboard({
                                     </div>
                                     <div style={{ background: '#080e17', borderRadius: '12px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <code style={{ fontSize: '11px', color: '#10b981', fontFamily: 'monospace' }}>{`<script src="https://cdn.trustvault.io/v3/widget.js" />`}</code>
-                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} />
+                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard(`<script src="https://cdn.trustvault.io/v3/widget.js" data-api-key="${apiKey}" />`); setCopyToast(true); }} />
                                     </div>
                                 </div>
                             ) : (
@@ -213,18 +215,21 @@ export default function VaultDashboard({
                                     <div style={{ background: '#080e17', borderRadius: '16px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                                             <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>TERMINAL</span>
-                                            <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('npm install @trustvault/sdk-core')} />
+                                            <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => { copyToClipboard('npm install @trustvault/sdk-core'); setCopyToast(true); }} />
                                         </div>
                                         <code style={{ fontSize: '13px', color: '#e2e8f0', fontFamily: 'monospace', display: 'block', borderLeft: '3px solid #10b981', paddingLeft: '12px' }}>
                                             npm install @trustvault/sdk-core
                                         </code>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <button style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#fff', color: '#000', border: 'none', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
-                                            Get API Credentials
+                                        <button 
+                                            onClick={() => setShowDocs(true)}
+                                            style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#fff', color: '#000', border: 'none', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}
+                                        >
+                                            Read SDK Documentation
                                         </button>
                                         <button style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
-                                            Read SDK Documentation
+                                            Join Discord Community
                                         </button>
                                     </div>
                                 </div>
@@ -404,6 +409,70 @@ export default function VaultDashboard({
             <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                 {renderContent()}
             </div>
+
+            {/* Toast Notification */}
+            {copyToast && (
+                <Toast 
+                    message="Copied to clipboard!" 
+                    onClose={() => setCopyToast(false)} 
+                />
+            )}
+
+            {/* SDK Documentation Modal */}
+            {showDocs && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ background: '#0d1724', width: '100%', maxWidth: '600px', maxHeight: '80vh', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} className="fade-in">
+                        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff' }}>SDK Documentation</h3>
+                                <p style={{ fontSize: '12px', color: '#64748b' }}>Technical Implementation Guide v1.0</p>
+                            </div>
+                            <button onClick={() => setShowDocs(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer' }}>×</button>
+                        </div>
+                        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>1. CORE CONCEPT</h4>
+                            <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '20px' }}>
+                                TrustVault SDK provides a unified wrapper around our multi-chain smart contracts. 
+                                By initializing the SDK with your API Key (Wallet Address), you can manage inheritance vaults directly from your code.
+                            </p>
+                            
+                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>2. SAMPLE IMPLEMENTATION</h4>
+                            <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '20px' }}>
+                                <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+{`import { TrustVaultSDK } from '@trustvault/sdk';
+
+// Initialize
+const sdk = TrustVaultSDK.forEVM({
+  apiKey: "YOUR_API_KEY",
+  network: "testnet"
+});
+
+// Protect Assets
+await sdk.createVault({
+  beneficiary: "0x...",
+  lockDuration: 3600 * 24 * 30 // 30 Days
+});`}
+                                </code>
+                            </div>
+
+                            <h4 style={{ color: '#10b981', fontSize: '14px', fontWeight: 800, marginBottom: '12px' }}>3. SMART CONTRACT ADDRESSES</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '10px', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#64748b' }}>EVM (Sepolia)</span>
+                                    <code style={{ color: '#fff' }}>0x72...94k2</code>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '10px', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#64748b' }}>Solana (Devnet)</span>
+                                    <code style={{ color: '#fff' }}>Trv1...x82z</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                            <button onClick={() => setShowDocs(false)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#10b981', color: '#000', border: 'none', fontWeight: 800, cursor: 'pointer' }}>Got it, thanks!</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Nav (Mobile) */}
             <div className="mobile-nav" style={{ 
