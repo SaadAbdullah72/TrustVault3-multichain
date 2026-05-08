@@ -333,7 +333,6 @@ export default function VaultDashboard({
                 flexDirection: 'column', 
                 overflowY: 'auto',
                 background: '#080e17',
-                minHeight: '100vh',
                 border: '1px solid rgba(255,255,255,0.05)'
             }}>
                 {/* Mobile Back Button - New */}
@@ -454,34 +453,27 @@ const sdk = TrustVaultSDK.forEVM({
                 </div>
             )}
 
-            {/* Bottom Nav (Mobile) */}
-            <div className="mobile-nav" style={{ 
-                padding: '12px 24px 28px', 
-                background: '#0d1724', 
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                display: 'flex', 
-                justifyContent: 'space-around',
-                alignItems: 'center'
-            }}>
-                <button onClick={() => setCurrentTab('dashboard')} style={{ background: 'none', border: 'none', color: currentTab === 'dashboard' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <Home size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Vault</span>
+            {/* Bottom Nav (Mobile) - High Performance Glassmorphism */}
+            <div className="mobile-nav">
+                <button onClick={() => setCurrentTab('dashboard')} className={`nav-item ${currentTab === 'dashboard' ? 'active' : ''}`}>
+                    <div className="nav-icon-wrapper"><Home size={22} /></div>
+                    <span>Vault</span>
                 </button>
-                <button onClick={() => setCurrentTab('security')} style={{ background: 'none', border: 'none', color: currentTab === 'security' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <Shield size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Safe</span>
+                <button onClick={() => setCurrentTab('security')} className={`nav-item ${currentTab === 'security' ? 'active' : ''}`}>
+                    <div className="nav-icon-wrapper"><Shield size={22} /></div>
+                    <span>Safe</span>
                 </button>
-                <button onClick={() => setCurrentTab('history')} style={{ background: 'none', border: 'none', color: currentTab === 'history' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <History size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Activity</span>
+                <button onClick={() => setCurrentTab('history')} className={`nav-item ${currentTab === 'history' ? 'active' : ''}`}>
+                    <div className="nav-icon-wrapper"><History size={22} /></div>
+                    <span>Activity</span>
                 </button>
-                <button onClick={() => setCurrentTab('info')} style={{ background: 'none', border: 'none', color: currentTab === 'info' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <Info size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Info</span>
+                <button onClick={() => setCurrentTab('info')} className={`nav-item ${currentTab === 'info' ? 'active' : ''}`}>
+                    <div className="nav-icon-wrapper"><Info size={22} /></div>
+                    <span>Info</span>
                 </button>
-                <button onClick={() => setCurrentTab('api')} style={{ background: 'none', border: 'none', color: currentTab === 'api' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <Code size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>API</span>
+                <button onClick={() => setCurrentTab('api')} className={`nav-item ${currentTab === 'api' ? 'active' : ''}`}>
+                    <div className="nav-icon-wrapper"><Code size={22} /></div>
+                    <span>API</span>
                 </button>
             </div>
         </div>
