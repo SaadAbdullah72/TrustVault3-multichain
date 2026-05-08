@@ -635,6 +635,7 @@ export const VaultPage: React.FC = () => {
                     }
                     .desktop-content {
                         flex: 1;
+                        width: calc(100% - 280px); /* Explicit width to fix 0-width bug on desktop */
                         min-width: 0;
                         min-height: 100vh;
                         position: relative;
