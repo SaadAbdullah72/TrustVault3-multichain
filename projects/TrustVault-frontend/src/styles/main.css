@@ -3475,3 +3475,36 @@ body {
     }
 }
 
+
+/* Vault Dashboard Premium Styles */
+.btn-scale:active { transform: scale(0.96); }
+.fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.spinning { animation: spin 1s linear infinite; }
+.pulse { animation: pulse 1.5s ease-in-out infinite; }
+@media (min-width: 1024px) {
+  .mobile-nav { display: none !important; }
+  .mobile-only-back { display: none !important; }
+}
+@media (max-width: 1023px) {
+  .dashboard-action-btn:active { transform: scale(0.95); }
+  .dashboard-main-content { padding-top: 60px !important; }
+  .vault-dashboard-root > div:first-child { padding-right: 70px !important; }
+  .addr-text { max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 640px) {
+  .info-grid, .action-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .dashboard-main-content { padding: 24px !important; justify-content: center !important; }
+  .action-btn { padding: 20px 12px !important; }
+  .action-btn span { font-size: 11px !important; }
+  .responsive-input-row { flex-direction: column !important; align-items: stretch !important; }
+  .responsive-input-row button { width: 100% !important; }
+}
+@media (max-width: 400px) {
+  .action-grid { grid-template-columns: 1fr !important; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
