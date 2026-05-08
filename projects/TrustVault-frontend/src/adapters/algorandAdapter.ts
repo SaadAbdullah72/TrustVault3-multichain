@@ -104,45 +104,49 @@ export class AlgorandAdapter implements ChainAdapter {
 
         // Bootstrap + Fund
         onStatus?.('Step 2/2: Setting up & Funding...')
-        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        try {
+            const appAddress = getAppAddress(appId)
+            const suggestedParams = await algodClient.getTransactionParams().do()
+            const method = new algosdk.ABIMethod({
+                name: 'bootstrap',
+                args: [{ name: 'beneficiary', type: 'address' }, { name: 'lock_duration', type: 'uint64' }],
+                returns: { type: 'void' }
+            })
 
-        const appAddress = getAppAddress(appId)
-        const suggestedParams = await algodClient.getTransactionParams().do()
-        const method = new algosdk.ABIMethod({
-            name: 'bootstrap',
-            args: [{ name: 'beneficiary', type: 'address' }, { name: 'lock_duration', type: 'uint64' }],
-            returns: { type: 'void' }
-        })
+            const atc = new algosdk.AtomicTransactionComposer()
+            
+            // 1. Bootstrap call
+            const encodedNote = new TextEncoder().encode(VAULT_NOTE_PREFIX + beneficiary.trim())
+            atc.addMethodCall({
+                appID: Number(appId),
+                method: method,
+                methodArgs: [beneficiary.trim(), BigInt(lockDuration)],
+                sender: this.activeAddress,
+                suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
+                signer: this.transactionSigner,
+                note: encodedNote
+            })
 
-        const encodedNote = new TextEncoder().encode(VAULT_NOTE_PREFIX + beneficiary.trim())
-        const bootstrapTxn = algosdk.makeApplicationCallTxnFromObject({
-            sender: this.activeAddress,
-            appIndex: Number(appId),
-            onComplete: algosdk.OnApplicationComplete.NoOpOC,
-            suggestedParams: { ...suggestedParams, flatFee: true, fee: 2000 },
-            appArgs: [
-                method.getSelector(),
-                algosdk.decodeAddress(beneficiary.trim()).publicKey,
-                algosdk.encodeUint64(lockDuration)
-            ],
-            accounts: [beneficiary.trim()],
-            note: encodedNote
-        })
+            // 2. Initial Funding payment
+            const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+                sender: this.activeAddress,
+                receiver: appAddress,
+                amount: depositMicro,
+                suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
+            })
+            atc.addTransaction({
+                txn: payTxn,
+                signer: this.transactionSigner
+            })
 
-        const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-            sender: this.activeAddress,
-            receiver: appAddress,
-            amount: depositMicro,
-            suggestedParams: { ...suggestedParams, flatFee: true, fee: 1000 },
-        })
-
-        const txns = [bootstrapTxn, payTxn]
-        algosdk.assignGroupID(txns)
-        console.log('[AlgorandAdapter] Signing transactions...')
-        const signedTxns = await this.transactionSigner(txns, [0, 1])
-        console.log('[AlgorandAdapter] Sending txns...')
-        await algodClient.sendRawTransaction(signedTxns).do()
-        await algosdk.waitForConfirmation(algodClient, bootstrapTxn.txID().toString(), 4)
+            console.log('[AlgorandAdapter] Executing bootstrap + fund via ATC...')
+            await atc.execute(algodClient, 4)
+            console.log('[AlgorandAdapter] ATC execution successful.')
+        } catch (atcError: any) {
+            console.error('[AlgorandAdapter] ATC execution failed:', atcError)
+            throw new Error(`Vault created (#${appId}) but setup failed: ${atcError.message || atcError}`)
+        }
 
         // Save to registries
         onStatus?.('Vault established! Finalizing secure registry...')

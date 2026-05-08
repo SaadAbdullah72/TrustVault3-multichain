@@ -35,10 +35,11 @@ export const useVaultActions = () => {
         // Fallbacks
         if (e.reason) return e.reason.charAt(0).toUpperCase() + e.reason.slice(1)
         if (e.message) {
-            if (e.message.length > 60) return 'Action failed. Please verify your inputs and try again.'
+            // Only mask extremely long technical stack traces, but keep the core message
+            if (e.message.length > 200) return 'Action failed: ' + e.message.slice(0, 100) + '...'
             return e.message
         }
-        return 'An unexpected error occurred. Please try again.'
+        return 'An unexpected error occurred: ' + (typeof e === 'string' ? e : 'Check console for details')
     }
 
     const handleConnect = useCallback(async () => {
