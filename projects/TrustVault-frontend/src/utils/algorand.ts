@@ -294,8 +294,8 @@ export async function fetchVaultState(appId: number | bigint): Promise<VaultStat
         })
 
         const result: VaultState = {
-            owner: String(state[STATE_KEYS.OWNER] || senderAddr),
-            beneficiary: String(state[STATE_KEYS.BENEFICIARY] || ''),
+            owner: String(state[STATE_KEYS.OWNER] || senderAddr || 'Unknown Owner'),
+            beneficiary: String(state[STATE_KEYS.BENEFICIARY] || 'Pending Registration'),
             lockDuration: Number(state[STATE_KEYS.LOCK_DURATION]) || 0,
             lastHeartbeat: Number(state[STATE_KEYS.LAST_HEARTBEAT]) || 0,
             released: state[STATE_KEYS.RELEASED] === 1

@@ -98,6 +98,7 @@ export const VaultPage: React.FC = () => {
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
     const [vaultBalance, setVaultBalance] = useState(0)
     const [isDiscovering, setIsDiscovering] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [showVaultSelector, setShowVaultSelector] = useState(false)
     const [copied, setCopied] = useState(false)
@@ -119,62 +120,73 @@ export const VaultPage: React.FC = () => {
 
         setIsDiscovering(true)
         try {
-            // 1. Discover vaults from Supabase (Cloud Registry)
-            const cloudVaults = await getVaultsByOwner(walletAddress)
+            // 1. Fetch from Cloud and On-Chain in parallel
+            const [cloudVaults, onChainIds, cloudInherited, onChainClaimable] = await Promise.all([
+                getVaultsByOwner(walletAddress).catch(() => []),
+                adapter.discoverVaults(walletAddress).catch(() => []),
+                getVaultsByBeneficiary(walletAddress).catch(() => []),
+                adapter.discoverClaimableVaults(walletAddress).catch(() => [])
+            ])
 
-            // 2. Discover vaults from Blockchain (On-Chain)
-            const onChainIds = await adapter.discoverVaults(walletAddress)
-
-            // 3. Merge: If an on-chain vault is missing from cloud, add it
-            const mergedVaults = [...cloudVaults]
+            // 2. Merge Owned Vaults (Unique by ID)
+            const ownedMap = new Map<string, RegistryVault>()
+            cloudVaults.forEach(v => ownedMap.set(v.vault_id.toString().toLowerCase(), v))
+            
+            // Add on-chain discovered ones if missing
             for (const id of onChainIds) {
-                if (!mergedVaults.find(v => v.vault_id.toLowerCase() === id.toLowerCase())) {
-                    mergedVaults.push({
-                        vault_id: id,
-                        vault_name: `${currentChain.name} Vault`,
+                const idStr = id.toString().toLowerCase()
+                if (!ownedMap.has(idStr)) {
+                    // Try to fetch real metadata if missing
+                    let beneficiary = '?'
+                    try {
+                        const state = await adapter.fetchVaultState(id)
+                        if (state) beneficiary = state.beneficiary
+                    } catch {}
+
+                    ownedMap.set(idStr, {
+                        vault_id: id.toString(),
+                        vault_name: `Algorand Vault`, // Proper name
                         owner_address: walletAddress,
-                        beneficiary_address: '?'
+                        beneficiary_address: beneficiary
                     })
                 }
             }
+            setUserVaults(Array.from(ownedMap.values()))
 
-            console.log(`[VaultPage] Final merged owned vaults: ${mergedVaults.length}`, mergedVaults);
-            setUserVaults(mergedVaults)
+            // 3. Merge Inherited Vaults (Unique by ID)
+            const inheritedMap = new Map<string, RegistryVault>()
+            cloudInherited.forEach(v => inheritedMap.set(v.vault_id.toString().toLowerCase(), v))
 
-            // 4. Discover Inherited Vaults from Cloud
-            const cloudInherited = await getVaultsByBeneficiary(walletAddress)
-
-            // 5. Discover Inherited Vaults from Blockchain (Fallback/Merge)
-            const onChainClaimable = await adapter.discoverClaimableVaults(walletAddress)
-
-            const mergedInherited = [...cloudInherited]
             for (const c of onChainClaimable) {
-                if (!mergedInherited.find(v => v.vault_id.toLowerCase() === c.vaultId.toLowerCase())) {
-                    mergedInherited.push({
+                const idStr = c.vaultId.toString().toLowerCase()
+                if (!inheritedMap.has(idStr)) {
+                    inheritedMap.set(idStr, {
                         vault_id: c.vaultId,
-                        vault_name: `Inherited ${currentChain.name} Vault`,
+                        vault_name: `Inherited Vault`,
                         owner_address: c.state.owner,
                         beneficiary_address: walletAddress,
                         isClaimed: c.state.released
                     })
                 }
             }
-            setInheritedVaults(mergedInherited)
+            setInheritedVaults(Array.from(inheritedMap.values()))
 
-            // Auto-select if nothing selected
+            // Auto-select logic
             if (!selectedVaultId) {
-                if (mergedVaults.length > 0) setSelectedVaultId(mergedVaults[0].vault_id)
-                else if (mergedInherited.length > 0) {
-                    setSelectedVaultId(mergedInherited[0].vault_id)
+                const allOwned = Array.from(ownedMap.values())
+                const allInherited = Array.from(inheritedMap.values())
+                if (allOwned.length > 0) setSelectedVaultId(allOwned[0].vault_id)
+                else if (allInherited.length > 0) {
+                    setSelectedVaultId(allInherited[0].vault_id)
                     setActiveListTab('inherited')
                 }
             }
         } catch (e) {
-            console.error('Discovery failed:', e)
+            console.error('[Discovery] Failed:', e)
         } finally {
             setIsDiscovering(false)
         }
-    }, [adapter, walletAddress, selectedVaultId, currentChain.name])
+    }, [adapter, walletAddress, selectedVaultId])
 
     useEffect(() => {
         if (isConnected && walletAddress && walletAddress !== 'undefined') {
@@ -420,9 +432,18 @@ export const VaultPage: React.FC = () => {
             )}
             <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => resetStatus()} />
 
-            <div className="wallet-container desktop-mode">
-                {/* Desktop Sidebar */}
-                <div className="desktop-sidebar">
+            <div className={`wallet-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
+                {/* Mobile Menu Toggle */}
+                <button 
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 2000, background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '12px', display: 'none' }}
+                    className="mobile-menu-toggle"
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+
+                {/* Sidebar (Responsive) */}
+                <div className={`desktop-sidebar ${isMobileMenuOpen ? 'show' : ''}`}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
                         <div style={{ width: '40px', height: '40px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Asterisk size={24} color="#000" />
@@ -431,19 +452,19 @@ export const VaultPage: React.FC = () => {
                     </div>
 
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                        <button onClick={() => setCurrentTab('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'dashboard' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => { setCurrentTab('dashboard'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'dashboard' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Home size={20} /> Dashboard
                         </button>
-                        <button onClick={() => setCurrentTab('security')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'security' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'security' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => { setCurrentTab('security'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'security' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'security' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Shield size={20} /> Security
                         </button>
-                        <button onClick={() => setCurrentTab('history')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'history' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'history' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => { setCurrentTab('history'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'history' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'history' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <History size={20} /> Activity
                         </button>
-                        <button onClick={() => setCurrentTab('info')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'info' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'info' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => { setCurrentTab('info'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'info' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'info' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Info size={20} /> Vault Info
                         </button>
-                        <button onClick={() => setCurrentTab('api')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'api' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'api' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                        <button onClick={() => { setCurrentTab('api'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'api' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'api' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Code size={20} /> API & SDK
                         </button>
                     </nav>
@@ -459,7 +480,7 @@ export const VaultPage: React.FC = () => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="desktop-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
+                <div className="desktop-content" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
                     {isDiscovering ? (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
@@ -475,7 +496,7 @@ export const VaultPage: React.FC = () => {
                             isOwner={isOwner}
                             isBeneficiary={isBeneficiary}
                             isExpired={isExpired}
-                            isLatest={selectedVaultId === userVaults[0]}
+                            isLatest={selectedVaultId === userVaults[0]?.vault_id}
                             formatAddr={formatAddr}
                             copyToClipboard={copyToClipboard}
                             onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
@@ -503,14 +524,14 @@ export const VaultPage: React.FC = () => {
 
                     {/* Create Form Overlay */}
                     {showCreateForm && (
-                        <div style={{ position: 'absolute', inset: 0, zIndex: 1000, background: '#0B131E', display: 'flex', flexDirection: 'column', padding: '32px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: '#0B131E', display: 'flex', flexDirection: 'column', padding: '24px', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                 <button onClick={() => setShowCreateForm(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
                                 <span style={{ fontWeight: 800, fontSize: '15px', color: '#fff' }}>NEW PROTOCOL</span>
                                 <div style={{ width: 48 }} />
                             </div>
 
-                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '40px' }}>
                                 <div style={{ marginBottom: '20px' }}>
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
                                     <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder={currentChain.type === 'evm' ? '0x... ETH Address' : currentChain.type === 'solana' ? 'Solana Address' : 'Algorand Address'} style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff' }} />
@@ -530,6 +551,53 @@ export const VaultPage: React.FC = () => {
                         </div>
                     )}
                 </div>
+            </div>
+
+            <style>{`
+                .wallet-container {
+                    display: flex;
+                    height: 100vh;
+                    overflow: hidden;
+                    background: #080e17;
+                }
+                .desktop-sidebar {
+                    width: 280px;
+                    background: #0f172a;
+                    border-right: 1px solid rgba(255,255,255,0.05);
+                    padding: 32px 24px;
+                    display: flex;
+                    flex-direction: column;
+                    transition: all 0.3s ease;
+                    z-index: 1001;
+                }
+                .desktop-content {
+                    flex: 1;
+                    height: 100%;
+                    position: relative;
+                }
+
+                @media (max-width: 1023px) {
+                    .mobile-menu-toggle {
+                        display: block !important;
+                    }
+                    .desktop-sidebar {
+                        position: fixed;
+                        top: 0;
+                        left: -280px;
+                        height: 100vh;
+                        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+                    }
+                    .desktop-sidebar.show {
+                        left: 0;
+                    }
+                    .desktop-content {
+                        width: 100%;
+                    }
+                    .wallet-container {
+                        flex-direction: column;
+                    }
+                }
+            `}</style>
 
                 {/* Mobile Dropdown (Dashboard mode only) */}
                 {!showCreateForm && (
