@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight, Code, Info } from 'lucide-react'
+import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight, Code, Info, Key, Package, Layout } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
 import { Toast } from './Toast'
@@ -54,7 +54,7 @@ export default function VaultDashboard({
     const [showWithdrawInput, setShowWithdrawInput] = useState(false)
     const [withdrawAmount, setWithdrawAmount] = useState('')
     const [copyToast, setCopyToast] = useState(false)
-    const [apiTab, setApiTab] = useState('Initialize')
+    const [apiTab, setApiTab] = useState('SDK')
 
     const symbol = currentChain.nativeCurrency.symbol
     const statusText = vaultState.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
@@ -151,85 +151,84 @@ export default function VaultDashboard({
             case 'api':
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="fade-in">
+                        {/* Integration Credentials Card */}
                         <div style={{ background: 'linear-gradient(135deg, #111e2f 0%, #0d1724 100%)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Code size={20} color="#10b981" />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '32px', height: '32px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Key size={16} color="#10b981" />
+                                    </div>
+                                    <h3 style={{ fontSize: '16px', fontWeight: 800 }}>Developer Access</h3>
                                 </div>
-                                <div>
-                                    <h3 style={{ fontSize: '18px', fontWeight: 800 }}>TrustVault Developer Portal</h3>
-                                    <p style={{ fontSize: '12px', color: '#94a3b8' }}>Unified Multi-Chain Inheritance SDK</p>
-                                </div>
-                            </div>
-                            
-                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
-                                {['Initialize', 'Create Vault', 'Heartbeat', 'Claim'].map((tab) => (
-                                    <button 
-                                        key={tab}
-                                        onClick={() => setApiTab?.(tab)}
-                                        style={{ 
-                                            padding: '6px 12px', 
-                                            borderRadius: '8px', 
-                                            fontSize: '11px', 
-                                            fontWeight: 700,
-                                            background: (apiTab === tab || (!apiTab && tab === 'Initialize')) ? '#10b981' : 'rgba(255,255,255,0.05)',
-                                            color: (apiTab === tab || (!apiTab && tab === 'Initialize')) ? '#000' : '#94a3b8',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        {tab}
-                                    </button>
-                                ))}
+                                <div style={{ fontSize: '10px', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '20px' }}>ACTIVE</div>
                             </div>
 
-                            <div style={{ background: '#080e17', borderRadius: '16px', padding: '16px', border: '1px solid rgba(255,255,255,0.1)', minHeight: '140px' }}>
-                                <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: '"JetBrains Mono", monospace', whiteSpace: 'pre-wrap', display: 'block', lineHeight: 1.5 }}>
-{apiTab === 'Create Vault' ? `// Create inheritance vault
-const vaultId = await sdk.createVault({
-  beneficiary: "0x123...",
-  lockDuration: 86400 * 30,
-  depositAmount: 1.5,
-  vaultName: "Family Trust"
-});` : 
-apiTab === 'Heartbeat' ? `// Send heartbeat to reset timer
-await sdk.heartbeat(vaultId);
-console.log("Vault safety confirmed!");` :
-apiTab === 'Claim' ? `// Beneficiary claims funds
-if (await sdk.isExpired(vaultId)) {
-  await sdk.autoRelease(vaultId);
-}` :
-`// Initialize for ${currentChain.name}
-const sdk = TrustVaultSDK.for${currentChain.type.toUpperCase()}({
-  rpcUrl: "${currentChain.testnet.rpcUrl}",
-  factory: "${currentChain.testnet.factoryAddress}"
-});`}
-                                </code>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '20px' }}>
-                                <button style={{ padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
-                                    Download SDK (.zip)
-                                </button>
-                                <button style={{ padding: '14px', borderRadius: '12px', background: '#fff', color: '#000', border: 'none', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
-                                    Full API Docs
-                                </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase' }}>Public API Key</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <code style={{ fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace' }}>tv_pub_live_94k2...x82z</code>
+                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('tv_pub_live_94k2...x82z')} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* SDK Features List */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                                <div style={{ color: '#10b981', marginBottom: '8px' }}><Shield size={18} /></div>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>Production Ready</div>
-                                <div style={{ fontSize: '11px', color: '#64748b' }}>Audited smart contracts for all chains.</div>
+                        {/* SDK & Widget Selector */}
+                        <div style={{ background: '#111e2f', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+                                <div 
+                                    onClick={() => setApiTab('SDK')}
+                                    style={{ flex: 1, padding: '16px', borderRadius: '16px', background: apiTab === 'SDK' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)', border: apiTab === 'SDK' ? '1px solid #10b981' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
+                                >
+                                    <div style={{ color: apiTab === 'SDK' ? '#10b981' : '#64748b', marginBottom: '8px' }}><Package size={20} /></div>
+                                    <div style={{ fontSize: '14px', fontWeight: 700 }}>NPM Package</div>
+                                    <div style={{ fontSize: '11px', color: '#64748b' }}>Full SDK Integration</div>
+                                </div>
+                                <div 
+                                    onClick={() => setApiTab('WIDGET')}
+                                    style={{ flex: 1, padding: '16px', borderRadius: '16px', background: apiTab === 'WIDGET' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)', border: apiTab === 'WIDGET' ? '1px solid #3b82f6' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
+                                >
+                                    <div style={{ color: apiTab === 'WIDGET' ? '#3b82f6' : '#64748b', marginBottom: '8px' }}><Layout size={20} /></div>
+                                    <div style={{ fontSize: '14px', fontWeight: 700 }}>Direct Widget</div>
+                                    <div style={{ fontSize: '11px', color: '#64748b' }}>Drop-in Component</div>
+                                </div>
                             </div>
-                            <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                                <div style={{ color: '#3b82f6', marginBottom: '8px' }}><Activity size={18} /></div>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>Status Monitoring</div>
-                                <div style={{ fontSize: '11px', color: '#64748b' }}>Real-time heartbeat tracking via SDK.</div>
-                            </div>
+
+                            {apiTab === 'WIDGET' ? (
+                                <div className="fade-in">
+                                    <div style={{ background: '#080e17', borderRadius: '16px', padding: '24px', marginBottom: '16px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                        <div style={{ padding: '12px 24px', background: '#fff', color: '#000', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 15px rgba(255,255,255,0.1)' }}>
+                                            <Shield size={14} /> Setup Inheritance
+                                        </div>
+                                        <p style={{ fontSize: '11px', color: '#64748b', marginTop: '16px' }}>Live Preview: How the widget appears on your site</p>
+                                    </div>
+                                    <div style={{ background: '#080e17', borderRadius: '12px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <code style={{ fontSize: '11px', color: '#10b981', fontFamily: 'monospace' }}>{`<script src="https://cdn.trustvault.io/v3/widget.js" />`}</code>
+                                        <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="fade-in">
+                                    <div style={{ background: '#080e17', borderRadius: '16px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>TERMINAL</span>
+                                            <Copy size={14} color="#64748b" style={{ cursor: 'pointer' }} onClick={() => copyToClipboard('npm install @trustvault/sdk-core')} />
+                                        </div>
+                                        <code style={{ fontSize: '13px', color: '#e2e8f0', fontFamily: 'monospace', display: 'block', borderLeft: '3px solid #10b981', paddingLeft: '12px' }}>
+                                            npm install @trustvault/sdk-core
+                                        </code>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <button style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#fff', color: '#000', border: 'none', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
+                                            Get API Credentials
+                                        </button>
+                                        <button style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
+                                            Read SDK Documentation
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )
