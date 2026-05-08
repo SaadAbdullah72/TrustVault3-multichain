@@ -519,27 +519,17 @@ export const VaultPage: React.FC = () => {
                 {!showCreateForm && (
                     <div className="mobile-only-selector">
                         <VaultDropdown
-                            currentChain={currentChain}
-                            userVaults={userVaults}
-                            vaultRoles={vaultRoles}
-                            selectedVaultId={selectedVaultId}
-                            setSelectedVaultId={setSelectedVaultId}
-                            adapter={adapter}
-                            handleDeleteVaultId={() => {}}
-                            isDiscovering={isDiscovering}
-                            handleManualScan={discoverVaults}
-                            uiStatus={uiStatus}
-                            setShowCreateForm={setShowCreateForm}
-                            showVaultSelector={showVaultSelector}
-                            setShowVaultSelector={setShowVaultSelector}
-                            vaultAddress={selectedVaultId || ''}
-                            walletAddress={walletAddress}
-                            copied={copied}
-                            copyToClipboard={copyToClipboard}
-                            formatAddr={formatAddr}
-                            inheritedVaults={inheritedVaults}
+                            vaults={visibleOwned as any}
+                            inheritedVaults={visibleInherited as any}
                             activeListTab={activeListTab}
                             setActiveListTab={setActiveListTab}
+                            onSelect={handleVaultSelect}
+                            onDelete={handleDeleteVaultId}
+                            onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
+                            formatAddr={formatAddr}
+                            showVaultSelector={showVaultSelector}
+                            setShowVaultSelector={setShowVaultSelector}
+                            selectedVaultId={selectedVaultId}
                         />
                     </div>
                 )}

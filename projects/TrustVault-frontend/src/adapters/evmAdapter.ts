@@ -351,16 +351,10 @@ export class EVMAdapter implements ChainAdapter {
     async discoverClaimableVaults(address: string): Promise<ClaimableVault[]> {
         const allVaults = await this.discoverVaults(address)
         const results: ClaimableVault[] = []
-        const now = Math.floor(Date.now() / 1000)
 
         for (const vaultId of allVaults) {
             const state = await this.fetchVaultState(vaultId)
-            if (
-                state &&
-                state.beneficiary.toLowerCase() === address.toLowerCase() &&
-                !state.released &&
-                now >= state.lastHeartbeat + state.lockDuration
-            ) {
+            if (state && state.beneficiary.toLowerCase() === address.toLowerCase()) {
                 results.push({ vaultId, state })
             }
         }

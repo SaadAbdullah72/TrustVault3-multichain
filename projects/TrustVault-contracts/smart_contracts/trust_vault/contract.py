@@ -61,6 +61,9 @@ def withdraw(amount: abi.Uint64):
     return Seq(
         # Only owner can withdraw
         Assert(Txn.sender() == App.globalGet(owner_key)),
+        # Cannot withdraw if already released or timer expired
+        Assert(App.globalGet(released_key) == Int(0)),
+        Assert(Global.latest_timestamp() < App.globalGet(last_heartbeat_key) + App.globalGet(lock_duration_key)),
         
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields({

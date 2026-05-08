@@ -76,6 +76,7 @@ contract TrustVault {
      */
     function withdraw(uint256 amount) external onlyOwner notReleased {
         require(bootstrapped, "Not bootstrapped");
+        require(block.timestamp < lastHeartbeat + lockDuration, "Timer expired - funds locked for beneficiary");
         require(amount <= address(this).balance, "Insufficient balance");
 
         (bool success, ) = payable(msg.sender).call{value: amount}("");
