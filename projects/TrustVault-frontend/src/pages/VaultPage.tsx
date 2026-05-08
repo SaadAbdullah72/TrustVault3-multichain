@@ -126,7 +126,7 @@ export const VaultPage: React.FC = () => {
                 if (!mergedVaults.find(v => v.vault_id.toLowerCase() === id.toLowerCase())) {
                     mergedVaults.push({
                         vault_id: id,
-                        vault_name: 'Solana Vault',
+                        vault_name: `${currentChain.name} Vault`,
                         owner_address: walletAddress,
                         beneficiary_address: '?'
                     })
@@ -144,10 +144,10 @@ export const VaultPage: React.FC = () => {
             
             const mergedInherited = [...cloudInherited]
             for (const c of onChainClaimable) {
-                if (!mergedInherited.find(v => v.vault_id === c.vaultId)) {
+                if (!mergedInherited.find(v => v.vault_id.toLowerCase() === c.vaultId.toLowerCase())) {
                     mergedInherited.push({
                         vault_id: c.vaultId,
-                        vault_name: 'Inherited Vault',
+                        vault_name: `Inherited ${currentChain.name} Vault`,
                         owner_address: c.state.owner,
                         beneficiary_address: walletAddress,
                         isClaimed: c.state.released
