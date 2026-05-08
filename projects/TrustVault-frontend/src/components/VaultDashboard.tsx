@@ -523,7 +523,6 @@ const sdk = TrustVaultSDK.forEVM({
                 .spinning { animation: spin 1s linear infinite; }
                 .pulse { animation: pulse 1.5s ease-in-out infinite; }
             `}</style>
-      `}</style>
         </div>
     )
 }
