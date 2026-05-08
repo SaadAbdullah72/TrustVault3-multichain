@@ -123,7 +123,7 @@ export const VaultPage: React.FC = () => {
             // 3. Merge: If an on-chain vault is missing from cloud, add it
             const mergedVaults = [...cloudVaults]
             for (const id of onChainIds) {
-                if (!mergedVaults.find(v => v.vault_id === id)) {
+                if (!mergedVaults.find(v => v.vault_id.toLowerCase() === id.toLowerCase())) {
                     mergedVaults.push({
                         vault_id: id,
                         vault_name: 'Solana Vault',
@@ -133,6 +133,9 @@ export const VaultPage: React.FC = () => {
                 }
             }
             
+            console.log(`[VaultPage] Final merged owned vaults: ${mergedVaults.length}`, mergedVaults);
+            setUserVaults(mergedVaults)
+
             // 4. Discover Inherited Vaults from Cloud
             const cloudInherited = await getVaultsByBeneficiary(walletAddress)
             
@@ -180,7 +183,12 @@ export const VaultPage: React.FC = () => {
         localStorage.setItem('hidden_vaults', JSON.stringify(next))
     }
 
-    const visibleOwned = useMemo(() => userVaults.filter(v => !hiddenVaultIds.includes(v.vault_id)), [userVaults, hiddenVaultIds])
+    const visibleOwned = useMemo(() => {
+        const visible = userVaults.filter(v => !hiddenVaultIds.includes(v.vault_id))
+        console.log('[VaultPage] Visible Owned:', visible.length, 'Hidden:', hiddenVaultIds.length);
+        return visible
+    }, [userVaults, hiddenVaultIds])
+
     const visibleInherited = useMemo(() => inheritedVaults.filter(v => !hiddenVaultIds.includes(v.vault_id)), [inheritedVaults, hiddenVaultIds])
 
     // Load vault data
