@@ -542,14 +542,14 @@ export const VaultPage: React.FC = () => {
                     {isDiscovering ? (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>FETCHING VAULTS...</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>INITIALIZING PROTOCOL...</span>
                         </div>
-                    ) : selectedVaultId && !vaultState ? (
+                    ) : (selectedVaultId && !vaultState && currentTab !== 'api') ? (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>LOADING VAULT DATA...</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>LOADING...</span>
                         </div>
-                    ) : selectedVaultId && vaultState ? (
+                    ) : (selectedVaultId && vaultState) || (currentTab === 'api') ? (
                         <VaultDashboard
                             vaultState={vaultState}
                             vaultBalance={vaultBalance}

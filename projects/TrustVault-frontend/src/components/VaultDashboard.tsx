@@ -214,7 +214,17 @@ export default function VaultDashboard({
                                 <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Initialize the SDK Client</h4>
                             </div>
                             <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Import the package in your application and initialize it using your API key. You can then specify which blockchain environment you want to target.</p>
-                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto', position: 'relative' }}>
+                                <button 
+                                    onClick={() => {
+                                        const code = `import { TrustVault } from '@trustvault/sdk-core';\n\n// Initialize the client\nconst tv = new TrustVault({\n  apiKey: "${apiKey}",\n  environment: "mainnet"\n});`;
+                                        copyToClipboard(code);
+                                        setCopyToast(true);
+                                    }}
+                                    style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                                >
+                                    <Copy size={14} color="#94a3b8" />
+                                </button>
                                 <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
                                     <span style={{ color: '#c084fc' }}>import</span> {'{'} TrustVault {'}'} <span style={{ color: '#c084fc' }}>from</span> <span style={{ color: '#fbbf24' }}>'@trustvault/sdk-core'</span>;<br/><br/>
                                     <span style={{ color: '#64748b' }}>// Initialize the client</span><br/>
@@ -233,7 +243,17 @@ export default function VaultDashboard({
                                 <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Deploy a New Vault</h4>
                             </div>
                             <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Use the <code>createVault</code> method to deploy a smart contract vault. You must define a beneficiary address and a lock duration (in seconds).</p>
-                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto', position: 'relative' }}>
+                                <button 
+                                    onClick={() => {
+                                        const code = `async function setupProtection() {\n  try {\n    const vaultId = await tv.createVault({\n      beneficiary: "0x71C...976F",\n      lockDuration: 86400, // 24 hours in seconds\n      depositAmount: 1.5 // Native token amount\n    });\n    console.log("Vault deployed at:", vaultId);\n  } catch (error) {\n    console.error("Deployment failed:", error);\n  }\n}`;
+                                        copyToClipboard(code);
+                                        setCopyToast(true);
+                                    }}
+                                    style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                                >
+                                    <Copy size={14} color="#94a3b8" />
+                                </button>
                                 <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
                                     <span style={{ color: '#c084fc' }}>async function</span> <span style={{ color: '#3b82f6' }}>setupProtection</span>() {'{'}<br/>
                                     &nbsp;&nbsp;<span style={{ color: '#c084fc' }}>try</span> {'{'}<br/>
@@ -258,7 +278,17 @@ export default function VaultDashboard({
                                 <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Maintain Vault Health (Heartbeat)</h4>
                             </div>
                             <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>To prevent the vault from triggering an inheritance transfer, the owner must periodically call the <code>heartbeat</code> method to reset the countdown timer.</p>
-                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto', position: 'relative' }}>
+                                <button 
+                                    onClick={() => {
+                                        const code = `async function pingVault(vaultId) {\n  // Resets the timer back to 100%\n  const txHash = await tv.heartbeat(vaultId);\n  console.log("Heartbeat sent, TX:", txHash);\n}`;
+                                        copyToClipboard(code);
+                                        setCopyToast(true);
+                                    }}
+                                    style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                                >
+                                    <Copy size={14} color="#94a3b8" />
+                                </button>
                                 <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
                                     <span style={{ color: '#c084fc' }}>async function</span> <span style={{ color: '#3b82f6' }}>pingVault</span>(vaultId) {'{'}<br/>
                                     &nbsp;&nbsp;<span style={{ color: '#64748b' }}>// Resets the timer back to 100%</span><br/>
