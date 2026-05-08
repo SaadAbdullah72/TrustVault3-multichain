@@ -574,8 +574,18 @@ export const VaultPage: React.FC = () => {
                 )}
 
                 <style dangerouslySetInnerHTML={{ __html: `
+                    .wallet-shell {
+                        padding: 0 !important;
+                        display: block !important;
+                        width: 100% !important;
+                        height: 100vh !important;
+                        max-width: none !important;
+                        background: #080e17 !important;
+                    }
                     .wallet-container {
                         display: flex;
+                        width: 100% !important;
+                        max-width: none !important;
                         height: 100vh;
                         overflow: hidden;
                         background: #080e17;
@@ -594,6 +604,7 @@ export const VaultPage: React.FC = () => {
                         flex: 1;
                         height: 100%;
                         position: relative;
+                        overflow-y: auto;
                     }
 
                     @media (max-width: 1023px) {
