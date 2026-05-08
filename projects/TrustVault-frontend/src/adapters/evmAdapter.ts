@@ -4,6 +4,7 @@
  */
 import { ChainAdapter, VaultState, ClaimableVault } from './types'
 import { ChainConfig } from '../config/chains'
+import { saveVaultToRegistry } from '../utils/supabase'
 
 // TrustVaultV2 ABI (from Solidity contract)
 const VAULT_ABI = [
