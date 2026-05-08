@@ -129,17 +129,30 @@ export const VaultPage: React.FC = () => {
                 }
             }
             
-            setUserVaults(mergedVaults)
+            // 4. Discover Inherited Vaults from Cloud
+            const cloudInherited = await getVaultsByBeneficiary(walletAddress)
             
-            // 4. Discover Inherited Vaults
-            const inherited = await getVaultsByBeneficiary(walletAddress)
-            setInheritedVaults(inherited)
+            // 5. Discover Inherited Vaults from Blockchain (Fallback/Merge)
+            const onChainClaimable = await adapter.discoverClaimableVaults(walletAddress)
+            
+            const mergedInherited = [...cloudInherited]
+            for (const c of onChainClaimable) {
+                if (!mergedInherited.find(v => v.vault_id === c.address)) {
+                    mergedInherited.push({
+                        vault_id: c.address,
+                        vault_name: 'Inherited Vault',
+                        owner_address: c.owner,
+                        beneficiary_address: walletAddress
+                    })
+                }
+            }
+            setInheritedVaults(mergedInherited)
 
             // Auto-select if nothing selected
             if (!selectedVaultId) {
                 if (mergedVaults.length > 0) setSelectedVaultId(mergedVaults[0].vault_id)
-                else if (inherited.length > 0) {
-                    setSelectedVaultId(inherited[0].vault_id)
+                else if (mergedInherited.length > 0) {
+                    setSelectedVaultId(mergedInherited[0].vault_id)
                     setActiveListTab('inherited')
                 }
             }
