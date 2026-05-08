@@ -31,7 +31,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 alignItems: 'center',
                 padding: '20px'
             }}>
-                <h1 style={{ fontSize: '32px', fontWeight: 800, textAlign: 'center', marginBottom: '16px', lineHeight: 1.1 }}>
+                <h1 style={{ fontSize: 'clamp(28px, 5vw, 36px)', fontWeight: 800, textAlign: 'center', marginBottom: '16px', lineHeight: 1.1 }}>
                     Don't Lose Your<br/>Crypto Forever
                 </h1>
                 <p style={{ fontSize: '15px', color: '#8E8E93', textAlign: 'center', maxWidth: '300px', marginBottom: '40px', lineHeight: 1.5 }}>
@@ -73,7 +73,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 }
             `}</style>
 
-            <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ padding: 'clamp(24px, 5vh, 48px) 32px clamp(40px, 8vh, 64px)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <button 
                     onClick={onLaunch}
                     style={{ 

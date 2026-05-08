@@ -64,18 +64,21 @@ export default function ChainSwitcher() {
             </button>
 
             {isOpen && (
-                <div style={{ 
-                    position: 'absolute', 
-                    top: 'calc(100% + 12px)', 
-                    right: 0, 
-                    width: '280px', 
-                    borderRadius: '20px', 
-                    zIndex: 1000,
-                    overflow: 'hidden',
-                    background: '#fff',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                    border: '1px solid #e2e8f0'
-                }}>
+                <div 
+                    className="chain-dropdown"
+                    style={{ 
+                        position: 'absolute', 
+                        top: 'calc(100% + 12px)', 
+                        right: 0, 
+                        width: '280px', 
+                        borderRadius: '20px', 
+                        zIndex: 1000,
+                        overflow: 'hidden',
+                        background: '#fff',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                        border: '1px solid #e2e8f0'
+                    }}
+                >
                     <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Search size={14} color="#94a3b8" />
                         <input 
@@ -133,6 +136,17 @@ export default function ChainSwitcher() {
             )}
             <style>{`
                 .chain-row-hover:hover { background: #f8fafc !important; }
+                @media (max-width: 640px) {
+                    .chain-dropdown {
+                        right: -16px !important;
+                        width: calc(100vw - 32px) !important;
+                        max-width: 320px !important;
+                        position: fixed !important;
+                        top: 70px !important;
+                        left: 50% !important;
+                        transform: translateX(-50%) !important;
+                    }
+                }
             `}</style>
         </div>
     )

@@ -332,10 +332,10 @@ export const VaultPage: React.FC = () => {
     if (step === 'connect') {
         return (
             <div className="wallet-shell">
-                {/* Fixed Back Button */}
-                <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
-                    <button onClick={handleGoBackToLanding} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
-                        <ArrowLeft size={18} />
+                {/* Fixed Back Button - Improved Mobile Spacing */}
+                <div style={{ position: 'absolute', top: 'clamp(16px, 4vh, 24px)', left: 'clamp(16px, 4vw, 24px)', zIndex: 100 }}>
+                    <button onClick={handleGoBackToLanding} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '10px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, backdropFilter: 'blur(10px)', transition: 'all 0.2s ease' }} className="nav-btn-hover">
+                        <ArrowLeft size={16} />
                         Back
                     </button>
                 </div>
@@ -357,9 +357,9 @@ export const VaultPage: React.FC = () => {
     if (step === 'actionSelect') {
         return (
             <div className="wallet-shell">
-                <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100 }}>
-                    <button onClick={() => setStep('connect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
-                        <ArrowLeft size={18} />
+                <div style={{ position: 'absolute', top: 'clamp(16px, 4vh, 24px)', left: 'clamp(16px, 4vw, 24px)', zIndex: 100 }}>
+                    <button onClick={() => setStep('connect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '10px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, backdropFilter: 'blur(10px)', transition: 'all 0.2s ease' }} className="nav-btn-hover">
+                        <ArrowLeft size={16} />
                         Back
                     </button>
                 </div>
@@ -408,9 +408,9 @@ export const VaultPage: React.FC = () => {
     if (step === 'vaultList') {
         return (
             <div style={{ minHeight: '100vh', background: '#0B131E', width: '100%' }}>
-                <div style={{ position: 'fixed', top: '24px', left: '24px', zIndex: 100 }}>
-                    <button onClick={() => setStep('actionSelect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px 20px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
-                        <ArrowLeft size={18} /> Back
+                <div style={{ position: 'fixed', top: 'clamp(16px, 4vh, 24px)', left: 'clamp(16px, 4vw, 24px)', zIndex: 100 }}>
+                    <button onClick={() => setStep('actionSelect')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '10px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, backdropFilter: 'blur(10px)', transition: 'all 0.2s ease' }} className="nav-btn-hover">
+                        <ArrowLeft size={16} /> Back
                     </button>
                 </div>
                 <div style={{ paddingTop: '100px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
@@ -451,10 +451,10 @@ export const VaultPage: React.FC = () => {
                 {/* Mobile Menu Toggle */}
                 <button 
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 2000, background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '12px', display: 'none' }}
+                    style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 2000, background: 'rgba(17, 30, 47, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px', borderRadius: '10px', display: 'none', backdropFilter: 'blur(10px)' }}
                     className="mobile-menu-toggle"
                 >
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
 
                 {/* Sidebar (Responsive) */}
@@ -494,15 +494,15 @@ export const VaultPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="desktop-content" style={{ flex: 1, height: '100%', overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative', background: '#080e17' }}>
+                {/* Main Content Area - Fixed Desktop Blank Issue */}
+                <div className="desktop-content" style={{ flex: 1, minWidth: 0, minHeight: '100%', position: 'relative', background: '#080e17', display: 'flex', flexDirection: 'column' }}>
                     {isDiscovering ? (
-                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>FETCHING VAULTS...</span>
                         </div>
                     ) : selectedVaultId && !vaultState ? (
-                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>LOADING VAULT DATA...</span>
                         </div>
@@ -606,8 +606,7 @@ export const VaultPage: React.FC = () => {
                         display: flex;
                         width: 100% !important;
                         max-width: none !important;
-                        height: 100vh;
-                        overflow: hidden;
+                        min-height: 100vh;
                         background: #080e17;
                     }
                     .desktop-sidebar {
@@ -617,14 +616,22 @@ export const VaultPage: React.FC = () => {
                         padding: 32px 24px;
                         display: flex;
                         flex-direction: column;
-                        transition: all 0.3s ease;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         z-index: 1001;
                     }
                     .desktop-content {
                         flex: 1;
-                        height: 100%;
+                        min-width: 0;
+                        min-height: 100vh;
                         position: relative;
-                        overflow-y: auto;
+                        display: flex;
+                        flex-direction: column;
+                        background: #080e17;
+                    }
+
+                    .nav-btn-hover:hover {
+                        background: rgba(255,255,255,0.15) !important;
+                        transform: translateY(-1px);
                     }
 
                     @media (max-width: 1023px) {
@@ -643,13 +650,9 @@ export const VaultPage: React.FC = () => {
                         }
                         .desktop-content {
                             width: 100%;
-                            height: auto !important;
-                            overflow-y: visible !important;
                         }
                         .wallet-container {
                             flex-direction: column;
-                            height: auto !important;
-                            overflow-y: auto !important;
                         }
                     }
                     @media (min-width: 1024px) {

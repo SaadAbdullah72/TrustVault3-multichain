@@ -385,9 +385,20 @@ export default function VaultDashboard({
     }
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#080e17' }}>
+        <div style={{ flex: 1, minHeight: '100%', display: 'flex', flexDirection: 'column', background: '#080e17' }}>
             {/* Minimal Top Bar for Dashboard — Hide redundant back/title on desktop */}
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', background: '#0f172a' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button onClick={onBack} className="mobile-only-back" style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div className="mobile-only-back" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Shield size={16} />
+                        </div>
+                        <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>TRUSTVAULT 3</span>
+                    </div>
+                </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     {walletAddress && (
                         <div style={{ 
@@ -411,7 +422,7 @@ export default function VaultDashboard({
             </div>
 
             {/* Content */}
-            <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div className="dashboard-main-content" style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                 {renderContent()}
             </div>
 
@@ -542,18 +553,21 @@ const sdk = TrustVaultSDK.forEVM({
             <style>{`
                 @media (min-width: 1024px) {
                     .mobile-nav { display: none !important; }
+                    .mobile-only-back { display: none !important; }
                 }
                 .fade-in {
                     animation: fadeIn 0.4s ease-out forwards;
                 }
+                @media (max-width: 1023px) {
+                    .dashboard-action-btn:active { transform: scale(0.95); }
+                }
                 @media (max-width: 640px) {
-                    .info-grid {
+                    .info-grid, .action-grid {
                         grid-template-columns: 1fr !important;
-                        gap: 10px !important;
+                        gap: 12px !important;
                     }
-                    .action-grid {
-                        grid-template-columns: repeat(3, 1fr) !important;
-                        gap: 8px !important;
+                    .dashboard-main-content {
+                        padding: 16px !important;
                     }
                     .action-btn {
                         padding: 12px 8px !important;

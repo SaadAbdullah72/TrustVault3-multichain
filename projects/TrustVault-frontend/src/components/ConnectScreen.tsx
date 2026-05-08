@@ -25,12 +25,21 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({ onConnect, onConti
             color: '#fff',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
         }}>
-            {/* Top Bar with Chain Switcher */}
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '16px', position: 'relative' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600 }}>NETWORK</span>
-                <div style={{ position: 'absolute', right: '16px', top: '12px' }}>
-                    <ChainSwitcher />
-                </div>
+            {/* Responsive Top Bar */}
+            <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between', 
+                padding: '16px clamp(16px, 4vw, 24px)', 
+                background: 'rgba(15, 23, 42, 0.4)',
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 150
+            }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '1px', color: '#94a3b8' }}>NETWORK</span>
+                <ChainSwitcher />
             </div>
 
             {/* Content */}
