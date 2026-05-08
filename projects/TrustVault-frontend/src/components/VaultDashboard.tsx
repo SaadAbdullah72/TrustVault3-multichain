@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight, Code } from 'lucide-react'
+import { Eye, EyeOff, Shield, Copy, Heart, Unlock, ArrowUpRight, MoreHorizontal, Home, History, Settings, QrCode, Activity, RefreshCw, ArrowLeft, ArrowRight, Code, Info } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Countdown from './Countdown'
 import { Toast } from './Toast'
@@ -23,8 +23,8 @@ export interface VaultDashboardProps {
     onRefresh?: () => void;
     onBack?: () => void;
     uiStatus: any;
-    currentTab: 'dashboard' | 'security' | 'history' | 'settings' | 'api';
-    setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'settings' | 'api') => void;
+    currentTab: 'dashboard' | 'security' | 'history' | 'info' | 'api';
+    setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'info' | 'api') => void;
 }
 
 export default function VaultDashboard({
@@ -128,11 +128,11 @@ export default function VaultDashboard({
                         </div>
                     </div>
                 )
-            case 'settings':
+            case 'info':
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div style={{ background: '#111e2f', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px' }}>Protocol Settings</h3>
+                            <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '20px' }}>Vault Information</h3>
                             <button onClick={handleCopyVault} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'flex-start', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '14px', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
                                 <Copy size={18} /> Copy Vault Address
                             </button>
@@ -385,9 +385,9 @@ export default function VaultDashboard({
                     <History size={22} />
                     <span style={{ fontSize: '10px', fontWeight: 700 }}>Activity</span>
                 </button>
-                <button onClick={() => setCurrentTab('settings')} style={{ background: 'none', border: 'none', color: currentTab === 'settings' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    <Settings size={22} />
-                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Settings</span>
+                <button onClick={() => setCurrentTab('info')} style={{ background: 'none', border: 'none', color: currentTab === 'info' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <Info size={22} />
+                    <span style={{ fontSize: '10px', fontWeight: 700 }}>Info</span>
                 </button>
                 <button onClick={() => setCurrentTab('api')} style={{ background: 'none', border: 'none', color: currentTab === 'api' ? '#fff' : '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
                     <Code size={22} />

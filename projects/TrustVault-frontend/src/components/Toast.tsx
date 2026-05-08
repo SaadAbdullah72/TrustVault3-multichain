@@ -26,9 +26,9 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
     }, [duration, onClose])
 
     const colors = {
-        error: { bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.3)', icon: '#ef4444' },
-        success: { bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.3)', icon: '#10b981' },
-        info: { bg: 'rgba(255, 255, 255, 0.1)', border: 'rgba(255, 255, 255, 0.2)', icon: '#fff' }
+        error: { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.2)', icon: '#ef4444' },
+        success: { bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.2)', icon: '#10b981' },
+        info: { bg: 'rgba(255, 255, 255, 0.05)', border: 'rgba(255, 255, 255, 0.1)', icon: '#94a3b8' }
     }
 
     const c = colors[type]
@@ -54,10 +54,10 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
             <Icon size={20} color={c.icon} style={{ flexShrink: 0 }} />
             <span style={{ 
                 flex: 1, 
-                fontSize: '13px', 
-                fontWeight: 700, 
+                fontSize: '14px', 
+                fontWeight: 600, 
                 color: '#fff', 
-                lineHeight: 1.4,
+                lineHeight: 1.2,
                 overflowWrap: 'anywhere',
                 wordBreak: 'break-word'
             }}>

@@ -19,7 +19,8 @@ import {
     Menu,
     X,
     ArrowRight,
-    Code
+    Code,
+    Info
 } from 'lucide-react'
 import { useChain } from '../contexts/ChainContext'
 import { useVaultActions } from '../hooks/useVaultActions'
@@ -68,9 +69,8 @@ export const VaultPage: React.FC = () => {
         }
     }, [uiStatus.error, resetStatus])
 
-    // Watch for success messages
     useEffect(() => {
-        if (uiStatus.txId && !uiStatus.loading && (uiStatus.txId.includes('confirmed') || uiStatus.txId.includes('established') || uiStatus.txId.includes('claimed') || uiStatus.txId.includes('Withdrawn'))) {
+        if (uiStatus.txId && !uiStatus.loading && (uiStatus.txId.includes('successfully') || uiStatus.txId.includes('confirmed') || uiStatus.txId.includes('completed'))) {
             setToast({ message: uiStatus.txId, type: 'success' })
         }
     }, [uiStatus.txId, uiStatus.loading])
@@ -84,7 +84,7 @@ export const VaultPage: React.FC = () => {
         return () => { delete (window as any).setPageStep; };
     }, []);
 
-    const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'settings' | 'api'>('dashboard')
+    const [currentTab, setCurrentTab] = useState<'dashboard' | 'security' | 'history' | 'info' | 'api'>('dashboard')
 
     // Vault Data
     const [userVaults, setUserVaults] = useState<RegistryVault[]>([])
@@ -434,8 +434,8 @@ export const VaultPage: React.FC = () => {
                         <button onClick={() => setCurrentTab('history')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'history' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'history' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <History size={20} /> Activity
                         </button>
-                        <button onClick={() => setCurrentTab('settings')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'settings' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'settings' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                            <Settings size={20} /> Settings
+                        <button onClick={() => setCurrentTab('info')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'info' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'info' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                            <Info size={20} /> Vault Info
                         </button>
                         <button onClick={() => setCurrentTab('api')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', borderRadius: '12px', background: currentTab === 'api' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: currentTab === 'api' ? '#fff' : '#94a3b8', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
                             <Code size={20} /> API & SDK

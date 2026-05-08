@@ -93,7 +93,7 @@ export const useVaultActions = () => {
                 vaultName
             )
 
-            updateStatus({ txId: 'Vault established! ✨' })
+            updateStatus({ txId: 'Vault created successfully.' })
             onSuccess(vaultId)
         } catch (e: any) {
             updateStatus({ error: extractErrorMessage(e), txId: '' })
@@ -107,7 +107,7 @@ export const useVaultActions = () => {
         updateStatus({ loading: true, error: '', txId: 'Processing Heartbeat...' })
         try {
             const id = await adapter.heartbeat(vaultId)
-            updateStatus({ txId: `Heartbeat confirmed! TX: ${id}` })
+            updateStatus({ txId: `Heartbeat signal confirmed.` })
             onComplete?.()
         } catch (e: any) {
             updateStatus({ error: extractErrorMessage(e), txId: '' })
@@ -121,7 +121,7 @@ export const useVaultActions = () => {
         updateStatus({ loading: true, error: '', txId: 'Claiming Inheritance funds...' })
         try {
             const id = await adapter.autoRelease(vaultId)
-            updateStatus({ txId: `Inheritance claimed successfully! TX: ${id}` })
+            updateStatus({ txId: `Inheritance funds claimed successfully.` })
             onComplete?.()
         } catch (e: any) {
             updateStatus({ error: extractErrorMessage(e), txId: '' })
@@ -135,7 +135,7 @@ export const useVaultActions = () => {
         updateStatus({ loading: true, error: '', txId: 'Processing Withdrawal...' })
         try {
             const id = await adapter.withdraw(vaultId, amount)
-            updateStatus({ txId: `Funds Withdrawn! TX: ${id}` })
+            updateStatus({ txId: `Withdrawal completed successfully.` })
             onComplete?.()
         } catch (e: any) {
             updateStatus({ error: extractErrorMessage(e), txId: '' })
