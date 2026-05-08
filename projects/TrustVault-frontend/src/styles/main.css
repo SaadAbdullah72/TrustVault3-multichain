@@ -3541,7 +3541,7 @@ body {
     box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
   }
   .desktop-only-header { display: none !important; }
-  .vault-dashboard-root { height: 100dvh !important; padding-bottom: 90px !important; }
+  .vault-dashboard-root { padding-bottom: 90px !important; }
   .mobile-back-btn { display: flex !important; }
 }
 @media (max-width: 400px) {
