@@ -41,7 +41,7 @@ export const saveVaultToRegistry = async (
         )
 
         if (error) {
-            console.error('Supabase save error:', error)
+            console.error('Supabase save error:', JSON.stringify(error, null, 2))
             return false
         }
 
@@ -122,7 +122,7 @@ export const deleteVaultFromRegistry = async (vaultId: string): Promise<boolean>
             .eq('vault_id', vaultId.toString())
 
         if (error) {
-            console.error('Supabase delete error:', error)
+            console.error('Supabase delete error:', JSON.stringify(error, null, 2))
             return false
         }
         console.log(`Cloud registry: Deleted vault #${vaultId}`)
