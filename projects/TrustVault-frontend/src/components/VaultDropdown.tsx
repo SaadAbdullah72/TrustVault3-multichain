@@ -16,6 +16,7 @@ interface VaultDropdownProps {
     setActiveListTab: (tab: 'owned' | 'inherited') => void;
     onSelect: (vaultId: string) => void;
     onDelete: (vaultId: string) => void;
+    onDeleteAll: () => void;
     onCreateNew: () => void;
     formatAddr: (addr: string) => string;
     showVaultSelector: boolean;
@@ -29,7 +30,8 @@ export default function VaultDropdown({
     activeListTab,
     setActiveListTab,
     onSelect, 
-    onDelete,
+    onDelete, 
+    onDeleteAll,
     onCreateNew, 
     formatAddr,
     showVaultSelector,
@@ -118,7 +120,17 @@ export default function VaultDropdown({
                                 INHERITED
                             </button>
                         </div>
-                        <button onClick={() => setShowVaultSelector(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '8px', borderRadius: '10px' }}><X size={18} /></button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {currentList.length > 0 && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); if (window.confirm('Really remove ALL vaults in this list?')) onDeleteAll(); }}
+                                    style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '8px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}
+                                >
+                                    REMOVE ALL
+                                </button>
+                            )}
+                            <button onClick={() => setShowVaultSelector(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '8px', borderRadius: '10px' }}><X size={18} /></button>
+                        </div>
                     </div>
 
                     <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>

@@ -178,9 +178,19 @@ export const VaultPage: React.FC = () => {
     }, [isConnected, currentChain.id, walletAddress, discoverVaults])
 
     const handleDeleteVaultId = (id: string) => {
-        const next = [...hiddenVaultIds, id]
-        setHiddenVaultIds(next)
-        localStorage.setItem('hidden_vaults', JSON.stringify(next))
+        const updated = [...hiddenVaultIds, id]
+        setHiddenVaultIds(updated)
+        localStorage.setItem('hidden_vaults', JSON.stringify(updated))
+        if (selectedVaultId === id) setSelectedVaultId(null)
+    }
+
+    const handleDeleteAll = () => {
+        const currentList = activeListTab === 'owned' ? visibleOwned : visibleInherited
+        const newHidden = [...hiddenVaultIds, ...currentList.map(v => v.vault_id)]
+        const unique = Array.from(new Set(newHidden))
+        setHiddenVaultIds(unique)
+        localStorage.setItem('hidden_vaults', JSON.stringify(unique))
+        setSelectedVaultId(null)
     }
 
     const visibleOwned = useMemo(() => {
@@ -375,10 +385,12 @@ export const VaultPage: React.FC = () => {
                     <VaultList
                         vaults={visibleOwned as any}
                         inheritedVaults={visibleInherited as any}
-                        activeListTab={activeListTab}
-                        setActiveListTab={setActiveListTab}
+                        activeTab={activeListTab}
+                        setActiveTab={setActiveListTab}
+                        selectedVaultId={selectedVaultId}
                         onSelect={handleVaultSelect}
                         onDelete={handleDeleteVaultId}
+                        onDeleteAll={handleDeleteAll}
                         onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                         formatAddr={formatAddr}
                         currentChain={currentChain}
@@ -525,6 +537,7 @@ export const VaultPage: React.FC = () => {
                             setActiveListTab={setActiveListTab}
                             onSelect={handleVaultSelect}
                             onDelete={handleDeleteVaultId}
+                            onDeleteAll={handleDeleteAll}
                             onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                             formatAddr={formatAddr}
                             showVaultSelector={showVaultSelector}

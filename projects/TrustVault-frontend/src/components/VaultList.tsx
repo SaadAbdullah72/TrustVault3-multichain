@@ -16,6 +16,7 @@ interface VaultListProps {
     setActiveListTab: (tab: 'owned' | 'inherited') => void;
     onSelect: (vaultId: string) => void;
     onDelete: (vaultId: string) => void;
+    onDeleteAll: () => void;
     onCreateNew: () => void;
     formatAddr: (addr: string) => string;
     currentChain: any;
@@ -29,11 +30,14 @@ export default function VaultList({
     setActiveListTab,
     onSelect, 
     onDelete,
+    onDeleteAll,
     onCreateNew, 
     formatAddr, 
     currentChain, 
     isDiscovering 
 }: VaultListProps) {
+    const currentList = activeListTab === 'owned' ? vaults : inheritedVaults;
+
     if (isDiscovering) {
         return (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
@@ -81,15 +85,25 @@ export default function VaultList({
                         </button>
                     </div>
                 </div>
-                <button 
-                    onClick={onCreateNew}
-                    style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-                >
-                    <Plus size={16} /> New Vault
-                </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    {currentList.length > 0 && (
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); if (window.confirm('Remove ALL vaults in this list?')) onDeleteAll(); }}
+                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '8px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                            Remove All
+                        </button>
+                    )}
+                    <button 
+                        onClick={onCreateNew}
+                        style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                    >
+                        <Plus size={16} /> New Vault
+                    </button>
+                </div>
             </div>
 
-            {(activeListTab === 'owned' ? vaults : inheritedVaults).length === 0 ? (
+            {currentList.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
                     <div style={{ width: '64px', height: '64px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                         <Shield size={32} color="#475569" />
