@@ -447,7 +447,7 @@ export const VaultPage: React.FC = () => {
             )}
             <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => resetStatus()} />
 
-            <div className={`wallet-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`} style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden', background: '#080e17' }}>
+            <div className={`wallet-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`} style={{ width: '100%', height: '100vh', overflow: 'hidden', background: '#080e17' }}>
                 {/* Mobile Menu Toggle */}
                 <button 
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -617,14 +617,14 @@ export const VaultPage: React.FC = () => {
                         background: #080e17 !important;
                     }
                     .wallet-container {
-                        display: flex;
+                        display: grid;
+                        grid-template-columns: 280px 1fr;
                         width: 100% !important;
                         max-width: none !important;
                         min-height: 100vh;
                         background: #080e17;
                     }
                     .desktop-sidebar {
-                        width: 280px;
                         background: #0f172a;
                         border-right: 1px solid rgba(255,255,255,0.05);
                         padding: 32px 24px;
@@ -634,8 +634,6 @@ export const VaultPage: React.FC = () => {
                         z-index: 1001;
                     }
                     .desktop-content {
-                        flex: 1;
-                        width: calc(100% - 280px); /* Explicit width to fix 0-width bug on desktop */
                         min-width: 0;
                         min-height: 100vh;
                         position: relative;
@@ -667,6 +665,7 @@ export const VaultPage: React.FC = () => {
                             width: 100%;
                         }
                         .wallet-container {
+                            display: flex !important;
                             flex-direction: column;
                         }
                     }
