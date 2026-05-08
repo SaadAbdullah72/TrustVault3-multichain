@@ -385,8 +385,8 @@ export const VaultPage: React.FC = () => {
                     <VaultList
                         vaults={visibleOwned as any}
                         inheritedVaults={visibleInherited as any}
-                        activeTab={activeListTab}
-                        setActiveTab={setActiveListTab}
+                        activeListTab={activeListTab}
+                        setActiveListTab={setActiveListTab}
                         selectedVaultId={selectedVaultId}
                         onSelect={handleVaultSelect}
                         onDelete={handleDeleteVaultId}
