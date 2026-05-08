@@ -509,7 +509,7 @@ export const VaultPage: React.FC = () => {
                 </div>
 
                 {/* Main Content Area - Fixed Desktop Blank Issue */}
-                <div className="desktop-content" style={{ flex: 1, minWidth: 0, minHeight: '100%', position: 'relative', background: '#080e17', display: 'flex', flexDirection: 'column' }}>
+                <div className="desktop-content" style={{ flex: 1, minWidth: 0, height: '100vh', position: 'relative', background: '#080e17', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {isDiscovering ? (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>

@@ -288,7 +288,7 @@ export default function VaultDashboard({
     }
 
     return (
-        <div className="vault-dashboard-root" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#080e17', minHeight: '100%' }}>
+        <div className="vault-dashboard-root" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#080e17', height: '100vh', overflow: 'hidden' }}>
             {/* Top Bar - Hidden on Mobile to avoid double headers */}
             <div className="desktop-only-header" style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
