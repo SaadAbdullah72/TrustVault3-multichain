@@ -553,63 +553,17 @@ export const VaultPage: React.FC = () => {
                 </div>
             </div>
 
-            <style>{`
-                .wallet-container {
-                    display: flex;
-                    height: 100vh;
-                    overflow: hidden;
-                    background: #080e17;
-                }
-                .desktop-sidebar {
-                    width: 280px;
-                    background: #0f172a;
-                    border-right: 1px solid rgba(255,255,255,0.05);
-                    padding: 32px 24px;
-                    display: flex;
-                    flex-direction: column;
-                    transition: all 0.3s ease;
-                    z-index: 1001;
-                }
-                .desktop-content {
-                    flex: 1;
-                    height: 100%;
-                    position: relative;
-                }
-
-                @media (max-width: 1023px) {
-                    .mobile-menu-toggle {
-                        display: block !important;
-                    }
-                    .desktop-sidebar {
-                        position: fixed;
-                        top: 0;
-                        left: -280px;
-                        height: 100vh;
-                        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-                    }
-                    .desktop-sidebar.show {
-                        left: 0;
-                    }
-                    .desktop-content {
-                        width: 100%;
-                    }
-                    .wallet-container {
-                        flex-direction: column;
-                    }
-                }
-            `}</style>
-
                 {/* Mobile Dropdown (Dashboard mode only) */}
                 {!showCreateForm && (
                     <div className="mobile-only-selector">
                         <VaultDropdown
-                            vaults={visibleOwned as any}
-                            inheritedVaults={visibleInherited as any}
+                            vaults={userVaults as any}
+                            inheritedVaults={inheritedVaults as any}
                             activeListTab={activeListTab}
                             setActiveListTab={setActiveListTab}
-                            onSelect={handleVaultSelect}
-                            onDelete={handleDeleteVaultId}
-                            onDeleteAll={handleDeleteAll}
+                            onSelect={setSelectedVaultId}
+                            onDelete={() => {}} 
+                            onDeleteAll={() => {}}
                             onCreateNew={() => { setShowCreateForm(true); setStep('dashboard'); }}
                             formatAddr={formatAddr}
                             showVaultSelector={showVaultSelector}
@@ -618,13 +572,56 @@ export const VaultPage: React.FC = () => {
                         />
                     </div>
                 )}
-            </div>
 
-            <style>{`
-                @media (min-width: 1024px) {
-                    .mobile-only-selector { display: none; }
-                }
-            `}</style>
+                <style>{`
+                    .wallet-container {
+                        display: flex;
+                        height: 100vh;
+                        overflow: hidden;
+                        background: #080e17;
+                    }
+                    .desktop-sidebar {
+                        width: 280px;
+                        background: #0f172a;
+                        border-right: 1px solid rgba(255,255,255,0.05);
+                        padding: 32px 24px;
+                        display: flex;
+                        flex-direction: column;
+                        transition: all 0.3s ease;
+                        z-index: 1001;
+                    }
+                    .desktop-content {
+                        flex: 1;
+                        height: 100%;
+                        position: relative;
+                    }
+
+                    @media (max-width: 1023px) {
+                        .mobile-menu-toggle {
+                            display: block !important;
+                        }
+                        .desktop-sidebar {
+                            position: fixed;
+                            top: 0;
+                            left: -280px;
+                            height: 100vh;
+                            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+                        }
+                        .desktop-sidebar.show {
+                            left: 0;
+                        }
+                        .desktop-content {
+                            width: 100%;
+                        }
+                        .wallet-container {
+                            flex-direction: column;
+                        }
+                    }
+                    @media (min-width: 1024px) {
+                        .mobile-only-selector { display: none; }
+                    }
+                `}</style>
+            </div>
         </div>
     )
 }
