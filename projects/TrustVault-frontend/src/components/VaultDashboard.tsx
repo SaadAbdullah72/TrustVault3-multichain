@@ -372,7 +372,6 @@ export default function VaultDashboard({
                         {/* Claim Button */}
                         {isBeneficiary && isExpired && !vaultState.released && (
                             <button onClick={onClaim} style={{ width: '100%', padding: '18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '18px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-ap: '8px' }}>
                                 <Unlock size={20} /> Claim Inheritance
                             </button>
                         )}
