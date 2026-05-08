@@ -159,8 +159,8 @@ export default function VaultDashboard({
                                         <div style={{ fontSize: '14px', fontWeight: 900, color: '#fff' }}>{currentChain?.name}</div>
                                     </div>
                                     <div style={{ flex: 1, background: 'rgba(8, 14, 23, 0.6)', borderRadius: '18px', padding: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', marginBottom: '4px', textTransform: 'uppercase' }}>Version</div>
-                                        <div style={{ fontSize: '14px', fontWeight: 900, color: '#fff' }}>V3.0.1</div>
+                                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', marginBottom: '4px', textTransform: 'uppercase' }}>Protection</div>
+                                        <div style={{ fontSize: '14px', fontWeight: 900, color: '#10b981' }}>Active</div>
                                     </div>
                                 </div>
                             </div>
@@ -173,16 +173,17 @@ export default function VaultDashboard({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', paddingBottom: '60px' }}>
                         {/* Professional Header */}
                         <div>
-                            <h2 style={{ fontSize: '28px', fontWeight: 950, color: '#fff', letterSpacing: '-1px', marginBottom: '8px' }}>SDK Integration</h2>
-                            <p style={{ fontSize: '15px', color: '#64748b', lineHeight: 1.6 }}>Connect TrustVault 3 to your application with our high-performance SDK.</p>
+                            <h2 style={{ fontSize: '28px', fontWeight: 950, color: '#fff', letterSpacing: '-1px', marginBottom: '8px' }}>Developer Integration Guide</h2>
+                            <p style={{ fontSize: '15px', color: '#64748b', lineHeight: 1.6 }}>Follow this step-by-step guide to integrate the TrustVault protocol into your own application. This setup allows you to manage decentralized inheritance securely.</p>
                         </div>
 
                         {/* Step 1: Credentials */}
                         <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>1</div>
-                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Get Your API Key</h4>
+                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Initialize API Key</h4>
                             </div>
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Your unique API key is tied to your currently connected wallet. Keep this key secure as it authorizes SDK actions on your behalf.</p>
                             <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <code style={{ flex: 1, fontSize: '13px', color: '#3b82f6', fontFamily: "'JetBrains Mono', monospace", overflow: 'hidden' }}>{apiKey}</code>
                                 <button onClick={() => { copyToClipboard(apiKey); setCopyToast(true); }} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer' }}>
@@ -195,43 +196,77 @@ export default function VaultDashboard({
                         <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>2</div>
-                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Install Package</h4>
+                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Install the Core Package</h4>
                             </div>
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Install the official TrustVault SDK into your project via npm or yarn. This package handles all multi-chain routing automatically.</p>
                             <div style={{ background: '#080e17', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <code style={{ flex: 1, fontSize: '13px', color: '#10b981', fontFamily: "'JetBrains Mono', monospace" }}>npm i @trustvault/sdk-core</code>
-                                <button onClick={() => { copyToClipboard('npm i @trustvault/sdk-core'); setCopyToast(true); }} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer' }}>
+                                <code style={{ flex: 1, fontSize: '13px', color: '#10b981', fontFamily: "'JetBrains Mono', monospace" }}>npm install @trustvault/sdk-core</code>
+                                <button onClick={() => { copyToClipboard('npm install @trustvault/sdk-core'); setCopyToast(true); }} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer' }}>
                                     <Copy size={16} color="#94a3b8" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Step 3: Implementation */}
+                        {/* Step 3: Setup Client */}
                         <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>3</div>
-                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Quick Start</h4>
+                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Initialize the SDK Client</h4>
                             </div>
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Import the package in your application and initialize it using your API key. You can then specify which blockchain environment you want to target.</p>
                             <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
                                 <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
-                                    <span style={{ color: '#64748b' }}>// Init SDK</span><br/>
-                                    <span style={{ color: '#c084fc' }}>const</span> tv = <span style={{ color: '#c084fc' }}>new</span> TrustVault(apiKey);<br/><br/>
-                                    <span style={{ color: '#64748b' }}>// Create Protocol</span><br/>
-                                    <span style={{ color: '#c084fc' }}>await</span> tv.createVault({'{'}<br/>
-                                    &nbsp;&nbsp;beneficiary: <span style={{ color: '#fbbf24' }}>"0x..."</span>,<br/>
-                                    &nbsp;&nbsp;timer: <span style={{ color: '#3b82f6' }}>86400</span><br/>
+                                    <span style={{ color: '#c084fc' }}>import</span> {'{'} TrustVault {'}'} <span style={{ color: '#c084fc' }}>from</span> <span style={{ color: '#fbbf24' }}>'@trustvault/sdk-core'</span>;<br/><br/>
+                                    <span style={{ color: '#64748b' }}>// Initialize the client</span><br/>
+                                    <span style={{ color: '#c084fc' }}>const</span> tv = <span style={{ color: '#c084fc' }}>new</span> TrustVault({'{'}<br/>
+                                    &nbsp;&nbsp;apiKey: <span style={{ color: '#fbbf24' }}>"{apiKey}"</span>,<br/>
+                                    &nbsp;&nbsp;environment: <span style={{ color: '#fbbf24' }}>"mainnet"</span><br/>
                                     {'}'});
                                 </pre>
                             </div>
                         </div>
 
-                        {/* Professional Footer Buttons */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '20px', borderRadius: '20px', fontSize: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' }} className="btn-scale">
-                                <Code size={20} /> Docs
-                            </button>
-                            <button style={{ background: '#fff', color: '#000', border: 'none', padding: '20px', borderRadius: '20px', fontSize: '14px', fontWeight: 950, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' }} className="btn-scale">
-                                <Activity size={20} /> Demo
-                            </button>
+                        {/* Step 4: Vault Creation */}
+                        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>4</div>
+                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Deploy a New Vault</h4>
+                            </div>
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>Use the <code>createVault</code> method to deploy a smart contract vault. You must define a beneficiary address and a lock duration (in seconds).</p>
+                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                                <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
+                                    <span style={{ color: '#c084fc' }}>async function</span> <span style={{ color: '#3b82f6' }}>setupProtection</span>() {'{'}<br/>
+                                    &nbsp;&nbsp;<span style={{ color: '#c084fc' }}>try</span> {'{'}<br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: '#c084fc' }}>const</span> vaultId = <span style={{ color: '#c084fc' }}>await</span> tv.createVault({'{'}<br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beneficiary: <span style={{ color: '#fbbf24' }}>"0x71C...976F"</span>,<br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockDuration: <span style={{ color: '#3b82f6' }}>86400</span>, <span style={{ color: '#64748b' }}>// 24 hours in seconds</span><br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;depositAmount: <span style={{ color: '#3b82f6' }}>1.5</span> <span style={{ color: '#64748b' }}>// Native token amount</span><br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;{'}'});<br/><br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: '#3b82f6' }}>console</span>.log(<span style={{ color: '#fbbf24' }}>"Vault deployed at:"</span>, vaultId);<br/>
+                                    &nbsp;&nbsp;{'}'} <span style={{ color: '#c084fc' }}>catch</span> (error) {'{'}<br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: '#3b82f6' }}>console</span>.error(<span style={{ color: '#fbbf24' }}>"Deployment failed:"</span>, error);<br/>
+                                    &nbsp;&nbsp;{'}'}<br/>
+                                    {'}'}
+                                </pre>
+                            </div>
+                        </div>
+
+                        {/* Step 5: Sending Heartbeats */}
+                        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>5</div>
+                                <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#fff' }}>Maintain Vault Health (Heartbeat)</h4>
+                            </div>
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.6 }}>To prevent the vault from triggering an inheritance transfer, the owner must periodically call the <code>heartbeat</code> method to reset the countdown timer.</p>
+                            <div style={{ background: '#080e17', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                                <pre style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
+                                    <span style={{ color: '#c084fc' }}>async function</span> <span style={{ color: '#3b82f6' }}>pingVault</span>(vaultId) {'{'}<br/>
+                                    &nbsp;&nbsp;<span style={{ color: '#64748b' }}>// Resets the timer back to 100%</span><br/>
+                                    &nbsp;&nbsp;<span style={{ color: '#c084fc' }}>const</span> txHash = <span style={{ color: '#c084fc' }}>await</span> tv.heartbeat(vaultId);<br/>
+                                    &nbsp;&nbsp;<span style={{ color: '#3b82f6' }}>console</span>.log(<span style={{ color: '#fbbf24' }}>"Heartbeat sent, TX:"</span>, txHash);<br/>
+                                    {'}'}
+                                </pre>
+                            </div>
                         </div>
                     </div>
                 )

@@ -27,11 +27,11 @@ export const TransactionOverlay: React.FC<TransactionOverlayProps> = ({ loading,
 
     return (
         <div style={{ 
-            position: 'absolute', 
+            position: 'fixed', 
             inset: 0, 
             background: 'rgba(11, 19, 30, 0.9)', 
             backdropFilter: 'blur(20px)', 
-            zIndex: 2000, 
+            zIndex: 9999, 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
