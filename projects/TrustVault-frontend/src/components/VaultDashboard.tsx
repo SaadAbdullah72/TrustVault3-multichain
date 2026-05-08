@@ -289,17 +289,17 @@ export default function VaultDashboard({
 
     return (
         <div className="vault-dashboard-root" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#080e17', minHeight: '100%' }}>
-            {/* Minimal Top Bar for Dashboard — Hide redundant back/title on desktop */}
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+            {/* Top Bar - Hidden on Mobile to avoid double headers */}
+            <div className="desktop-only-header" style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button onClick={onBack} className="mobile-only-back" style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                         <ArrowLeft size={20} />
                     </button>
-                    <div className="mobile-only-back" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Shield size={16} />
                         </div>
-                        <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>TRUSTVAULT 3</span>
+                        <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>{vaultName || 'TRUSTVAULT 3'}</span>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -336,6 +336,24 @@ export default function VaultDashboard({
                 minHeight: '100vh',
                 border: '1px solid rgba(255,255,255,0.05)'
             }}>
+                {/* Mobile Back Button - New */}
+                <button onClick={onBack} className="mobile-back-btn" style={{ 
+                    display: 'none', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    background: 'rgba(255,255,255,0.05)', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    color: '#fff', 
+                    padding: '12px 20px', 
+                    borderRadius: '16px', 
+                    marginBottom: '20px', 
+                    fontWeight: 800, 
+                    fontSize: '13px',
+                    width: 'fit-content'
+                }}>
+                    <ArrowLeft size={18} /> Exit Protocol
+                </button>
+
                 {renderContent() || (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
                         No content available for this tab.

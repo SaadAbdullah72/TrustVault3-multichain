@@ -650,7 +650,7 @@ export const VaultPage: React.FC = () => {
 
                     @media (max-width: 1023px) {
                         .mobile-menu-toggle {
-                            display: block !important;
+                            display: none !important;
                         }
                         .desktop-sidebar {
                             position: fixed;

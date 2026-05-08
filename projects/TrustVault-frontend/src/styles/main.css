@@ -3492,12 +3492,17 @@ body {
   .addr-text { max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
 }
 @media (max-width: 640px) {
-  .info-grid, .action-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-  .dashboard-main-content { padding: 24px !important; justify-content: center !important; }
-  .action-btn { padding: 20px 12px !important; }
-  .action-btn span { font-size: 11px !important; }
+  .info-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .action-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+  .dashboard-main-content { padding: 20px 16px 100px !important; }
+  .action-btn { padding: 15px 8px !important; }
+  .action-btn span { font-size: 10px !important; }
   .responsive-input-row { flex-direction: column !important; align-items: stretch !important; }
   .responsive-input-row button { width: 100% !important; }
+  .mobile-nav { height: 70px; padding-bottom: 20px !important; }
+  .desktop-only-header { display: none !important; }
+  .vault-dashboard-root { padding-top: 20px; }
+  .mobile-back-btn { display: flex !important; }
 }
 @media (max-width: 400px) {
   .action-grid { grid-template-columns: 1fr !important; }
