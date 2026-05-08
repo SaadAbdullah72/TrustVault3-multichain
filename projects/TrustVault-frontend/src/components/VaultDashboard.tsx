@@ -376,7 +376,8 @@ export default function VaultDashboard({
                             </button>
                         )}
                     </div>
-                )
+                </div>
+            )
         }
     }
 
