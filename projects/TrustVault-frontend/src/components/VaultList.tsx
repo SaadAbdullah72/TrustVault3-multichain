@@ -1,5 +1,5 @@
 import React from 'react'
-import { Shield, Clock, ArrowRight, Plus, ExternalLink, Timer } from 'lucide-react'
+import { Shield, Clock, ArrowRight, Plus, ExternalLink, Timer, X } from 'lucide-react'
 
 export interface VaultMetadata {
     vault_id: string;
