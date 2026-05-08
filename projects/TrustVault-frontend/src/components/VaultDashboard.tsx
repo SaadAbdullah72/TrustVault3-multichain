@@ -90,7 +90,7 @@ export default function VaultDashboard({
         switch (currentTab) {
             case 'security':
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, justifyContent: 'center' }} className="fade-in">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, justifyContent: 'center' }}>
                         <div style={{ background: 'rgba(17, 30, 47, 0.6)', backdropFilter: 'blur(10px)', padding: '32px', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                                 <div style={{ width: '40px', height: '40px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
@@ -128,7 +128,7 @@ export default function VaultDashboard({
                 )
             case 'history':
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: 1, justifyContent: 'center', alignItems: 'center', textAlign: 'center' }} className="fade-in">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: 1, justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
                         <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <Activity size={32} color="#94a3b8" style={{ opacity: 0.5 }} />
                         </div>
@@ -140,7 +140,7 @@ export default function VaultDashboard({
                 )
             case 'info':
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, justifyContent: 'center' }} className="fade-in">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, justifyContent: 'center' }}>
                         <div style={{ background: 'rgba(17, 30, 47, 0.6)', backdropFilter: 'blur(10px)', padding: '32px', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#fff', marginBottom: '24px', letterSpacing: '-0.5px' }}>Vault Metadata</h3>
                             
@@ -170,7 +170,7 @@ export default function VaultDashboard({
             case 'api':
                 const apiKey = walletAddress ? `${walletAddress.toUpperCase()}_TV_MAIN` : 'Connect wallet first';
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', paddingBottom: '60px' }} className="fade-in">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', paddingBottom: '60px' }}>
                         {/* Professional Header */}
                         <div>
                             <h2 style={{ fontSize: '28px', fontWeight: 950, color: '#fff', letterSpacing: '-1px', marginBottom: '8px' }}>SDK Integration</h2>
@@ -237,7 +237,7 @@ export default function VaultDashboard({
                 )
             default:
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, justifyContent: 'center' }} className="fade-in">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, justifyContent: 'center' }}>
                         {/* Balance Card */}
                         <div style={{ background: 'rgba(17, 30, 47, 0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '32px', padding: '32px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -333,7 +333,8 @@ export default function VaultDashboard({
                 flexDirection: 'column', 
                 overflowY: 'auto',
                 background: '#080e17',
-                minHeight: '400px'
+                minHeight: '100vh',
+                border: '1px solid rgba(255,255,255,0.05)'
             }}>
                 {renderContent() || (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
