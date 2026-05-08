@@ -20,6 +20,9 @@ export interface VaultDropdownProps {
     copied: boolean;
     copyToClipboard: (text: string) => void;
     formatAddr: (addr: string) => string;
+    inheritedVaults: RegistryVault[];
+    activeListTab: 'owned' | 'inherited';
+    setActiveListTab: (tab: 'owned' | 'inherited') => void;
 }
 
 export default function VaultDropdown({
@@ -40,7 +43,10 @@ export default function VaultDropdown({
     walletAddress,
     copied,
     copyToClipboard,
-    formatAddr
+    formatAddr,
+    inheritedVaults,
+    activeListTab,
+    setActiveListTab
 }: VaultDropdownProps) {
 
     return (
@@ -59,12 +65,50 @@ export default function VaultDropdown({
                     border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <span style={{ fontWeight: 800, fontSize: '13px', color: '#94a3b8', letterSpacing: '1px' }}>MY VAULTS</span>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <button 
+                                onClick={() => setActiveListTab('owned')}
+                                style={{ 
+                                    background: 'none', 
+                                    border: 'none', 
+                                    color: activeListTab === 'owned' ? '#fff' : '#94a3b8', 
+                                    fontWeight: activeListTab === 'owned' ? 800 : 500,
+                                    fontSize: '13px',
+                                    letterSpacing: '1px',
+                                    cursor: 'pointer',
+                                    padding: '4px 0',
+                                    borderBottom: activeListTab === 'owned' ? '2px solid #fff' : 'none'
+                                }}
+                            >
+                                MY VAULTS
+                            </button>
+                            <button 
+                                onClick={() => setActiveListTab('inherited')}
+                                style={{ 
+                                    background: 'none', 
+                                    border: 'none', 
+                                    color: activeListTab === 'inherited' ? '#fff' : '#94a3b8', 
+                                    fontWeight: activeListTab === 'inherited' ? 800 : 500,
+                                    fontSize: '13px',
+                                    letterSpacing: '1px',
+                                    cursor: 'pointer',
+                                    padding: '4px 0',
+                                    borderBottom: activeListTab === 'inherited' ? '2px solid #fff' : 'none'
+                                }}
+                            >
+                                INHERITED
+                            </button>
+                        </div>
                         <button onClick={() => setShowVaultSelector(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={20} /></button>
                     </div>
 
                     <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {userVaults.map(v => (
+                        {(activeListTab === 'owned' ? userVaults : inheritedVaults).length === 0 && (
+                            <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                                No {activeListTab} vaults found
+                            </div>
+                        )}
+                        {(activeListTab === 'owned' ? userVaults : inheritedVaults).map(v => (
                             <div key={v.vault_id} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <button 
                                     onClick={() => { setSelectedVaultId(v.vault_id); setShowVaultSelector(false) }}
@@ -91,7 +135,9 @@ export default function VaultDropdown({
                                     </div>
                                     {selectedVaultId === v.vault_id && <CheckCircle size={16} color="#fff" />}
                                 </button>
-                                <button onClick={() => handleDeleteVaultId(v.vault_id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
+                                {activeListTab === 'owned' && (
+                                    <button onClick={() => handleDeleteVaultId(v.vault_id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}><X size={16} /></button>
+                                )}
                             </div>
                         ))}
                     </div>

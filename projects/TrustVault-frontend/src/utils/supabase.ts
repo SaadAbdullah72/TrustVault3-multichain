@@ -58,24 +58,22 @@ export interface RegistryVault {
     owner_address: string;
 }
 
-// Get all vault IDs where an address is the beneficiary
-export const getVaultsByBeneficiary = async (beneficiaryAddress: string): Promise<string[]> => {
+// Get all vaults where an address is the beneficiary
+export const getVaultsByBeneficiary = async (beneficiaryAddress: string): Promise<RegistryVault[]> => {
     if (!supabase) return []
 
     try {
         const { data, error } = await supabase
             .from('vault_registry')
-            .select('vault_id')
-            .ilike('beneficiary_address', beneficiaryAddress)
+            .select('*')
+            .ilike('beneficiary_address', beneficiaryAddress.toUpperCase())
 
         if (error) {
             console.error('Supabase query error:', error)
             return []
         }
 
-        const ids = (data || []).map((row: any) => row.vault_id)
-        console.log(`Cloud registry: Found ${ids.length} vault(s) for ${beneficiaryAddress.slice(0, 8)}...`)
-        return ids
+        return data as RegistryVault[]
     } catch (e) {
         console.error('Supabase query failed:', e)
         return []

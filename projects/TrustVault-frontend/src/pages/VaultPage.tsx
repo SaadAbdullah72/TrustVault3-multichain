@@ -88,6 +88,8 @@ export const VaultPage: React.FC = () => {
 
     // Vault Data
     const [userVaults, setUserVaults] = useState<RegistryVault[]>([])
+    const [inheritedVaults, setInheritedVaults] = useState<RegistryVault[]>([])
+    const [activeListTab, setActiveListTab] = useState<'owned' | 'inherited'>('owned')
     const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
     const [vaultBalance, setVaultBalance] = useState(0)
@@ -128,8 +130,18 @@ export const VaultPage: React.FC = () => {
             }
             
             setUserVaults(mergedVaults)
-            if (mergedVaults.length > 0 && !selectedVaultId) {
-                setSelectedVaultId(mergedVaults[0].vault_id)
+            
+            // 4. Discover Inherited Vaults
+            const inherited = await getVaultsByBeneficiary(walletAddress)
+            setInheritedVaults(inherited)
+
+            // Auto-select if nothing selected
+            if (!selectedVaultId) {
+                if (mergedVaults.length > 0) setSelectedVaultId(mergedVaults[0].vault_id)
+                else if (inherited.length > 0) {
+                    setSelectedVaultId(inherited[0].vault_id)
+                    setActiveListTab('inherited')
+                }
             }
         } catch (e) {
             console.error('Discovery failed:', e)
@@ -483,6 +495,9 @@ export const VaultPage: React.FC = () => {
                             copied={copied}
                             copyToClipboard={copyToClipboard}
                             formatAddr={formatAddr}
+                            inheritedVaults={inheritedVaults}
+                            activeListTab={activeListTab}
+                            setActiveListTab={setActiveListTab}
                         />
                     </div>
                 )}
