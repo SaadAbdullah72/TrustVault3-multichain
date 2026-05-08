@@ -104,7 +104,6 @@ export const VaultPage: React.FC = () => {
     const [vaultRoles, setVaultRoles] = useState<Record<string, string>>({})
 
     // Form inputs
-    const [vaultNameInput, setVaultNameInput] = useState('')
     const [beneficiaryInput, setBeneficiaryInput] = useState('')
     const [lockDurationInput, setLockDurationInput] = useState('60')
     const [depositInput, setDepositInput] = useState('0.1')
@@ -505,9 +504,6 @@ export const VaultPage: React.FC = () => {
 
                             <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%', background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Vault Nickname</label>
-                                    <input value={vaultNameInput} onChange={(e) => setVaultNameInput(e.target.value)} placeholder="e.g. My Savings Vault" style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff', marginBottom: '20px' }} />
-
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase' }}>Beneficiary Address</label>
                                     <input value={beneficiaryInput} onChange={(e) => setBeneficiaryInput(e.target.value)} placeholder={currentChain.type === 'evm' ? '0x... ETH Address' : currentChain.type === 'solana' ? 'Solana Address' : 'Algorand Address'} style={{ width: '100%', background: '#080e17', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '18px', fontSize: '16px', outline: 'none', color: '#fff' }} />
                                 </div>
