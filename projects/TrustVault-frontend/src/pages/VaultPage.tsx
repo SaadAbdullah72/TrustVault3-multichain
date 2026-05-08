@@ -130,23 +130,33 @@ export const VaultPage: React.FC = () => {
 
             // 2. Merge Owned Vaults (Unique by ID)
             const ownedMap = new Map<string, RegistryVault>()
-            cloudVaults.forEach(v => ownedMap.set(v.vault_id.toString().toLowerCase(), v))
+            cloudVaults.forEach(v => {
+                const idStr = v.vault_id.toString().toLowerCase()
+                // Sanitize legacy names from database
+                if (v.vault_name === 'Algorand Vault' && currentChain.type !== 'algorand') {
+                    v.vault_name = `${currentChain.name} Vault`
+                }
+                ownedMap.set(idStr, v)
+            })
             
             // Add on-chain discovered ones if missing
             for (const id of onChainIds) {
                 const idStr = id.toString().toLowerCase()
                 if (!ownedMap.has(idStr)) {
-                    // Try to fetch real metadata if missing
                     let beneficiary = '?'
+                    let owner = walletAddress
                     try {
                         const state = await adapter.fetchVaultState(id)
-                        if (state) beneficiary = state.beneficiary
+                        if (state) {
+                            beneficiary = state.beneficiary
+                            owner = state.owner
+                        }
                     } catch {}
 
                     ownedMap.set(idStr, {
                         vault_id: id.toString(),
                         vault_name: `${currentChain.name} Vault`,
-                        owner_address: walletAddress,
+                        owner_address: owner,
                         beneficiary_address: beneficiary
                     })
                 }
@@ -155,17 +165,22 @@ export const VaultPage: React.FC = () => {
 
             // 3. Merge Inherited Vaults (Unique by ID)
             const inheritedMap = new Map<string, RegistryVault>()
-            cloudInherited.forEach(v => inheritedMap.set(v.vault_id.toString().toLowerCase(), v))
+            cloudInherited.forEach(v => {
+                const idStr = v.vault_id.toString().toLowerCase()
+                if (v.vault_name === 'Algorand Vault' && currentChain.type !== 'algorand') {
+                    v.vault_name = `${currentChain.name} Vault`
+                }
+                inheritedMap.set(idStr, v)
+            })
 
             for (const c of onChainClaimable) {
                 const idStr = c.vaultId.toString().toLowerCase()
                 if (!inheritedMap.has(idStr)) {
                     inheritedMap.set(idStr, {
-                        vault_id: c.vaultId,
-                        vault_name: `Inherited Vault`,
+                        vault_id: c.vaultId.toString(),
+                        vault_name: `${currentChain.name} Vault`,
                         owner_address: c.state.owner,
-                        beneficiary_address: walletAddress,
-                        isClaimed: c.state.released
+                        beneficiary_address: walletAddress
                     })
                 }
             }
@@ -432,7 +447,7 @@ export const VaultPage: React.FC = () => {
             )}
             <TransactionOverlay loading={uiStatus.loading} txId={uiStatus.txId} onCancel={() => resetStatus()} />
 
-            <div className={`wallet-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
+            <div className={`wallet-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`} style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden', background: '#080e17' }}>
                 {/* Mobile Menu Toggle */}
                 <button 
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -480,11 +495,16 @@ export const VaultPage: React.FC = () => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="desktop-content" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <div className="desktop-content" style={{ flex: 1, height: '100%', overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative', background: '#080e17' }}>
                     {isDiscovering ? (
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>FETCHING VAULTS...</span>
+                        </div>
+                    ) : selectedVaultId && !vaultState ? (
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+                            <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>LOADING VAULT DATA...</span>
                         </div>
                     ) : selectedVaultId && vaultState ? (
                         <VaultDashboard
@@ -623,9 +643,13 @@ export const VaultPage: React.FC = () => {
                         }
                         .desktop-content {
                             width: 100%;
+                            height: auto !important;
+                            overflow-y: visible !important;
                         }
                         .wallet-container {
                             flex-direction: column;
+                            height: auto !important;
+                            overflow-y: auto !important;
                         }
                     }
                     @media (min-width: 1024px) {

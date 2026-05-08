@@ -56,13 +56,15 @@ export default function VaultDashboard({
     const [copyToast, setCopyToast] = useState(false)
     const [showDocs, setShowDocs] = useState(false)
 
-    const symbol = currentChain.nativeCurrency.symbol
-    const statusText = vaultState.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
-    const statusColor = vaultState.released ? '#10b981' : isExpired ? '#ef4444' : '#10b981'
-    const statusLabel = isExpired && !vaultState.released ? 'ACTION REQUIRED' : statusText;
+    const vaultData = vaultState || {}
+    const symbol = currentChain?.nativeCurrency?.symbol || ''
+    const statusText = vaultData.released ? 'RELEASED' : isExpired ? 'EXPIRED' : 'ACTIVE'
+    const statusColor = vaultData.released ? '#10b981' : isExpired ? '#ef4444' : '#10b981'
+    const statusLabel = isExpired && !vaultData.released ? 'ACTION REQUIRED' : statusText;
 
     // Correct address type label per chain
     const getAddressLabel = () => {
+        if (!currentChain) return 'Wallet Address'
         switch(currentChain.type) {
             case 'evm': return `${currentChain.nativeCurrency.symbol} Address`
             case 'solana': return 'Solana Address'
@@ -97,7 +99,7 @@ export default function VaultDashboard({
                                         <div style={{ fontWeight: 700, fontSize: '15px' }}>Auto-Release Timer</div>
                                         <div style={{ fontSize: '12px', color: '#94a3b8' }}>Reset on every heartbeat</div>
                                     </div>
-                                    <div style={{ fontWeight: 800, color: '#fff' }}>{vaultState.lockDuration}s</div>
+                                    <div style={{ fontWeight: 800, color: '#fff' }}>{vaultData.lockDuration || 0}s</div>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
@@ -143,7 +145,7 @@ export default function VaultDashboard({
                             </div>
                             <div style={{ marginTop: '12px', background: '#080e17', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Network</div>
-                                <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{currentChain.name}</div>
+                                <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{currentChain?.name}</div>
                             </div>
                         </div>
                     </div>
@@ -203,7 +205,7 @@ export default function VaultDashboard({
                         <div style={{ background: '#111e2f', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
                                 <div style={{ width: '40px', height: '40px', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
-                                    <Terminal size={20} color="#a855f7" />
+                                    <Activity size={20} color="#a855f7" />
                                 </div>
                                 <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>Integration Guide</h3>
                             </div>
@@ -252,7 +254,7 @@ export default function VaultDashboard({
                                     <Code size={18} /> API Reference
                                 </button>
                                 <button style={{ background: '#fff', color: '#000', border: 'none', padding: '16px', borderRadius: '14px', fontSize: '13px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                    <Zap size={18} /> SDK Playground
+                                    <Activity size={18} /> SDK Playground
                                 </button>
                             </div>
                         </div>
@@ -343,19 +345,19 @@ export default function VaultDashboard({
                         {/* Countdown Timer */}
                         <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Auto-Release Countdown</div>
-                            <Countdown lastHeartbeat={vaultState.lastHeartbeat} lockDuration={vaultState.lockDuration} released={vaultState.released} />
+                            <Countdown lastHeartbeat={vaultData.lastHeartbeat || 0} lockDuration={vaultData.lockDuration || 0} released={vaultData.released || false} />
                         </div>
 
                         {/* Vault Info Cards */}
                         <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owner</div>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>{formatAddr(vaultState.owner || '')}</div>
+                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>{formatAddr(vaultData.owner || '')}</div>
                                 {isOwner && <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, marginTop: '4px' }}>YOU</div>}
                             </div>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Beneficiary</div>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>{formatAddr(vaultState.beneficiary || '')}</div>
+                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>{formatAddr(vaultData.beneficiary || '')}</div>
                                 {isBeneficiary && <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, marginTop: '4px' }}>YOU</div>}
                             </div>
                         </div>
@@ -363,16 +365,16 @@ export default function VaultDashboard({
                         <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Lock Duration</div>
-                                <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>{vaultState.lockDuration}s</div>
+                                <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>{vaultData.lockDuration || 0}s</div>
                             </div>
                             <div style={{ background: '#111e2f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px' }}>
                                 <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Network</div>
-                                <div style={{ fontSize: '15px', fontWeight: 800, color: '#fff' }}>{currentChain.name}</div>
+                                <div style={{ fontSize: '15px', fontWeight: 800, color: '#fff' }}>{currentChain?.name}</div>
                             </div>
                         </div>
 
                         {/* Claim Button */}
-                        {isBeneficiary && isExpired && !vaultState.released && (
+                        {isBeneficiary && isExpired && !vaultData.released && (
                             <button onClick={onClaim} style={{ width: '100%', padding: '18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '18px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <Unlock size={20} /> Claim Inheritance
                             </button>
@@ -384,38 +386,27 @@ export default function VaultDashboard({
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#080e17' }}>
-            {/* Top Bar */}
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                        <ArrowLeft size={18} />
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Shield size={16} />
-                            </div>
-                            <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.5px' }}>TRUSTVAULT 3</span>
+            {/* Minimal Top Bar for Dashboard — Hide redundant back/title on desktop */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', background: '#0f172a' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    {walletAddress && (
+                        <div style={{ 
+                            fontSize: '13px', 
+                            fontWeight: 800, 
+                            color: '#fff', 
+                            background: 'rgba(16, 185, 129, 0.1)', 
+                            padding: '8px 16px', 
+                            borderRadius: '12px', 
+                            border: '1px solid rgba(16, 185, 129, 0.2)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            boxShadow: '0 0 15px rgba(16, 185, 129, 0.05)'
+                        }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></div>
+                            {formatAddr(walletAddress)}
                         </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        {walletAddress && (
-                            <div style={{ 
-                                fontSize: '13px', 
-                                fontWeight: 800, 
-                                color: '#fff', 
-                                background: 'rgba(16, 185, 129, 0.1)', 
-                                padding: '8px 16px', 
-                                borderRadius: '12px', 
-                                border: '1px solid rgba(16, 185, 129, 0.2)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '8px',
-                                boxShadow: '0 0 15px rgba(16, 185, 129, 0.05)'
-                            }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></div>
-                                {formatAddr(walletAddress)}
-                            </div>
-                        )}
+                    )}
                 </div>
             </div>
 
