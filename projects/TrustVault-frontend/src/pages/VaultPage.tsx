@@ -540,6 +540,7 @@ export const VaultPage: React.FC = () => {
                 </div>
 
                 {/* Main Content Area - Fixed Desktop Blank Issue */}
+                <div className="desktop-content" style={{ flex: 1, minWidth: 0, position: 'relative', background: '#080e17', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Lightning Fast Developer Mode: Skip discovery spinner if user wants API docs */}
                     {currentTab === 'api' ? (
                         <VaultDashboard
