@@ -183,7 +183,8 @@ export const VaultPage: React.FC = () => {
             }
             setInheritedVaults(Array.from(inheritedMap.values()))
 
-            // Auto-select logic
+            // Auto-select logic disabled to keep user on selection screen until explicit action
+            /*
             if (!selectedVaultId) {
                 const allOwned = Array.from(ownedMap.values())
                 const allInherited = Array.from(inheritedMap.values())
@@ -193,6 +194,7 @@ export const VaultPage: React.FC = () => {
                     setActiveListTab('inherited')
                 }
             }
+            */
         } catch (e) {
             console.error('[Discovery] Failed:', e)
         } finally {
@@ -538,18 +540,41 @@ export const VaultPage: React.FC = () => {
                 </div>
 
                 {/* Main Content Area - Fixed Desktop Blank Issue */}
-                <div className="desktop-content" style={{ flex: 1, minWidth: 0, position: 'relative', background: '#080e17', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    {isDiscovering ? (
+                    {/* Lightning Fast Developer Mode: Skip discovery spinner if user wants API docs */}
+                    {currentTab === 'api' ? (
+                        <VaultDashboard
+                            vaultState={vaultState}
+                            vaultBalance={vaultBalance}
+                            currentChain={currentChain}
+                            vaultAddress={selectedVaultId || 'developer-mode'}
+                            walletAddress={walletAddress}
+                            isOwner={isOwner}
+                            isBeneficiary={isBeneficiary}
+                            isExpired={isExpired}
+                            isLatest={selectedVaultId === userVaults[0]?.vault_id}
+                            formatAddr={formatAddr}
+                            copyToClipboard={copyToClipboard}
+                            onHeartbeat={() => handleHeartbeat(selectedVaultId!, loadVaultState)}
+                            onWithdraw={(amount: number) => handleWithdraw(selectedVaultId!, amount, loadVaultState)}
+                            onClaim={() => handleClaim(selectedVaultId!, loadVaultState)}
+                            vaultName={userVaults.find(v => v.vault_id === selectedVaultId)?.vault_name}
+                            onRefresh={loadVaultState}
+                            onBack={() => { setStep('actionSelect'); setCurrentTab('dashboard'); }}
+                            uiStatus={uiStatus}
+                            currentTab={currentTab}
+                            setCurrentTab={setCurrentTab}
+                        />
+                    ) : isDiscovering ? (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>INITIALIZING PROTOCOL...</span>
                         </div>
-                    ) : (selectedVaultId && !vaultState && currentTab !== 'api') ? (
+                    ) : (selectedVaultId && !vaultState) ? (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                             <div className="spinner" style={{ width: '44px', height: '44px' }}></div>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: '#8E8E93' }}>LOADING...</span>
                         </div>
-                    ) : (selectedVaultId && vaultState) || (currentTab === 'api') ? (
+                    ) : (selectedVaultId && vaultState) ? (
                         <VaultDashboard
                             vaultState={vaultState}
                             vaultBalance={vaultBalance}
@@ -589,7 +614,7 @@ export const VaultPage: React.FC = () => {
                     {showCreateForm && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: '#0B131E', display: 'flex', flexDirection: 'column', padding: '24px', overflowY: 'auto' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                                <button onClick={() => setShowCreateForm(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
+                                <button onClick={() => { setShowCreateForm(false); setStep('actionSelect'); }} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '12px' }}><ArrowLeft size={24} /></button>
                                 <span style={{ fontWeight: 800, fontSize: '15px', color: '#fff' }}>NEW PROTOCOL</span>
                                 <div style={{ width: 48 }} />
                             </div>

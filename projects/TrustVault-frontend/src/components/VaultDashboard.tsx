@@ -411,9 +411,9 @@ export default function VaultDashboard({
                 background: '#080e17',
                 border: '1px solid rgba(255,255,255,0.05)'
             }}>
-                {/* Mobile Back Button - New */}
+                {/* Mobile Back Button - Visible on mobile for better navigation */}
                 <button onClick={onBack} className="mobile-back-btn" style={{ 
-                    display: 'none', 
+                    display: 'flex', 
                     alignItems: 'center', 
                     gap: '8px', 
                     background: 'rgba(255,255,255,0.05)', 
