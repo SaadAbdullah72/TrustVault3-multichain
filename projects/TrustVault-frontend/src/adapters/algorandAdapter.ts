@@ -140,21 +140,9 @@ export class AlgorandAdapter implements ChainAdapter {
                 signer: this.transactionSigner
             })
 
-            console.log('[AlgorandAdapter] Building group for bootstrap + fund...')
-            const group = atc.buildGroup()
-            const txns = group.map(g => g.txn)
-            
-            // Assign group ID (safety)
-            algosdk.assignGroupID(txns)
-
-            console.log('[AlgorandAdapter] Awaiting Pera Wallet signature for group...')
-            const signedTxns = await this.transactionSigner(txns, txns.map((_, i) => i))
-            
-            console.log('[AlgorandAdapter] Sending signed group to network...')
-            const { txId } = await algodClient.sendRawTransaction(signedTxns).do()
-            
-            await algosdk.waitForConfirmation(algodClient, txId, 4)
-            console.log('[AlgorandAdapter] Execution successful, TxID:', txId)
+            console.log('[AlgorandAdapter] Executing bootstrap + fund via ATC...')
+            const result = await atc.execute(algodClient, 4)
+            console.log('[AlgorandAdapter] Execution successful, TxID:', result.txIDs[0])
         } catch (atcError: any) {
             console.error('[AlgorandAdapter] ATC execution failed:', atcError)
             throw new Error(`Vault created (#${appId}) but setup failed: ${atcError.message || atcError}`)
