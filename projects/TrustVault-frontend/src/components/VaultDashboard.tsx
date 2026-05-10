@@ -23,6 +23,7 @@ export interface VaultDashboardProps {
     onRefresh?: () => void;
     onBack?: () => void;
     uiStatus: any;
+    isRefreshing?: boolean;
     currentTab: 'dashboard' | 'security' | 'history' | 'info' | 'api';
     setCurrentTab: (tab: 'dashboard' | 'security' | 'history' | 'info' | 'api') => void;
 }
@@ -46,6 +47,7 @@ export default function VaultDashboard({
     onRefresh,
     onBack,
     uiStatus,
+    isRefreshing,
     currentTab,
     setCurrentTab
 }: VaultDashboardProps) {
@@ -345,9 +347,9 @@ export default function VaultDashboard({
                                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>Withdraw</span>
                             </button>
 
-                            <button onClick={onRefresh} disabled={uiStatus.loading} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: uiStatus.loading ? 0.5 : 1 }}>
+                            <button onClick={onRefresh} disabled={uiStatus.loading || isRefreshing} className="btn-scale" style={{ background: 'rgba(17, 30, 47, 0.6)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 12px', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: (uiStatus.loading || isRefreshing) ? 0.5 : 1 }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <RefreshCw size={22} color="#fff" className={uiStatus.loading ? 'spinning' : ''} />
+                                    <RefreshCw size={22} color="#fff" className={isRefreshing ? 'spinning' : ''} />
                                 </div>
                                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>Refresh</span>
                             </button>
@@ -432,6 +434,52 @@ export default function VaultDashboard({
                 {renderContent() || (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
                         No content available for this tab.
+                    </div>
+                )}
+
+                {/* Withdraw Modal Overlay */}
+                {showWithdrawInput && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        <div style={{ background: '#0f172a', width: '100%', maxWidth: '400px', padding: '32px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                                <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <ArrowUpRight size={20} color="#fff" />
+                                </div>
+                                <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>Withdraw Funds</h3>
+                            </div>
+                            
+                            <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '24px', lineHeight: 1.5 }}>
+                                Enter the amount you wish to withdraw from your vault back to your primary wallet.
+                                <br/><span style={{ fontSize: '12px', color: '#64748b' }}>Available: {vaultBalance.toFixed(4)} {symbol}</span>
+                            </p>
+                            
+                            <div style={{ background: '#080e17', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '32px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Amount ({symbol})</label>
+                                <input 
+                                    type="number" 
+                                    value={withdrawAmount} 
+                                    onChange={(e) => setWithdrawAmount(e.target.value)} 
+                                    placeholder="0.00"
+                                    autoFocus
+                                    style={{ width: '100%', background: 'none', border: 'none', color: '#fff', fontSize: '28px', fontWeight: 800, outline: 'none' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <button 
+                                    onClick={() => setShowWithdrawInput(false)}
+                                    style={{ padding: '18px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderRadius: '18px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleWithdrawSubmit}
+                                    style={{ padding: '18px', background: '#fff', color: '#000', border: 'none', borderRadius: '18px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

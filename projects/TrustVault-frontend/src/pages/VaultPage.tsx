@@ -98,6 +98,7 @@ export const VaultPage: React.FC = () => {
     const [vaultState, setVaultState] = useState<VaultState | null>(null)
     const [vaultBalance, setVaultBalance] = useState(0)
     const [isDiscovering, setIsDiscovering] = useState(false)
+    const [isRefreshing, setIsRefreshing] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [showVaultSelector, setShowVaultSelector] = useState(false)
@@ -255,6 +256,7 @@ export const VaultPage: React.FC = () => {
     // Load vault data
     const loadVaultState = useCallback(async () => {
         if (!selectedVaultId || !walletAddress || walletAddress === 'undefined') return
+        setIsRefreshing(true)
         try {
             const state = await adapter.fetchVaultState(selectedVaultId)
             const balance = await adapter.getVaultBalance(selectedVaultId)
@@ -275,13 +277,12 @@ export const VaultPage: React.FC = () => {
                     [selectedVaultId]: isOwner ? 'owner' : (isBen ? 'beneficiary' : '')
                 }))
             } else {
-                // If state is null (e.g. Solana account closed after claim), 
-                // we should stop trying to load it to avoid stuck spinner.
-                console.log('[VaultPage] Vault state is null, resetting selection.')
                 setSelectedVaultId(null)
             }
         } catch (e) {
             setSelectedVaultId(null)
+        } finally {
+            setIsRefreshing(false)
         }
     }, [adapter, selectedVaultId, walletAddress, currentChain.type])
 
@@ -595,6 +596,7 @@ export const VaultPage: React.FC = () => {
                             onRefresh={loadVaultState}
                             onBack={() => setStep('actionSelect')}
                             uiStatus={uiStatus}
+                            isRefreshing={isRefreshing}
                             currentTab={currentTab}
                             setCurrentTab={setCurrentTab}
                         />
