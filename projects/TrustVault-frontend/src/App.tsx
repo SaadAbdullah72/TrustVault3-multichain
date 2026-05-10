@@ -1,3 +1,4 @@
+// Trigger redeploy after Midnight removal
 import { NetworkId, WalletId, WalletManager, WalletProvider } from '@txnlab/use-wallet-react'
 import { SnackbarProvider } from 'notistack'
 import VaultPage from './pages/VaultPage'
